@@ -1076,6 +1076,15 @@ wheels = [
 ]
 
 [[package]]
+name = "dnspython"
+version = "2.7.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b5/4a/263763cb2ba3816dd94b08ad3a33d5fdae34ecb856678773cc40a3605829/dnspython-2.7.0.tar.gz", hash = "sha256:ce9c432eda0dc91cf618a5cedf1a4e142651196bbcd2c80e89ed5a907e5cfaf1", size = 345197, upload-time = "2024-10-05T20:14:59.362Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/68/1b/e0a87d256e40e8c888847551b20a017a6b98139178505dc7ffb96f04e954/dnspython-2.7.0-py3-none-any.whl", hash = "sha256:b4c34b7d10b51bcc3a5071e7b8dee77939f1e878477eeecc965e9835f63c6c86", size = 313632, upload-time = "2024-10-05T20:14:57.687Z" },
+]
+
+[[package]]
 name = "einops"
 version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2504,6 +2513,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/0f/bb/63a6a8c9e7a96b6ba92647fa5b1595c2dbee29f8178705adb4704d82ecba/lightning_utilities-0.14.3.tar.gz", hash = "sha256:37e2f83f273890052955a44054382c211a303012ee577619efbaa5df9e65e9f5", size = 30346, upload-time = "2025-04-03T15:59:56.928Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1a/c1/31b3184cba7b257a4a3b5ca5b88b9204ccb7aa02fe3c992280899293ed54/lightning_utilities-0.14.3-py3-none-any.whl", hash = "sha256:4ab9066aa36cd7b93a05713808901909e96cc3f187ea6fd3052b2fd91313b468", size = 28894, upload-time = "2025-04-03T15:59:55.658Z" },
+]
+
+[[package]]
+name = "linkchecker"
+version = "10.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "beautifulsoup4" },
+    { name = "dnspython" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/db/8a/20cfbda1a4f5e9fd307cbb68dd15c2f14428deaf1eab89a79b9b7d03bf6e/LinkChecker-10.5.0.tar.gz", hash = "sha256:978b42b803e58b7a8f6ffae1ff88fa7fd1e87b944403b5dc82380dd59f516bb9", size = 546451, upload-time = "2024-09-03T18:42:46.612Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cd/c6/8d6a8383a92fbd19337b7a3c4ed57042a3f39f57772774a11bd56316af2e/LinkChecker-10.5.0-py3-none-any.whl", hash = "sha256:eb25bf11c795eedc290f93311c497312f4e967e1c5b242b24ce3fc335b4c47c5", size = 280788, upload-time = "2024-09-03T18:42:45.039Z" },
 ]
 
 [[package]]
@@ -5807,6 +5830,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "linkchecker" },
     { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -5842,6 +5866,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "linkchecker" },
     { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-cov" },
