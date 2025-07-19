@@ -48,11 +48,19 @@ TimeCopilot can pull a public time series dataset directly from the web and fore
 uvx timecopilot forecast https://otexts.com/fpppy/data/AirPassengers.csv
 ```
 
-Want to try a different LL​M?
+Want to try a different LLM?
 
 ```bash
 uvx timecopilot forecast https://otexts.com/fpppy/data/AirPassengers.csv \
   --llm openai:gpt-4o
+```
+
+Need faster inference for long time series?
+
+```bash
+uvx timecopilot forecast https://otexts.com/fpppy/data/AirPassengers.csv \
+  --llm openai:gpt-4o \
+  --max_length 100
 ```
 
 Have a specific question?
@@ -98,9 +106,11 @@ df = pd.read_csv("https://timecopilot.s3.amazonaws.com/public/data/air_passenger
 
 # Initialize the forecasting agent
 # You can use any LLM by specifying the model parameter
+# Optional: Set max_length to use only the last N observations for faster inference
 tc = TimeCopilot(
     llm="openai:gpt-4o",
     retries=3,
+    max_length=100,  # Use only last 100 observations for faster inference
 )
 
 # Generate forecast
@@ -108,6 +118,7 @@ tc = TimeCopilot(
 # - freq: The frequency of your data (e.g., 'D' for daily, 'M' for monthly)
 # - h: The forecast horizon, which is the number of periods to predict
 # - seasonality: The seasonal period of your data, which can be inferred if not provided
+# - max_length: Maximum number of observations to use from the end of each series
 result = tc.forecast(df=df)
 
 # The output contains:

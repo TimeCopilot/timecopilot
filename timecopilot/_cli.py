@@ -25,17 +25,23 @@ class TimeCopilot:
         seasonality: int | None = None,
         query: str | None = None,
         retries: int = 3,
+        max_length: int | None = None,
     ):
         with self.console.status(
             "[bold blue]TimeCopilot is navigating through time...[/bold blue]"
         ):
-            forecasting_agent = TimeCopilotAgent(llm=llm, retries=retries)
+            forecasting_agent = TimeCopilotAgent(
+                llm=llm, 
+                retries=retries, 
+                max_length=max_length
+            )
             result = forecasting_agent.forecast(
                 df=path,
                 freq=freq,
                 h=h,
                 seasonality=seasonality,
                 query=query,
+                max_length=max_length,
             )
 
         result.output.prettify(self.console)

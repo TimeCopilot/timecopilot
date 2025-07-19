@@ -49,19 +49,19 @@ from .models.foundational.timesfm import TimesFM
 from .utils.experiment_handler import ExperimentDataset, ExperimentDatasetParser
 
 MODELS = {
-    "ADIDA": ADIDA(),
-    "AutoARIMA": AutoARIMA(),
-    "AutoCES": AutoCES(),
-    "AutoETS": AutoETS(),
-    "CrostonClassic": CrostonClassic(),
-    "DynamicOptimizedTheta": DynamicOptimizedTheta(),
-    "HistoricAverage": HistoricAverage(),
-    "IMAPA": IMAPA(),
-    "SeasonalNaive": SeasonalNaive(),
-    "Theta": Theta(),
-    "ZeroModel": ZeroModel(),
-    "TimesFM": TimesFM(),
-    "Prophet": Prophet(),
+    "ADIDA": lambda max_length=None: ADIDA(max_length=max_length),
+    "AutoARIMA": lambda max_length=None: AutoARIMA(max_length=max_length),
+    "AutoCES": AutoCES,
+    "AutoETS": AutoETS,
+    "CrostonClassic": CrostonClassic,
+    "DynamicOptimizedTheta": DynamicOptimizedTheta,
+    "HistoricAverage": HistoricAverage,
+    "IMAPA": IMAPA,
+    "SeasonalNaive": lambda max_length=None: SeasonalNaive(max_length=max_length),
+    "Theta": Theta,
+    "ZeroModel": ZeroModel,
+    "TimesFM": lambda max_length=None: TimesFM(max_length=max_length),
+    "Prophet": Prophet,
 }
 
 TSFEATURES: dict[str, Callable] = {
@@ -259,13 +259,19 @@ class TimeCopilot:
     def __init__(
         self,
         llm: str,
+        max_length: int | None = None,
         **kwargs: Any,
     ):
         """
         Args:
             llm: The LLM to use.
+            max_length: Maximum number of observations to use from the
+                end of each time series for training and inference. If None, all
+                observations are used. This can significantly improve inference times
+                for long time series by reducing the amount of data processed.
             **kwargs: Additional keyword arguments to pass to the agent.
         """
+        self.max_length = max_length
 
         self.system_prompt = f"""
         You're a forecasting expert. You will be given a time series 
@@ -408,7 +414,11 @@ class TimeCopilot:
                         f"Model {str_model} is not available. Available models are: "
                         f"{', '.join(MODELS.keys())}"
                     )
-                callable_models.append(MODELS[str_model])
+                model_factory = MODELS[str_model]
+                if callable(model_factory):
+                    callable_models.append(model_factory(max_length=self.max_length))
+                else:
+                    callable_models.append(model_factory)
             forecaster = TimeCopilotForecaster(models=callable_models)
             fcst_cv = forecaster.cross_validation(
                 df=ctx.deps.df,
@@ -436,7 +446,11 @@ class TimeCopilot:
             ctx: RunContext[ExperimentDataset],
             model: str,
         ) -> str:
-            callable_model = MODELS[model]
+            model_factory = MODELS[model]
+            if callable(model_factory):
+                callable_model = model_factory(max_length=self.max_length)
+            else:
+                callable_model = model_factory
             forecaster = TimeCopilotForecaster(models=[callable_model])
             fcst_df = forecaster.forecast(
                 df=ctx.deps.df,
@@ -475,6 +489,7 @@ class TimeCopilot:
         freq: str | None = None,
         seasonality: int | None = None,
         query: str | None = None,
+        max_length: int | None = None,
     ) -> AgentRunResult[ForecastAgentOutput]:
         """Generate forecast and analysis.
 
@@ -498,6 +513,11 @@ class TimeCopilot:
                 agent. You can embed `freq`, `h` or `seasonality` here in
                 plain English, they take precedence over the keyword
                 arguments.
+            max_length: Maximum number of observations to use from the
+                end of each time series for training and inference. If None,
+                uses the instance's default max_length, or all observations
+                if no default is set. This can significantly improve inference
+                times for long time series by reducing the amount of data processed.
 
         Returns:
             A result object whose `output` attribute is a fully
@@ -506,6 +526,10 @@ class TimeCopilot:
                 `result.output.prettify()` to print a nicely formatted
                 report.
         """
+        # Use the provided max_length or fall back to the instance's default
+        if max_length is not None:
+            self.max_length = max_length
+        
         query = f"User query: {query}" if query else None
         experiment_dataset_parser = ExperimentDatasetParser(
             model=self.forecasting_agent.model,

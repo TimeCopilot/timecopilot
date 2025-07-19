@@ -60,6 +60,16 @@ def maybe_convert_col_to_datetime(df: pd.DataFrame, col_name: str) -> pd.DataFra
 class Forecaster:
     alias: str
 
+    def __init__(self, max_length: int | None = None):
+        """
+        Args:
+            max_length (int, optional): Maximum number of observations to use from the
+                end of each time series for training and inference. If None, all
+                observations are used. This can significantly improve inference times
+                for long time series by reducing the amount of data processed.
+        """
+        self.max_length = max_length
+
     @staticmethod
     def _maybe_infer_freq(
         df: pd.DataFrame,
@@ -75,6 +85,32 @@ class Forecaster:
                 return get_seasonality(freq)
         else:
             return get_seasonality(freq)
+
+    def _maybe_truncate_series(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Truncate each time series to the last max_length observations if max_length is set.
+        
+        Args:
+            df: DataFrame with columns 'unique_id', 'ds', 'y'
+            
+        Returns:
+            DataFrame with truncated series if max_length is set, otherwise original DataFrame
+        """
+        if self.max_length is None:
+            return df
+        
+        # Sort by unique_id and ds to ensure proper ordering
+        df = df.sort_values(['unique_id', 'ds'])
+        
+        # Take the last max_length rows for each series
+        truncated_dfs = []
+        for uid in df['unique_id'].unique():
+            series_df = df[df['unique_id'] == uid]
+            if len(series_df) > self.max_length:
+                series_df = series_df.tail(self.max_length)
+            truncated_dfs.append(series_df)
+        
+        return pd.concat(truncated_dfs, ignore_index=True)
 
     def forecast(
         self,
@@ -200,6 +236,7 @@ class Forecaster:
         """
         freq = self._maybe_infer_freq(df, freq)
         df = maybe_convert_col_to_datetime(df, "ds")
+        df = self._maybe_truncate_series(df)
         # mlforecast cv code
         results = []
         sort_idxs = maybe_compute_sort_indices(df, "unique_id", "ds")

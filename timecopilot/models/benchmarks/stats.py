@@ -80,13 +80,19 @@ class ADIDA(Forecaster):
         self,
         alias: str = "ADIDA",
         prediction_intervals: ConformalIntervals | None = None,
+        max_length: int | None = None,
     ):
         """
         Args:
             alias (str): Custom name of the model.
             prediction_intervals (ConformalIntervals, optional): Information to
                 compute conformal prediction intervals.
+            max_length (int, optional): Maximum number of observations to use from the
+                end of each time series for training and inference. If None, all
+                observations are used. This can significantly improve inference times
+                for long time series by reducing the amount of data processed.
         """
+        super().__init__(max_length=max_length)
         self.alias = alias
         self.prediction_intervals = prediction_intervals
 
@@ -145,6 +151,7 @@ class ADIDA(Forecaster):
                 identifiers as the input DataFrame.
         """
         freq = self._maybe_infer_freq(df, freq)
+        df = self._maybe_truncate_series(df)
         fcst_df = run_statsforecast_model(
             model=_ADIDA(alias=self.alias),
             df=df,
@@ -198,6 +205,7 @@ class AutoARIMA(Forecaster):
         season_length: int | None = None,
         alias: str = "AutoARIMA",
         prediction_intervals: ConformalIntervals | None = None,
+        max_length: int | None = None,
     ):
         """
         Args:
@@ -240,7 +248,12 @@ class AutoARIMA(Forecaster):
             alias (str): Custom name of the model.
             prediction_intervals (ConformalIntervals, optional): Information to
                 compute conformal prediction intervals.
+            max_length (int, optional): Maximum number of observations to use from the
+                end of each time series for training and inference. If None, all
+                observations are used. This can significantly improve inference times
+                for long time series by reducing the amount of data processed.
         """
+        super().__init__(max_length=max_length)
         self.d = d
         self.D = D
         self.max_p = max_p
@@ -330,6 +343,7 @@ class AutoARIMA(Forecaster):
                 identifiers as the input DataFrame.
         """
         freq = self._maybe_infer_freq(df, freq)
+        df = self._maybe_truncate_series(df)
         season_length = self._maybe_get_seasonality(freq)
         fcst_df = run_statsforecast_model(
             model=_AutoARIMA(
@@ -944,6 +958,7 @@ class SeasonalNaive(Forecaster):
         self,
         season_length: int | None = None,
         alias: str = "SeasonalNaive",
+        max_length: int | None = None,
     ):
         """
         Args:
@@ -951,7 +966,12 @@ class SeasonalNaive(Forecaster):
                 If None, it will be inferred automatically using
                 [`get_seasonality`][timecopilot.models.utils.forecaster.get_seasonality].
             alias (str): Custom name of the model.
+            max_length (int, optional): Maximum number of observations to use from the
+                end of each time series for training and inference. If None, all
+                observations are used. This can significantly improve inference times
+                for long time series by reducing the amount of data processed.
         """
+        super().__init__(max_length=max_length)
         self.season_length = season_length
         self.alias = alias
 
@@ -1010,6 +1030,7 @@ class SeasonalNaive(Forecaster):
                 identifiers as the input DataFrame.
         """
         freq = self._maybe_infer_freq(df, freq)
+        df = self._maybe_truncate_series(df)
         season_length = self._maybe_get_seasonality(freq)
         fcst_df = run_statsforecast_model(
             model=_SeasonalNaive(
