@@ -1,0 +1,50 @@
+name: TimeCopilot Bug
+description: Report a bug or unexpected behavior
+labels: ["bug"]
+
+body:
+  - type: markdown
+    attributes:
+      description: Use the following conventions to name your issue:
+              fix: <>
+              bug: <>
+              release: <>
+              feat: <> 
+              refactor: <>
+              docs: <>
+              chore: <>
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Initial Checks
+      description: Just making sure you're using the latest version of Pydantic AI.
+      options:
+        - label: I confirm that I'm using the latest version of TimeCopilot.
+          required: true
+        - label: I confirm that I've reviewed my issue at https://github.com/AzulGarza/timecopilot/issues before opening this one. 
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Explain what you're seeing and the outcome you expect to obtain.
+    validations:
+      required: true
+
+  - type: textarea
+    id: example
+    attributes:
+      label: Example Code
+      description: Provide an step-by-step example that others can reproduce. Follow the guidelines from 
+        [How to create a Minimal, Reproducible Example](https://stackoverflow.com/help/minimal-reproducible-example)
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Specify details of your local environment such as OS, architecture, Python and TimeCopilot's version. 
+      render: Text
+    validations:
+      required: true
