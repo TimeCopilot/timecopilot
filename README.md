@@ -88,14 +88,28 @@ TimeCopilot is available on PyPI as [`timecopilot`](https://pypi.org/project/tim
     Make sure to copy it, as you’ll need it in the next step. 
 
 3. Export your OpenAI API key as an environment variable by running:
-    ```
-    export OPENAI_API_KEY="<your-new-secret-key>"
-    ```
 
+   On Linux:
+    ```
+    export OPENAI_API_KEY="your-new-secret-key"
+    ```
+   On Windows (PowerShell):
+    ```
+    setx OPENAI_API_KEY "your-new-secret-key"
+    ```
+   Remember to restart session after doing so in order to preserve the changes in the environment variables (Windows).
+   You can also do this through python:
+
+   ```
+   import openai
+   os.environ["OPENAI_API_KEY"] = "your-new-secret-key"
+   ```
+   
 and that's it!
 
 !!! Important
-    TimeCopilot requires Python 3.10+. Additionally, it currently does not support macOS running on Intel processors (x86_64). If you’re using this setup, you may encounter installation issues with some dependencies like PyTorch. If you need support for this architecture, please create a new issue. 
+      * TimeCopilot requires Python 3.10+. Additionally, it currently does not support macOS running on Intel processors (x86_64). If you’re using this setup, you may encounter installation issues with some dependencies like PyTorch. If you need support for this architecture, please create a new issue. 
+      * If on Windows, Python 3.10 is recommended due to some of the packages' current architecture. 
 
 
 ---
