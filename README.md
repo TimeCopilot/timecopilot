@@ -108,8 +108,8 @@ TimeCopilot is available on PyPI as [`timecopilot`](https://pypi.org/project/tim
 and that's it!
 
 !!! Important
-      * TimeCopilot requires Python 3.10+. Additionally, it currently does not support macOS running on Intel processors (x86_64). If you’re using this setup, you may encounter installation issues with some dependencies like PyTorch. If you need support for this architecture, please create a new issue. 
-      * If on Windows, Python 3.10 is recommended due to some of the packages' current architecture. 
+* TimeCopilot requires Python 3.10+. Additionally, it currently does not support macOS running on Intel processors (x86_64). If you’re using this setup, you may encounter installation issues with some dependencies like PyTorch. If you need support for this architecture, please create a new issue.
+* If on Windows, Python 3.10 is recommended due to some of the packages' current architecture. 
 
 
 ---
