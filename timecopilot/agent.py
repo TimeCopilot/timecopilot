@@ -721,8 +721,10 @@ class AsyncTimeCopilot(TimeCopilot):
             df: The time-series data. Can be one of:
                 - a *pandas* `DataFrame` with at least the columns
                   `["unique_id", "ds", "y"]`.
-                - You must always work with time series data with the columns ds (date) and y (target value),
-                  If these are missing, attempt to infer them from similar column names or, if unsure, request clarification from the user.
+                - You must always work with time series data with the columns ds (date)
+                  and y (target value), if these are missing, attempt to infer them
+                  from similar column names or, if unsure, request clarification
+                  from the user.
                 - a file path or URL pointing to a CSV / Parquet file with the
                   same columns (it will be read automatically).
             h: Forecast horizon. Number of future periods to predict. If
