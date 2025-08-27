@@ -55,10 +55,10 @@ from timecopilot.agent import TimeCopilot
 df = pd.read_csv("https://timecopilot.s3.amazonaws.com/public/data/air_passengers.csv")
 query = """
   Which months will have peak passenger traffic in the next 24 months? 
-  use 12 as seasonality
+  use 12 as seasonality and MS as freq
 """ 
 
-tc = TimeCopilot(llm="gpt-4o")
+tc = TimeCopilot(llm="gpt-4o", retries=3)
 
 # Passing `None` simply uses the defaults; they are shown
 # here for clarity but can be omitted.
@@ -97,6 +97,7 @@ result = tc.forecast(
     seasonality=12, # yearly
     query=None,     # no natural-language query
 )
+print(result.output)
 ```
 
 Because every field is supplied, no inference or LLM call happens.
@@ -115,6 +116,7 @@ result = tc.forecast(
     seasonality=None, # default, inferred as 12
     query=query,
 )
+print(result.output.user_query_response)
 ```
 
 ## Choosing sensible defaults

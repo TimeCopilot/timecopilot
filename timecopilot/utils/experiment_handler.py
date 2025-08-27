@@ -161,10 +161,12 @@ class ExperimentDatasetParser:
         agent_result: AgentRunResult[DatasetParams] | None,
     ) -> DatasetParams:
         if query and agent_result:
+            # passed by user
+            # have higher priority than agent_result
             params = agent_result.output
-            params.freq = params.freq or freq
-            params.seasonality = params.seasonality or seasonality
-            params.h = params.h or h
+            params.freq = freq or params.freq
+            params.seasonality = seasonality or params.seasonality
+            params.h = h or params.h
         else:
             params = DatasetParams(freq=freq, h=h, seasonality=seasonality)
         return params
