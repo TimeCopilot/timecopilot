@@ -71,6 +71,12 @@ uv run mkdocs serve
 - Merging into the main branch triggers a deployment of a documentation preview, accessible at [preview.timecopilot.dev](https://preview.timecopilot.dev).
 - When a new version of the library is released, the documentation is deployed to [timecopilot.dev](https://timecopilot.dev).
 
+### File Naming Convention
+
+All documentation files should use **kebab-case** (e.g., `model-hub.md`, `forecasting-parameters.md`). Kebab-case is widely used in static site generators and web contexts because it is URL-friendly, consistent, and avoids ambiguity with underscores or `camelCase`. Using a single convention improves readability and prevents broken links in deployment.
+
+For further reference, see the [Google Developer Documentation Style Guide on file names](https://developers.google.com/style/filenames).
+
 ## Adding New Datasets
 
 The datasets utilized in our documentation are hosted on AWS at `https://timecopilot.s3.amazonaws.com/public/data/`. If you wish to contribute additional datasets for your changes, please contact [@AzulGarza](http://github.com/AzulGarza) for guidance.
