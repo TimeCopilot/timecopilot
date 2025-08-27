@@ -25,8 +25,8 @@ nav:
   - Experiments:
       - experiments/gift-eval.md
   - Documentation:
-      - Time Series Model Hub: model_hub.md
-      - Forecasting Parameters: forecasting_parameters.md
+      - Time Series Model Hub: model-hub.md
+      - Forecasting Parameters: forecasting-parameters.md
   - API Reference:
       - api/agent.md
       - api/forecaster.md
