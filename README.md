@@ -159,6 +159,21 @@ result = tc.forecast(df=df, freq="MS")
 # - forecast_analysis: Interpretation of the forecast results
 # - user_query_response: Response to the user prompt, if any
 print(result.output)
+
+# You can also access the forecast results in the same shape of the
+# provided input dataframe.  
+print(result.fcst_df)
+
+"""
+        unique_id         ds       Theta
+0   AirPassengers 1961-01-01  440.969208
+1   AirPassengers 1961-02-01  429.249237
+2   AirPassengers 1961-03-01  490.693176
+...
+21  AirPassengers 1962-10-01  472.164032
+22  AirPassengers 1962-11-01  411.458160
+23  AirPassengers 1962-12-01  462.795227
+"""
 ```
 <details> <summary>Click to expand the full forecast output</summary>
 
@@ -205,6 +220,7 @@ reflected in historical data." user_query_response='The analysis determined the 
 performing model and generated forecasts considering seasonality and trend, aiming for 
 accuracy and reliability surpassing basic seasonal models.'
 """
+
 ```
 
 </details>
