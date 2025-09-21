@@ -19,5 +19,5 @@ Requires Python 3.10 or later.
 
 !!! tip
 
-    If you don't have a prior experience with `uv`, the [getting started](https://docs.astral.sh/uv/getting-started/) page is a good starting point.
+    If you don't have a prior experience with `uv`, go to [uv getting started](https://docs.astral.sh/uv/getting-started/) section.
 

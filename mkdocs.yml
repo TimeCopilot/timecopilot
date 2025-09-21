@@ -14,15 +14,15 @@ watch:
 
 nav:
   - Home: index.md
-  - Installation: installation.md
-  - Getting Help: help.md
-  - Contributing: contributing.md
-  - Roadmap: roadmap.md
-  - Quickstart Examples:
-      - examples/agent-quickstart.ipynb
-      - examples/forecaster-quickstart.ipynb
-      - examples/anomaly-detection-forecaster-quickstart.ipynb
-      - examples/gift-eval.ipynb
+  - Getting Started: 
+      - Introduction: getting-started/introduction.md
+      - Quickstart: getting-started/quickstart.md
+      - Installation: getting-started/installation.md
+      - Examples:
+          - examples/agent-quickstart.ipynb
+          - examples/forecaster-quickstart.ipynb
+          - examples/anomaly-detection-forecaster-quickstart.ipynb
+          - examples/gift-eval.ipynb
   - Experiments:
       - experiments/gift-eval.md
       - experiments/fev.md
@@ -51,6 +51,10 @@ nav:
       - changelogs/v0.0.12.md
       - changelogs/v0.0.11.md
       - changelogs/v0.0.10.md
+  - Community:
+      - Getting Help: community/help.md
+      - Contributing: contributing.md
+      - Roadmap: community/roadmap.md
 
 theme:
   name: "material"
@@ -88,6 +92,9 @@ theme:
     - navigation.indexes
     - navigation.sections
     - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.footer
     - toc.follow
 
 extra_css:
@@ -138,3 +145,5 @@ plugins:
           extensions:
             - griffe_inherited_docstrings:
                 merge: true
+
+copyright: 2025 - TimeCopilot
