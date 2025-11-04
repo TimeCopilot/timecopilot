@@ -16,3 +16,6 @@ For general questions, ideas, and community discussions, join our [discussions](
 
 For real-time chat and community support, join our [Discord server](https://discord.gg/7GEdHR6Pfg).
 
+## Note 
+When using Windows, ensure to use the ` if __name__ == "__main__": ` guard to ensure that the code which starts new processes only runs when the script is executed directly, preventing child processes from re-importing the main module and causing a RuntimeError related to Python’s multiprocessing bootstrapping phase.
+
