@@ -182,6 +182,47 @@ accuracy and reliability surpassing basic seasonal models.'
 
 ---
 
+## Non-OpenAI LLM endpoints
+
+TimeCopilot uses [Pydantic](https://docs.pydantic.dev/latest/) to make calls to LLM endpoints, so it should be compatible with all endpoints [Pydantic supports](https://ai.pydantic.dev/models/overview/). Instructions on using other models/endpoints with Pydantic can be found on the matching Pydantic docs page, such as this page for [Google's models](https://ai.pydantic.dev/models/google/#api-key-generative-language-api).
+
+Note: models need support for tool use to function properly with TimeCopilot.
+
+### Anthropic example
+
+1. load the appropriate api key into the environment
+```bash
+export ANTHROPIC_API_KEY='your-api-key'
+```
+
+2. initialize the forecasting agent
+
+```python
+from timecopilot import TimeCopilot
+
+tc = TimeCopilot(llm="anthropic:claude-sonnet-4-5")
+```
+
+### Ollama example
+
+
+1. load the ollama url into the environment. If your endpoint needs an api key set `OLLAMA_API_KEY` too.
+```bash
+export OLLAMA_BASE_URL='http://localhost:11434/v1'
+# optional
+export OLLAMA_API_KEY='your-api-key'
+```
+
+2. initialize the forecasting agent
+
+```python
+from timecopilot import TimeCopilot
+
+tc = TimeCopilot(llm="ollama:gpt-oss:20b")
+```
+
+---
+
 ## Ask about the future
 
 With TimeCopilot, you can ask questions about the forecast in natural language. The agent will analyze the data, generate forecasts, and provide detailed answers to your queries. 
