@@ -250,7 +250,7 @@ export OLLAMA_API_KEY='your-api-key'
 ```python
 from timecopilot import TimeCopilot
 
-tc = TimeCopilot(llm="ollama:gpt-oss:20b")
+ollama_tc = TimeCopilot(llm="ollama:gpt-oss:20b")
 ```
 
 ---
