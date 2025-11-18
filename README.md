@@ -231,22 +231,9 @@ accuracy and reliability surpassing basic seasonal models.'
 
 TimeCopilot uses [Pydantic](https://docs.pydantic.dev/latest/) to make calls to LLM endpoints, so it should be compatible with all endpoints [pydantic supports](https://ai.pydantic.dev/models/overview/). Instructions on using other models/endpoints with Pydantic can be found on the matching pydantic docs page, such as this page for [Google's models](https://ai.pydantic.dev/models/google/#api-key-generative-language-api).
 
+For more details go to the LLM Providers example in [TimeCopilot's documentation](http://timecopilot.dev/examples/llm-providers/).
+
 Note: models need support for tool use to function properly with TimeCopilot.
-
-### Anthropic example
-
-1. load the appropriate api key into the environment
-```bash
-export ANTHROPIC_API_KEY='your-api-key'
-```
-
-2. initialize the forecasting agent
-
-```python
-from timecopilot import TimeCopilot
-
-tc = TimeCopilot(llm="anthropic:claude-sonnet-4-5")
-```
 
 ### Ollama example
 
