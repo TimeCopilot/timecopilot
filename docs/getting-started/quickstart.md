@@ -191,24 +191,6 @@ For more details go to the [LLM Providers example](http://timecopilot.dev/exampl
 
 Note: models need support for tool use to function properly with TimeCopilot.
 
-### Ollama example
-
-
-1. load the ollama url into the environment. If your endpoint needs an api key set `OLLAMA_API_KEY` too.
-```bash
-export OLLAMA_BASE_URL='http://localhost:11434/v1'
-# optional
-export OLLAMA_API_KEY='your-api-key'
-```
-
-2. initialize the forecasting agent
-
-```python
-from timecopilot import TimeCopilot
-
-ollama_tc = TimeCopilot(llm="ollama:gpt-oss:20b")
-```
-
 ---
 
 ## Ask about the future
