@@ -9,6 +9,7 @@ from gluonts.time_feature.seasonality import (
 from gluonts.time_feature.seasonality import (
     get_seasonality as _get_seasonality,
 )
+from prophet import Prophet as ProphetBase
 from scipy import stats
 from tqdm import tqdm
 from utilsforecast.plotting import plot_series
@@ -348,6 +349,9 @@ class Forecaster:
         min_series_length = df.groupby("unique_id").size().min()
         # we require at least one observation before the first forecast
         max_possible_windows = (min_series_length - 1) // h
+        # 3 row minimum for a df with Prophet
+        if isinstance(self, ProphetBase):
+            max_possible_windows -= 1
         if n_windows is None:
             _n_windows = max_possible_windows
         else:
