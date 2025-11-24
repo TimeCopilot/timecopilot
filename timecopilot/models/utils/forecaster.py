@@ -305,6 +305,7 @@ class Forecaster:
         Args:
             df (pd.DataFrame):
                 DataFrame containing the time series to detect anomalies.
+                Minimum series length is 1 higher for Prophet than other models.
             h (int, optional):
                 Forecast horizon specifying how many future steps to predict.
                 In each cross validation window. If not provided, the seasonality
@@ -357,9 +358,11 @@ class Forecaster:
         else:
             _n_windows = min(n_windows, max_possible_windows)
         if _n_windows < 1:
+            # min series length should be 1 higher for Prophet than other models
+            exp_min_series_length = h + 1 if isinstance(self, ProphetBase) else h + 2
             raise ValueError(
                 f"Cannot perform anomaly detection: series too short. "
-                f"Minimum series length required: {h + 1}, "
+                f"Minimum series length required: {exp_min_series_length}, "
                 f"actual minimum length: {min_series_length}"
             )
         cv_results = self.cross_validation(
