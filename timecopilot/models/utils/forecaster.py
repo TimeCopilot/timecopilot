@@ -359,7 +359,7 @@ class Forecaster:
             _n_windows = min(n_windows, max_possible_windows)
         if _n_windows < 1:
             # min series length should be 1 higher for Prophet than other models
-            exp_min_series_length = h + 1 if isinstance(self, ProphetBase) else h + 2
+            exp_min_series_length = h + 2 if isinstance(self, ProphetBase) else h + 1
             raise ValueError(
                 f"Cannot perform anomaly detection: series too short. "
                 f"Minimum series length required: {exp_min_series_length}, "
