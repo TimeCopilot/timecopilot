@@ -194,7 +194,7 @@ class Chronos(Forecaster):
         # model call
         with self._get_model() as model:
             if not isinstance(model, Chronos2Pipeline):
-                raise ValueError("wrong model type")
+                raise ValueError(f'Expected Chronos2Pipeline, got {type(model).__name__}')
 
             pred_df = model.predict_df(
                 context_df,
