@@ -296,7 +296,6 @@ class Chronos(Forecaster):
                 freq=freq,
                 qc=qc,
             )
-    
         dataset = TimeSeriesDataset.from_df(df, batch_size=self.batch_size)
         fcst_df = dataset.make_future_dataframe(h=h, freq=freq)
         with self._get_model() as model:
