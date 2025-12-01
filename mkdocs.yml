@@ -4,8 +4,8 @@ site_author: AzulGarza
 strict: true
 site_url: https://timecopilot.dev
 
-repo_name: AzulGarza/TimeCopilot
-repo_url: https://github.com/AzulGarza/TimeCopilot
+repo_name: TimeCopilot/timecopilot
+repo_url: https://github.com/TimeCopilot/timecopilot
 edit_uri: edit/main/docs
 
 watch:

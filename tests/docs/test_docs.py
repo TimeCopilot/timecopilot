@@ -63,7 +63,7 @@ def maybe_skip_gift_eval(fpath):
 
 
 # skipping notebooks for now, as they rise a no space error
-# see: https://github.com/AzulGarza/timecopilot/actions/runs/18858375517/job/53811527062?pr=245
+# see: https://github.com/TimeCopilot/timecopilot/actions/runs/18858375517/job/53811527062?pr=245
 # @pytest.mark.docs
 # @pytest.mark.parametrize(
 #    "fpath",

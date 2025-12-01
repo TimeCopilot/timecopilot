@@ -6,10 +6,10 @@
   <em>The GenAI Forecasting Agent · LLMs × Time Series Foundation Models</em>
 </div>
 <div align="center">
-  <a href="https://github.com/AzulGarza/TimeCopilot/actions/workflows/ci.yaml"><img src="https://github.com/AzulGarza/TimeCopilot/actions/workflows/ci.yaml/badge.svg?branch=main" alt="CI"></a>
+  <a href="https://github.com/TimeCopilot/timecopilot/actions/workflows/ci.yaml"><img src="https://github.com/TimeCopilot/timecopilot/actions/workflows/ci.yaml/badge.svg?branch=main" alt="CI"></a>
   <a href="https://pypi.python.org/pypi/timecopilot"><img src="https://img.shields.io/pypi/v/timecopilot.svg" alt="PyPI"></a>
-  <a href="https://github.com/AzulGarza/timecopilot"><img src="https://img.shields.io/pypi/pyversions/timecopilot.svg" alt="versions"></a>
-  <a href="https://github.com/AzulGarza/timecopilot/blob/main/LICENSE"><img src="https://img.shields.io/github/license/azulgarza/timecopilot.svg" alt="license"></a>
+  <a href="https://github.com/TimeCopilot/timecopilot"><img src="https://img.shields.io/pypi/pyversions/timecopilot.svg" alt="versions"></a>
+  <a href="https://github.com/TimeCopilot/timecopilot/blob/main/LICENSE"><img src="https://img.shields.io/github/license/TimeCopilot/timecopilot.svg" alt="license"></a>
   <a href="https://discord.gg/7GEdHR6Pfg"><img src="https://img.shields.io/discord/1387291858513821776?label=discord" alt="Join Discord" /></a>
 </div>
 
