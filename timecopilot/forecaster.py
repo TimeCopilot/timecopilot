@@ -96,11 +96,9 @@ class TimeCopilotForecaster(Forecaster):
                     res_df_model = fn(**known_kwargs, **kwargs)
                     res_df_model = res_df_model.rename(
                         columns={
-                            col: (
-                                col.replace(self.fallback_model.alias, model.alias)
-                                if col.startswith(self.fallback_model.alias)
-                                else col
-                            )
+                            col: col.replace(self.fallback_model.alias, model.alias)
+                            if col.startswith(self.fallback_model.alias)
+                            else col
                             for col in res_df_model.columns
                         }
                     )
@@ -115,7 +113,11 @@ class TimeCopilotForecaster(Forecaster):
                     # to cross validation
                     # (the initial model)
                     res_df_model = res_df_model.drop(columns=["y"])
-                res_df = res_df.merge(res_df_model, on=merge_on, how="left")
+                res_df = res_df.merge(
+                    res_df_model,
+                    on=merge_on,
+                    how="left"
+                )
         return res_df
 
     def forecast(
