@@ -116,6 +116,7 @@ class TimeCopilotForecaster(Forecaster):
                 res_df = res_df.merge(
                     res_df_model,
                     on=merge_on,
+                    how="left"
                 )
         return res_df
 
