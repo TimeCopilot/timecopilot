@@ -6,11 +6,11 @@ We aim to provide comprehensive support for TimeCopilot users. Whether you need 
 
 ### Issues
 
-If you encounter any bugs or have feature requests, please report them on our [issue tracker](https://github.com/AzulGarza/TimeCopilot/issues).
+If you encounter any bugs or have feature requests, please report them on our [issue tracker](https://github.com/TimeCopilot/timecopilot/issues).
 
 ### Discussions
 
-For general questions, ideas, and community discussions, join our [discussions](https://github.com/AzulGarza/TimeCopilot/discussions) forum.
+For general questions, ideas, and community discussions, join our [discussions](https://github.com/TimeCopilot/timecopilot/discussions) forum.
 
 ## Discord Server
 

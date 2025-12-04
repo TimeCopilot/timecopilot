@@ -4,8 +4,8 @@ site_author: AzulGarza
 strict: true
 site_url: https://timecopilot.dev
 
-repo_name: AzulGarza/TimeCopilot
-repo_url: https://github.com/AzulGarza/TimeCopilot
+repo_name: TimeCopilot/timecopilot
+repo_url: https://github.com/TimeCopilot/timecopilot
 edit_uri: edit/main/docs
 
 watch:
@@ -63,6 +63,8 @@ nav:
       - Getting Help: community/help.md
       - Contributing: contributing.md
       - Roadmap: community/roadmap.md
+  - Blog:
+    - blog/index.md
 
 theme:
   name: "material"
@@ -132,6 +134,8 @@ markdown_extensions:
 - tables
 
 plugins:
+  - blog:
+      post_url_format: "{slug}"
   - search
   - autorefs
   - mkdocs-jupyter
