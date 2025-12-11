@@ -1200,6 +1200,7 @@ class TimeCopilot:
             seasonality,
             query,
         )
+        query = query if query else "complete system prompt"
         result = self.forecasting_agent.run_sync(
             user_prompt=query,
             deps=self.dataset,

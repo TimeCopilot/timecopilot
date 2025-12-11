@@ -6,10 +6,10 @@
   <em>The GenAI Forecasting Agent · LLMs × Time Series Foundation Models</em>
 </div>
 <div align="center">
-  <a href="https://github.com/AzulGarza/TimeCopilot/actions/workflows/ci.yaml"><img src="https://github.com/AzulGarza/TimeCopilot/actions/workflows/ci.yaml/badge.svg?branch=main" alt="CI"></a>
+  <a href="https://github.com/TimeCopilot/timecopilot/actions/workflows/ci.yaml"><img src="https://github.com/TimeCopilot/timecopilot/actions/workflows/ci.yaml/badge.svg?branch=main" alt="CI"></a>
   <a href="https://pypi.python.org/pypi/timecopilot"><img src="https://img.shields.io/pypi/v/timecopilot.svg" alt="PyPI"></a>
-  <a href="https://github.com/AzulGarza/timecopilot"><img src="https://img.shields.io/pypi/pyversions/timecopilot.svg" alt="versions"></a>
-  <a href="https://github.com/AzulGarza/timecopilot/blob/main/LICENSE"><img src="https://img.shields.io/github/license/azulgarza/timecopilot.svg" alt="license"></a>
+  <a href="https://github.com/TimeCopilot/timecopilot"><img src="https://img.shields.io/pypi/pyversions/timecopilot.svg" alt="versions"></a>
+  <a href="https://github.com/TimeCopilot/timecopilot/blob/main/LICENSE"><img src="https://img.shields.io/github/license/TimeCopilot/timecopilot.svg" alt="license"></a>
   <a href="https://discord.gg/7GEdHR6Pfg"><img src="https://img.shields.io/discord/1387291858513821776?label=discord" alt="Join Discord" /></a>
 </div>
 
@@ -25,6 +25,20 @@ Developed with 💙 at [timecopilot.dev](https://timecopilot.dev/).
     Have ideas or want to test it in real-world use? Join our [Discord community](https://discord.gg/7GEdHR6Pfg) and help shape the future.
 
 ---
+
+## 🚀 Key Capabilities
+
+- **Unified Forecasting Layer**. Combines 30+ time-series foundation models (Chronos, Moirai, TimesFM, TimeGPT…) with LLM reasoning for automated model selection and explanation.
+
+- **Natural-Language Forecasting**. Ask questions in plain English and get forecasts, analysis, validation, and model comparisons. No scripts, pipelines, or dashboards needed.
+
+- **One-Line Forecasting**. Run end-to-end forecasts on any dataset in seconds with a single command (`uvx timecopilot forecast <url>`).
+
+## 📰 News
+
+- **#1 on the GIFT-Eval benchmark**. TimeCopilot reached the [top position](https://timecopilot.dev/experiments/gift-eval/) on the global GIFT-Eval benchmark above AWS, Salesforce, Google, IBM, and top universities.  
+- **Accepted at NeurIPS (BERTs Workshop)**. Our [work on agentic forecasting](https://arxiv.org/pdf/2509.00616) was [accepted](https://berts-workshop.github.io/accepted-papers/) at NeurIPS 2025.
+- **New Manifesto: “Forecasting, the Agentic Way”.**  Our [founding essay](https://timecopilot.dev/blog/forecasting-the-agentic-way/) on agentic forecasting, TSFMs, and the future of time series.
 
 ## How It Works
 
