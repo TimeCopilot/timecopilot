@@ -25,7 +25,7 @@ This ensemble leverages [**TimeCopilot's MedianEnsemble**](https://timecopilot.d
 ## Setup
 
 ### Prerequisites
-- Clone [TimeCopilot's repo](https://github.com/AzulGarza/timecopilot) and go to `experiments/gift-eval`.
+- Clone [TimeCopilot's repo](https://github.com/TimeCopilot/timecopilot) and go to `experiments/gift-eval`.
 - Python 3.11+
 - [uv](https://docs.astral.sh/uv/) package manager
 - AWS CLI configured (for distributed evaluation)
@@ -117,4 +117,4 @@ We introduced newer models based on the most recent progress in the field: Chron
 
 ### **2025-08-05**
 
-GIFT‑Eval recently [enhanced its evaluation dashboard](https://github.com/SalesforceAIResearch/gift-eval?tab=readme-ov-file#2025-08-05) with a new flag that identifies models likely affected by data leakage (i.e., having seen parts of the test set during training). While the test set itself hasn’t changed, this new insight helps us better interpret model performance. To keep our results focused on truly unseen data, we’ve excluded any flagged models from this experiment and added the Sundial model to the ensemble. The previous experiment details remain available [here](https://github.com/AzulGarza/timecopilot/tree/v0.0.14/experiments/gift-eval).
+GIFT‑Eval recently [enhanced its evaluation dashboard](https://github.com/SalesforceAIResearch/gift-eval?tab=readme-ov-file#2025-08-05) with a new flag that identifies models likely affected by data leakage (i.e., having seen parts of the test set during training). While the test set itself hasn’t changed, this new insight helps us better interpret model performance. To keep our results focused on truly unseen data, we’ve excluded any flagged models from this experiment and added the Sundial model to the ensemble. The previous experiment details remain available [here](https://github.com/TimeCopilot/timecopilot/tree/v0.0.14/experiments/gift-eval).

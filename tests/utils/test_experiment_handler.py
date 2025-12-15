@@ -119,7 +119,7 @@ def assert_experiment_dataset_equal(
     expected_exp_dataset: ExperimentDataset,
 ):
     # Using this because problem with python 3.13
-    # see https://github.com/AzulGarza/TimeCopilot/actions/runs/15988311135/job/45096742719?pr=25
+    # see https://github.com/TimeCopilot/timecopilot/actions/runs/15988311135/job/45096742719?pr=25
     assert exp_dataset.df.equals(expected_exp_dataset.df)
     assert exp_dataset.freq == expected_exp_dataset.freq
     assert exp_dataset.h == expected_exp_dataset.h

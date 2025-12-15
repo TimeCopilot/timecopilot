@@ -97,6 +97,7 @@ jobs:
         env: 
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }} 
+          OLLAMA_BASE_URL: "URL_PLACEHOLDER"
 
   build-docs:
     name: build docs
