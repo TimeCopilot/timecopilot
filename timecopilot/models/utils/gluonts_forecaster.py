@@ -15,6 +15,7 @@ from .forecaster import Forecaster, QuantileConverter
 
 _COARSE_FREQ_PREFIXES = ("B", "D", "W", "M", "Q", "A", "Y")
 
+
 def _maybe_align_for_gluonts(
     df: pd.DataFrame,
     freq: str,
@@ -53,11 +54,7 @@ def _maybe_align_for_gluonts(
     within = ds - base  # timedelta inside the bin (time-of-day for daily)
 
     # use the anchor provided function
-    anchor = (
-            within.groupby(g[id_col])
-                  .apply(_compute_anchor_with_guard)
-                  .dropna()
-        )
+    anchor = within.groupby(g[id_col]).apply(_compute_anchor_with_guard).dropna()
 
     if anchor.empty:
         return df, None
@@ -80,9 +77,10 @@ def _maybe_align_for_gluonts(
 
     return df_gluonts, anchor
 
-def _compute_anchor_with_guard(within: pd.Series,
-                               min_frac: float = 0.8,
-                               min_count: int = 10):
+
+def _compute_anchor_with_guard(
+    within: pd.Series, min_frac: float = 0.8, min_count: int = 10
+):
     vc = within.value_counts()
     top_offset = vc.index[0]
     top_count = vc.iloc[0]
@@ -98,6 +96,7 @@ def _compute_anchor_with_guard(within: pd.Series,
         return None
 
     return top_offset
+
 
 def fix_freq(freq: str) -> str:
     # see https://github.com/awslabs/gluonts/pull/2462/files
@@ -255,7 +254,8 @@ class GluonTSForecaster(Forecaster):
         df_gluonts, anchor = _maybe_align_for_gluonts(
             df,
             fix_freq(freq),
-            coarse_only=True,   # set False if you want this to handle hourly/minutely end-stamps too
+            coarse_only=True,  # set False if you want this
+            # to handle hourly/minutely end-stamps too
             verbose=True,
         )
 
@@ -283,14 +283,16 @@ class GluonTSForecaster(Forecaster):
         )
 
         if anchor is not None:
-            fcst_df["ds"] = pd.to_datetime(fcst_df["ds"]) + fcst_df["unique_id"].map(anchor)
+            fcst_df["ds"] = pd.to_datetime(fcst_df["ds"]) + fcst_df["unique_id"].map(
+                anchor
+            )
 
         if qc.quantiles is not None:
             fcst_df = qc.maybe_convert_quantiles_to_level(
                 fcst_df,
                 models=[self.alias],
             )
-        print('ayo')
+        print("ayo")
         print(fcst_df)
 
         return fcst_df
