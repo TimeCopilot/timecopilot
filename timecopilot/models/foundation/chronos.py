@@ -27,6 +27,7 @@ class Chronos(Forecaster):
         self,
         repo_id: str = "amazon/chronos-t5-large",
         batch_size: int = 16,
+        exog_cols: list[str] | None = None,
         alias: str = "Chronos",
     ):
         # ruff: noqa: E501
@@ -84,6 +85,8 @@ class Chronos(Forecaster):
         self.repo_id = repo_id
         self.batch_size = batch_size
         self.alias = alias
+        self.exog_cols = exog_cols
+        self.supports_exogenous = "chronos-2" in repo_id
 
     @contextmanager
     def _get_model(self) -> BaseChronosPipeline:
@@ -161,6 +164,80 @@ class Chronos(Forecaster):
             fcsts_mean_np = fcsts_mean.numpy()  # type: ignore
             fcsts_quantiles_np = None
         return fcsts_mean_np, fcsts_quantiles_np
+    
+
+    def _forecast_chronos2_df(
+        self,
+        df: pd.DataFrame,
+        h: int,
+        freq: str | None,
+        qc: QuantileConverter,
+    ) -> pd.DataFrame:
+
+        id_col = "unique_id"
+        ts_col = "ds"
+        target_col = "y"
+
+        required = {id_col, ts_col, target_col}
+        if not required.issubset(df.columns):
+            raise ValueError("missing required columns")
+
+        base_cols = [id_col, ts_col, target_col]
+        exog_cols = self.exog_cols or []
+
+        missing = [c for c in exog_cols if c not in df.columns]
+        if missing:
+            raise ValueError(f"Missing exogenous columns: {missing}")
+
+        bad_types = [c for c in exog_cols if not pd.api.types.is_numeric_dtype(df[c])] 
+        if bad_types:
+            raise ValueError(f"Exogenous columns must be numeric. Bad columns: {bad_types}")
+
+        cols = base_cols + exog_cols
+        context_df = df[cols].copy()
+        context_df = context_df.sort_values([id_col, ts_col]).reset_index(drop=True)
+
+        # model call
+        with self._get_model() as model:
+            if not isinstance(model, Chronos2Pipeline):
+                raise ValueError(f'Expected Chronos2Pipeline, got {type(model).__name__}')
+
+            pred_df = model.predict_df(
+                context_df,
+                future_df=None,
+                prediction_length=h,
+                quantile_levels=qc.quantiles,
+                id_column=id_col,
+                timestamp_column=ts_col,
+                target=target_col,
+            )
+
+        pred_df = pred_df.rename(columns={id_col: "unique_id", ts_col: "ds"})
+
+        if "predictions" not in pred_df.columns:
+            raise ValueError("predictions column missing")
+
+        # main forecast
+        pred_df[self.alias] = pred_df["predictions"]
+
+        if qc.quantiles is not None:
+            for q in qc.quantiles:
+                raw_col = str(q)
+                if raw_col in pred_df.columns:
+                    pred_df[f"{self.alias}-q-{int(q * 100)}"] = pred_df[raw_col]
+
+            pred_df = qc.maybe_convert_quantiles_to_level(
+                pred_df,
+                models=[self.alias],
+            )
+
+        # final selection
+        final_cols = ["unique_id", "ds", self.alias]
+        for col in pred_df.columns:
+            if col.startswith(self.alias + "-"):
+                final_cols.append(col)
+
+        return pred_df[final_cols].copy()
 
     def forecast(
         self,
@@ -218,6 +295,14 @@ class Chronos(Forecaster):
         """
         freq = self._maybe_infer_freq(df, freq)
         qc = QuantileConverter(level=level, quantiles=quantiles)
+
+        if "chronos-2" in self.repo_id:
+            return self._forecast_chronos2_df(
+                df=df,
+                h=h,
+                freq=freq,
+                qc=qc,
+            )
         dataset = TimeSeriesDataset.from_df(df, batch_size=self.batch_size)
         fcst_df = dataset.make_future_dataframe(h=h, freq=freq)
         with self._get_model() as model:

@@ -251,11 +251,26 @@ class Forecaster:
             freq=pd.tseries.frequencies.to_offset(freq),
             step_size=h if step_size is None else step_size,
         )
+        supports_exogenous = getattr(self, "supports_exogenous", False)
+        exog_cols = getattr(self, "exog_cols", None)
+        requested_exog = bool(exog_cols)    
+
         for _, (cutoffs, train, valid) in tqdm(enumerate(splits)):
-            if len(valid.columns) > 3:
+            if requested_exog and not supports_exogenous:
                 raise NotImplementedError(
-                    "Cross validation with exogenous variables is not yet supported."
+                    "Cross validation with exogenous variables is not yet supported for "
+                    f"model {getattr(self, 'alias', type(self).__name__)}."
                 )
+
+            if requested_exog: 
+                missing_train = [c for c in exog_cols if c not in train.columns]
+                missing_valid = [c for c in exog_cols if c not in valid.columns]
+                if missing_train or missing_valid:
+                    raise ValueError(
+                        f"Missing exogenous columns in CV split. "
+                        f"train missing={missing_train}, valid missing={missing_valid}"
+                    )
+                
             y_pred = self.forecast(
                 df=train,
                 h=h,
