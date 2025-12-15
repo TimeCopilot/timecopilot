@@ -36,6 +36,7 @@ class SKTimeAdapter(Forecaster):
     ):
         """
         Args:
+            model (sktime.forecasting.base.BaseForecaster): sktime forecasting model
             alias (str, optional): Custom name for the model instance.
                 Default is "SKTimeAdapter".
             *args: Additional positional arguments passed to SKTimeAdapter.
@@ -53,6 +54,56 @@ class SKTimeAdapter(Forecaster):
         level: list[int | float] | None = None,
         quantiles: list[float] | None = None,
     ) -> pd.DataFrame:
+        """
+        Generate forecasts for time series data using an sktime model.
+
+        This method produces point forecasts and, optionally, prediction
+        intervals or quantile forecasts. The input DataFrame can contain one
+        or multiple time series in stacked (long) format.
+
+        Prediction intervals and quantile forecasts are not currently supported
+        with sktime based models
+
+        Args:
+            df (pd.DataFrame):
+                DataFrame containing the time series to forecast. It must
+                include as columns:
+
+                    - "unique_id": an ID column to distinguish multiple series.
+                    - "ds": a time column indicating timestamps or periods.
+                    - "y": a target column with the observed values.
+
+            h (int):
+                Forecast horizon specifying how many future steps to predict.
+            freq (str, optional):
+                Frequency of the time series (e.g. "D" for daily, "M" for
+                monthly). See [Pandas frequency aliases](https://pandas.pydata.org/
+                pandas-docs/stable/user_guide/timeseries.html#offset-aliases) for
+                valid values. If not provided, the frequency will be inferred
+                from the data.
+            level (list[int | float], optional):
+                Confidence levels for prediction intervals, expressed as
+                percentages (e.g. [80, 95]). If provided, the returned
+                DataFrame will include lower and upper interval columns for
+                each specified level.
+            quantiles (list[float], optional):
+                List of quantiles to forecast, expressed as floats between 0
+                and 1. Should not be used simultaneously with `level`. When
+                provided, the output DataFrame will contain additional columns
+                named in the format "model-q-{percentile}", where {percentile}
+                = 100 × quantile value.
+
+        Returns:
+            pd.DataFrame:
+                DataFrame containing forecast results. Includes:
+
+                    - point forecasts for each timestamp and series.
+                    - prediction intervals if `level` is specified.
+                    - quantile forecasts if `quantiles` is specified.
+
+                For multi-series data, the output retains the same unique
+                identifiers as the input DataFrame.
+        """
         # TODO: support for exogenous data
         # TODO: add support for level for sktime models that can support it
         # TODO: add support for quantiles for sktime models that can support it
