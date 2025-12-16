@@ -113,10 +113,7 @@ class TimeCopilotForecaster(Forecaster):
                     # to cross validation
                     # (the initial model)
                     res_df_model = res_df_model.drop(columns=["y"])
-                res_df = res_df.merge(
-                    res_df_model,
-                    on=merge_on,
-                )
+                res_df = res_df.merge(res_df_model, on=merge_on, how="left")
         return res_df
 
     def forecast(
