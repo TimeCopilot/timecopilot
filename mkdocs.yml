@@ -28,6 +28,7 @@ nav:
           - examples/gift-eval.ipynb
           - examples/chronos-family.ipynb
           - examples/cryptocurrency-quickstart.ipynb
+          - examples/sktime.ipynb
   - Experiments:
       - experiments/gift-eval.md
       - experiments/fev.md
