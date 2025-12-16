@@ -54,6 +54,7 @@ class SKTimeAdapter(Forecaster):
         level: list[int | float] | None = None,
         quantiles: list[float] | None = None,
     ) -> pd.DataFrame:
+        # fmt: off
         """
         Generate forecasts for time series data using an sktime model.
 
@@ -103,7 +104,22 @@ class SKTimeAdapter(Forecaster):
 
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
+
+        Example:
+            ```python
+            import pandas as pd
+            from timecopilot import TimeCopilot
+            from timecopilot.models.adapters.sktime import SKTimeAdapter
+            from sktime.forecasting.trends import TrendForecaster
+
+            df = pd.read_csv("https://timecopilot.s3.amazonaws.com/public/data/air_passengers.csv")
+            adapted_skt_model = SKTimeAdapter(TrendForecaster())
+            tc = TimeCopilot(llm="openai:gpt-4o", models=[adapted_skt_model])
+            result = tc.forecast(df, h=12, freq="MS")
+            print(result.output)
+            ```
         """
+        # fmt: on
         # TODO: support for exogenous data
         # TODO: add support for level for sktime models that can support it
         # TODO: add support for quantiles for sktime models that can support it
