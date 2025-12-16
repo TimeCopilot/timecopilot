@@ -30,7 +30,7 @@ class SKTimeAdapter(Forecaster):
         self,
         model,
         # model: BaseForecaster,
-        alias: str = "SKTimeAdapter",
+        alias: str | None = None,
         *args: Any,
         **kwargs: Any,
     ):
@@ -38,12 +38,12 @@ class SKTimeAdapter(Forecaster):
         Args:
             model (sktime.forecasting.base.BaseForecaster): sktime forecasting model
             alias (str, optional): Custom name for the model instance.
-                Default is "SKTimeAdapter".
+                By default alias is retrieved from the type name of model.
             *args: Additional positional arguments passed to SKTimeAdapter.
             **kwargs: Additional keyword arguments passed to SKTimeAdapter.
         """
         super().__init__(*args, **kwargs)
-        self.alias = alias
+        self.alias = alias if alias is not None else type(model).__name__
         self.model = model
 
     def forecast(
