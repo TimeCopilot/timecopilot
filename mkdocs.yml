@@ -44,6 +44,7 @@ nav:
       - api/models/ml.md
       - api/models/neural.md
       - api/models/ensembles.md
+      - api/models/adapters/adapters.md
       - api/models/utils/forecaster.md
       - api/gift-eval/gift-eval.md
   - Changelogs:
