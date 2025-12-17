@@ -3,7 +3,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from .utils.forecaster import Forecaster
+from ..utils.forecaster import Forecaster
 
 # from sktime.forecasting.base import BaseForecaster, ForecastingHorizon
 
