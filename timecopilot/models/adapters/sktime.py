@@ -110,7 +110,7 @@ class SKTimeAdapter(Forecaster):
             import pandas as pd
             from timecopilot import TimeCopilot
             from timecopilot.models.adapters.sktime import SKTimeAdapter
-            from sktime.forecasting.trends import TrendForecaster
+            from sktime.forecasting.trend import TrendForecaster
 
             df = pd.read_csv("https://timecopilot.s3.amazonaws.com/public/data/air_passengers.csv")
             adapted_skt_model = SKTimeAdapter(TrendForecaster())
