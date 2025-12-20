@@ -11,6 +11,7 @@ from pydantic_ai import Agent
 from pydantic_ai.agent import AgentRunResult
 from utilsforecast.evaluation import evaluate
 from utilsforecast.losses import _zero_to_nan, mae
+import numpy as np
 
 from ..models.utils.forecaster import (
     get_seasonality,
@@ -23,6 +24,10 @@ warnings.simplefilter(
     category=FutureWarning,
 )
 
+def _zero_to_nan_pd(s: pd.Series) -> pd.Series:
+    s = s.astype(float).copy()
+    s[s == 0] = np.nan
+    return s
 
 def mase(
     df: pd.DataFrame,
@@ -31,18 +36,30 @@ def mase(
     train_df: pd.DataFrame,
     id_col: str = "unique_id",
     target_col: str = "y",
+    **kwargs,  
 ) -> pd.DataFrame:
-    mean_abs_err = mae(df, models, id_col, target_col)
-    mean_abs_err = mean_abs_err.set_index(id_col)
+    mean_abs_err = mae(df, models, id_col, target_col).set_index(id_col)
+
+    # don't divide datetime columns like 'cutoff'
+    cutoff = None
+    if "cutoff" in mean_abs_err.columns:
+        cutoff = mean_abs_err["cutoff"]
+        mean_abs_err = mean_abs_err.drop(columns=["cutoff"])
+
     # assume train_df is sorted
     lagged = train_df.groupby(id_col, observed=True)[target_col].shift(seasonality)
     scale = train_df[target_col].sub(lagged).abs()
     scale = scale.groupby(train_df[id_col], observed=True).mean()
     scale[scale < 1e-2] = 0.0
-    res = mean_abs_err.div(_zero_to_nan(scale), axis=0).fillna(0)
+
+    scale = _zero_to_nan_pd(scale).reindex(mean_abs_err.index)  # align by id
+    res = mean_abs_err.div(scale, axis=0).fillna(0)
+
+    if cutoff is not None:
+        res.insert(0, "cutoff", cutoff)
+
     res.index.name = id_col
-    res = res.reset_index()
-    return res
+    return res.reset_index()
 
 
 def generate_train_cv_splits(
@@ -246,9 +263,15 @@ class ExperimentDataset:
             models=models,
             id_col="id_cutoff",
         )
-        eval_df = eval_df.merge(cutoffs, on=["id_cutoff"])
-        eval_df = eval_df.drop(columns=["id_cutoff"])
-        eval_df = eval_df[["unique_id", "cutoff", "metric"] + models]
+        if "cutoff" not in eval_df.columns:
+            if "id_cutoff" in eval_df.columns:
+                eval_df = eval_df.merge(cutoffs, on="id_cutoff", how="left")
+            else:
+                pass
+
+        cols = ["unique_id", "cutoff", "metric"] + models
+        cols = [c for c in cols if c in eval_df.columns]
+        eval_df = eval_df[cols]
         return eval_df
 
 
