@@ -77,6 +77,14 @@ All documentation files should use **kebab-case** (e.g., `model-hub.md`, `foreca
 
 For further reference, see the [Google Developer Documentation Style Guide on file names](https://developers.google.com/style/filenames).
 
+### Adding Models & Adapters
+
+In order for new models and adapters to show up in TimeCopilot's documentation properly there are a couple steps to take:
+
+- Add the model/adapter in its own file or the appropriate file in `docs/api/models` or the appropriate subdirectory. For adapters, it may also be good to create an example notebook in `docs/examples` and add it to the `Examples` section of [mkdocs.yml](https://github.com/TimeCopilot/timecopilot/blob/main/mkdocs.yml).
+    - when creating a new file in `docs/api/models` for this step, add that file in the API Reference section of [mkdocs.yml](https://github.com/TimeCopilot/timecopilot/blob/main/mkdocs.yml)
+- A docstring should be present for the new model/adapter with an example in the `forecast()` method in a similar style to the [TimeCopilot agent query method](https://timecopilot.dev/api/agent/#timecopilot.agent.TimeCopilot.query). Note: when adding an adapter with its own dependencies you may need to add those dependencies as dev dependencies with `uv add new_dep --group dev`.
+
 ## Adding New Datasets
 
 The datasets utilized in our documentation are hosted on AWS at `https://timecopilot.s3.amazonaws.com/public/data/`. If you wish to contribute additional datasets for your changes, please contact [@AzulGarza](http://github.com/AzulGarza) for guidance.
