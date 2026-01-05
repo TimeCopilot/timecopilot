@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 from utilsforecast.data import generate_series
 
+from timecopilot.models.prophet import Prophet
 from timecopilot.models.stats import SeasonalNaive
 from timecopilot.models.utils.forecaster import (
     QuantileConverter,
@@ -332,3 +333,16 @@ def test_detect_anomalies_short_series_error():
     )
     with pytest.raises(ValueError, match="Cannot perform anomaly detection"):
         model.detect_anomalies(df, h=5, freq="D")
+
+
+def test_prophet_detect_anomalies_short_series_error():
+    model = Prophet()
+    df = pd.DataFrame(
+        {
+            "unique_id": ["A", "A"],
+            "ds": pd.date_range("2023-01-01", periods=2, freq="D"),
+            "y": [1.0, 2.0],
+        }
+    )
+    with pytest.raises(ValueError, match="Cannot perform anomaly detection"):
+        model.detect_anomalies(df, h=1, freq="D")
