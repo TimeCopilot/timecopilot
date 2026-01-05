@@ -114,7 +114,7 @@ class SKTimeAdapter(Forecaster):
 
             df = pd.read_csv("https://timecopilot.s3.amazonaws.com/public/data/air_passengers.csv")
             adapted_skt_model = SKTimeAdapter(TrendForecaster())
-            tc = TimeCopilot(llm="openai:gpt-4o", models=[adapted_skt_model])
+            tc = TimeCopilot(llm="openai:gpt-4o", forecasters=[adapted_skt_model])
             result = tc.forecast(df, h=12, freq="MS")
             print(result.output)
             ```
