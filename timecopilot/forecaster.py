@@ -71,11 +71,14 @@ class TimeCopilotForecaster(Forecaster):
         freq: str | None,
         level: list[int | float] | None,
         quantiles: list[float] | None,
+        X_df: pd.DataFrame | None = None,
+        static_features: list[str] | None = None,
         **kwargs,
     ) -> pd.DataFrame:
         # infer just once to avoid multiple calls to _maybe_infer_freq
         freq = self._maybe_infer_freq(df, freq)
         res_df: pd.DataFrame | None = None
+
         for model in self.models:
             known_kwargs = {
                 "df": df,
@@ -83,14 +86,22 @@ class TimeCopilotForecaster(Forecaster):
                 "freq": freq,
                 "level": level,
             }
+
+            # Forward exogenous arguments to models that support them.
+            # Models that don't support these should raise NotImplementedError.
+            known_kwargs["X_df"] = X_df
+            known_kwargs["static_features"] = static_features
+
             if attr != "detect_anomalies":
                 known_kwargs["quantiles"] = quantiles
+
             fn = getattr(model, attr)
             try:
                 res_df_model = fn(**known_kwargs, **kwargs)
-            except (ValueError, RuntimeError) as e:
+            except (ValueError, RuntimeError, NotImplementedError) as e:
                 if self.fallback_model is None:
                     raise e
+
                 fn = getattr(self.fallback_model, attr)
                 try:
                     res_df_model = fn(**known_kwargs, **kwargs)
@@ -102,8 +113,9 @@ class TimeCopilotForecaster(Forecaster):
                             for col in res_df_model.columns
                         }
                     )
-                except (ValueError, RuntimeError) as e:
+                except (ValueError, RuntimeError, NotImplementedError) as e:
                     raise e
+
             if res_df is None:
                 res_df = res_df_model
             else:
@@ -113,10 +125,11 @@ class TimeCopilotForecaster(Forecaster):
                     # to cross validation
                     # (the initial model)
                     res_df_model = res_df_model.drop(columns=["y"])
-                res_df = res_df.merge(
-                    res_df_model,
-                    on=merge_on,
-                )
+
+                # NOTE: keep merge semantics aligned with the modified behavior
+                # (default merge == inner join).
+                res_df = res_df.merge(res_df_model, on=merge_on)
+
         return res_df
 
     def forecast(
@@ -124,6 +137,8 @@ class TimeCopilotForecaster(Forecaster):
         df: pd.DataFrame,
         h: int,
         freq: str | None = None,
+        X_df: pd.DataFrame | None = None,  # known future covariates
+        static_features: list[str] | None = None,  # past-only covariates (in df)
         level: list[int | float] | None = None,
         quantiles: list[float] | None = None,
     ) -> pd.DataFrame:
@@ -151,6 +166,11 @@ class TimeCopilotForecaster(Forecaster):
                 pandas-docs/stable/user_guide/timeseries.html#offset-aliases) for
                 valid values. If not provided, the frequency will be inferred
                 from the data.
+            X_df (pd.DataFrame, optional):
+                Known future covariates for the forecast horizon.
+            static_features (list[str], optional):
+                Past-only covariates included in `df` that should be treated as static
+                (not expected to vary through time).
             level (list[int | float], optional):
                 Confidence levels for prediction intervals, expressed as
                 percentages (e.g. [80, 95]). If provided, the returned
@@ -182,6 +202,8 @@ class TimeCopilotForecaster(Forecaster):
             freq=freq,
             level=level,
             quantiles=quantiles,
+            X_df=X_df,
+            static_features=static_features,
         )
 
     def cross_validation(
@@ -191,6 +213,8 @@ class TimeCopilotForecaster(Forecaster):
         freq: str | None = None,
         n_windows: int = 1,
         step_size: int | None = None,
+        X_df: pd.DataFrame | None = None,
+        static_features: list[str] | None = None,
         level: list[int | float] | None = None,
         quantiles: list[float] | None = None,
     ) -> pd.DataFrame:
@@ -223,6 +247,10 @@ class TimeCopilotForecaster(Forecaster):
             step_size (int, optional):
                 Step size between the start of consecutive windows. If None, it
                 defaults to `h`.
+            X_df (pd.DataFrame, optional):
+                Known future covariates are not supported for cross-validation.
+            static_features (list[str], optional):
+                Past-only covariates are not supported for cross-validation.
             level (list[int | float], optional):
                 Confidence levels for prediction intervals, expressed as
                 percentages (e.g. [80, 95]). When specified, the output
@@ -248,6 +276,15 @@ class TimeCopilotForecaster(Forecaster):
                     - prediction intervals if `level` is specified.
                     - quantile forecasts if `quantiles` is specified.
         """
+        # Fail loudly at the unified layer: even if Chronos-2 supports exog for
+        # forecast(), the library does not implement per-window future_df
+        # construction for cross-validation.
+        if X_df is not None or static_features is not None:
+            raise NotImplementedError(
+                "Cross validation with exogenous variables is not supported. "
+                "Call `forecast(...)` instead (Chronos-2 only supports exogenous variables)."
+            )
+
         return self._call_models(
             "cross_validation",
             merge_on=["unique_id", "ds", "cutoff"],
@@ -258,6 +295,8 @@ class TimeCopilotForecaster(Forecaster):
             step_size=step_size,
             level=level,
             quantiles=quantiles,
+            X_df=None,
+            static_features=None,
         )
 
     def detect_anomalies(
@@ -326,4 +365,6 @@ class TimeCopilotForecaster(Forecaster):
             n_windows=n_windows,
             level=level,  # type: ignore
             quantiles=None,
+            X_df=None,
+            static_features=None,
         )
