@@ -31,7 +31,16 @@ jobs:
           enable-cache: true
 
       - name: Run tests 
-        run: uv run pytest
+        run: |
+          echo "Memory usage before:"
+          free -h
+          df -h
+
+          uv run pytest
+
+          echo "Memory usage after:"
+          free -h
+
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
