@@ -36,7 +36,15 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Test import class
-        run: uv run -- python -c "from timecopilot import TimeCopilot, TimeCopilotForecaster" 
+        run: |
+          echo "Memory usage before:"
+          free -h
+          df -h
+
+          uv run -- python -c "from timecopilot import TimeCopilot, TimeCopilotForecaster" 
+
+          echo "Memory usage after:"
+          free -h
 
   test-live:
     name: test live
