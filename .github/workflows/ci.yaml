@@ -13,7 +13,8 @@ concurrency:
 jobs:
   test:
     name: test on ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
+    runs-on:
+      labels: larger-timecopilot-cpu-runner
     strategy:
       fail-fast: false
       matrix:
