@@ -31,12 +31,26 @@ jobs:
           enable-cache: true
 
       - name: Run tests 
-        run: uv run pytest
+        run: |
+          echo "CPU info:"
+          nproc
+          lscpu
+          echo "Load average:"
+          uptime
+          # Time your critical steps
+          time uv run pytest
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Test import class
-        run: uv run -- python -c "from timecopilot import TimeCopilot, TimeCopilotForecaster" 
+        run: |
+          echo "CPU info:"
+          nproc
+          lscpu
+          echo "Load average:"
+          uptime
+          # Time your critical steps
+          time uv run -- python -c "from timecopilot import TimeCopilot, TimeCopilotForecaster" 
 
   test-live:
     name: test live
