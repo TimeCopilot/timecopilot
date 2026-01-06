@@ -27,7 +27,7 @@ nav:
           - examples/ts-foundation-models-comparison-quickstart.ipynb
           - examples/gift-eval.ipynb
           - examples/chronos-family.ipynb
-          - examples/crytpocurrency-quickstart.ipynb
+          - examples/cryptocurrency-quickstart.ipynb
   - Experiments:
       - experiments/gift-eval.md
       - experiments/fev.md
