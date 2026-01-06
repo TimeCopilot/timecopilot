@@ -25,6 +25,9 @@ jobs:
       - name: Clone repo
         uses: actions/checkout@v4
 
+      - name: Collect Workflow Telemetry
+        uses: catchpoint/workflow-telemetry-action@v2
+
       - name: Set up uv
         uses: astral-sh/setup-uv@v6 
         with:
