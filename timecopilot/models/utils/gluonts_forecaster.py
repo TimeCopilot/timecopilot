@@ -292,7 +292,5 @@ class GluonTSForecaster(Forecaster):
                 fcst_df,
                 models=[self.alias],
             )
-        print("ayo")
-        print(fcst_df)
 
         return fcst_df
