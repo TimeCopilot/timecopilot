@@ -13,11 +13,11 @@ concurrency:
 jobs:
   test:
     name: test on ${{ matrix.python-version }}
-    runs-on: larger-timecopilot-cpu-runner
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
+    runs-on: larger-timecopilot-cpu-runner
     env:
       UV_PYTHON: ${{ matrix.python-version }}
 
