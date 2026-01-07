@@ -25,6 +25,12 @@ jobs:
       - name: Clone repo
         uses: actions/checkout@v4
 
+      - name: cache huggingface models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface/hub/
+          key: ${{ runner.os }}-huggingface-
+
       - name: Set up uv
         uses: astral-sh/setup-uv@v6 
         with:
