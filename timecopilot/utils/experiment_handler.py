@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 from typing import Any
+import numpy as np
 
 import pandas as pd
 from pydantic import BaseModel, Field
@@ -11,7 +12,6 @@ from pydantic_ai import Agent
 from pydantic_ai.agent import AgentRunResult
 from utilsforecast.evaluation import evaluate
 from utilsforecast.losses import _zero_to_nan, mae
-import numpy as np
 
 from ..models.utils.forecaster import (
     get_seasonality,
@@ -35,28 +35,33 @@ def mase(
     seasonality: int,
     train_df: pd.DataFrame,
     id_col: str = "unique_id",
+    time_col: str = "ds",
     target_col: str = "y",
-    **kwargs,  
+    cutoff_col: str = "cutoff",
 ) -> pd.DataFrame:
-    mean_abs_err = mae(df, models, id_col, target_col).set_index(id_col)
+    mean_abs_err = mae(
+        df,
+        models,
+        id_col=id_col,
+        target_col=target_col,
+        cutoff_col=cutoff_col,
+    ).set_index(id_col)
 
-    # don't divide datetime columns like 'cutoff'
     cutoff = None
-    if "cutoff" in mean_abs_err.columns:
-        cutoff = mean_abs_err["cutoff"]
-        mean_abs_err = mean_abs_err.drop(columns=["cutoff"])
+    if cutoff_col in mean_abs_err.columns:
+        cutoff = mean_abs_err[cutoff_col]
+        mean_abs_err = mean_abs_err.drop(columns=[cutoff_col])
 
-    # assume train_df is sorted
     lagged = train_df.groupby(id_col, observed=True)[target_col].shift(seasonality)
     scale = train_df[target_col].sub(lagged).abs()
     scale = scale.groupby(train_df[id_col], observed=True).mean()
     scale[scale < 1e-2] = 0.0
 
-    scale = _zero_to_nan_pd(scale).reindex(mean_abs_err.index)  # align by id
+    scale = _zero_to_nan_pd(scale).reindex(mean_abs_err.index)
     res = mean_abs_err.div(scale, axis=0).fillna(0)
 
     if cutoff is not None:
-        res.insert(0, "cutoff", cutoff)
+        res.insert(0, cutoff_col, cutoff)
 
     res.index.name = id_col
     return res.reset_index()
