@@ -26,7 +26,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Cache huggingface models
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: ~/.cache/huggingface/hub/
           key: ${{ runner.os }}-huggingface-
