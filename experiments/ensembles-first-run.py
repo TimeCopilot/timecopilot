@@ -252,15 +252,15 @@ def run_and_score(ens, name):
     )
     print(f"[{name}] merge rows={len(merged)} (expected ~ {len(test_df)})")
     print(
-        f"[{name}] merged NaNs: y={merged['y'].isna().sum()}, \
-        pred={merged[ens.alias].isna().sum()}"
+        f"[{name}] merged NaNs: y={merged['y'].isna().sum()}, "
+        f"pred={merged[ens.alias].isna().sum()}"
     )
 
     # if merge got weird (ds mismatch), this will expose it fast
     if len(merged) == 0:
         print(
-            f"[{name}] ERROR: merge is empty. \
-            ds alignment is wrong (train/test ds mismatch)."
+            f"[{name}] ERROR: merge is empty. "
+            f"ds alignment is wrong (train/test ds mismatch)."
         )
         return None, None, fcst
 
