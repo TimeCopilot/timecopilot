@@ -71,11 +71,11 @@ class TrimmedEnsemble(Forecaster):
         Returns:
             k (int): how many to drop from each tail.
         """
-        if n_min <= 2:
-            return 0
-        if n_min <= 4:
-            return 1
         if n_min <= 7:
+            return 0
+        if n_min <= 8:
+            return 1
+        if n_min <= 9:
             return int(np.floor(0.20 * n_min))
         return int(np.floor(0.10 * n_min))
 
