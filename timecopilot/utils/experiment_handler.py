@@ -4,14 +4,14 @@ from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 from typing import Any
-import numpy as np
 
+import numpy as np
 import pandas as pd
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 from pydantic_ai.agent import AgentRunResult
 from utilsforecast.evaluation import evaluate
-from utilsforecast.losses import _zero_to_nan, mae
+from utilsforecast.losses import mae
 
 from ..models.utils.forecaster import (
     get_seasonality,
@@ -24,10 +24,12 @@ warnings.simplefilter(
     category=FutureWarning,
 )
 
+
 def _zero_to_nan_pd(s: pd.Series) -> pd.Series:
     s = s.astype(float).copy()
     s[s == 0] = np.nan
     return s
+
 
 def mase(
     df: pd.DataFrame,
