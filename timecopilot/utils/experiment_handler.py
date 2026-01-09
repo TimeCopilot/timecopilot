@@ -272,8 +272,6 @@ class ExperimentDataset:
         if "cutoff" not in eval_df.columns:
             if "id_cutoff" in eval_df.columns:
                 eval_df = eval_df.merge(cutoffs, on="id_cutoff", how="left")
-            else:
-                pass
 
         cols = ["unique_id", "cutoff", "metric"] + models
         cols = [c for c in cols if c in eval_df.columns]
