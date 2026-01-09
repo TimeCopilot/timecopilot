@@ -194,10 +194,7 @@ def debug_forecast_output(name, fcst, alias):
         print(f"[{name}] quantile cols: {qcols}")
         print(f"[{name}] quantile NaNs (top):\n{na_q.head(5).to_string()}")
     else:
-        print(
-            f"[{name}] no quantile columns found \
-            (ok if you didn't request quantiles)."
-        )
+        print(f"[{name}] no quantile columns found (ok if you didn't request quantiles).")
 
 
 # -----------------------------
