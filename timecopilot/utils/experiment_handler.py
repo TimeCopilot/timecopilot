@@ -46,7 +46,6 @@ def mase(
         models,
         id_col=id_col,
         target_col=target_col,
-        # cutoff_col=cutoff_col,
     ).set_index(id_col)
 
     cutoff = None
