@@ -147,7 +147,7 @@ class ExperimentDatasetParser:
             if suffix in {"csv", "txt"}:
                 df = read_fn(io.StringIO(resp.text))  # type: ignore[arg-type]
             elif suffix in {"parquet"}:
-                import pyarrow as pa  
+                import pyarrow as pa
 
                 table = pa.ipc.open_file(pa.BufferReader(resp.content)).read_all()
                 df = table.to_pandas()
