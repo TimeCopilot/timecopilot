@@ -1,10 +1,8 @@
-import sys
 from functools import partial
 
 import pandas as pd
 
 # Remember to set your project path!
-
 # Added for standarization
 from datasetsforecast.m4 import M4, Monthly
 from utilsforecast.evaluation import evaluate
@@ -17,6 +15,14 @@ from timecopilot.models.foundation.flowstate import FlowState
 from timecopilot.models.foundation.timesfm import TimesFM
 from timecopilot.models.foundation.tirex import TiRex
 from timecopilot.models.stats import AutoARIMA, SeasonalNaive, Theta
+
+# A few notes and instructions regarding this script. This experiment was
+# created as a means to compare the implementation of the median and the trimmed
+# ensembles. These run on 50 timeseries on 7 models. The idea is to revise
+# proper execution of both ensembles, but to later establish a whole gift-eval
+# run and assess whether conditions exists where one ensemble turns out to be
+# sharper than the other.
+
 
 # -----------------------------
 # helpers
