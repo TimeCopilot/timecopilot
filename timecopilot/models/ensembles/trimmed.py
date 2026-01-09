@@ -42,12 +42,20 @@ class TrimmedEnsemble(Forecaster):
         models: list[Forecaster],
         alias: str = "TrimmedEnsemble",
         min_quota: int = 2,
-        trim_10p_threshold: int = 8,  # n_min >= this -> 10% trim
+        trim_low_threshold: int = 8,  # n_min >= this -> switch to lower trim percentage
+        trim_10p_threshold: int | None = None,
     ):
         self.tcf = TimeCopilotForecaster(models=models, fallback_model=None)
         self.alias = alias
         self.min_quota = int(min_quota)
-        self.trim_10p_threshold = int(trim_10p_threshold)
+        # Backward-compatible handling: `trim_10p_threshold` (deprecated) overrides
+        # `trim_low_threshold` if explicitly provided.
+        effective_threshold = (
+            trim_10p_threshold if trim_10p_threshold is not None else trim_low_threshold
+        )
+        self.trim_low_threshold = int(effective_threshold)
+        # Preserve old attribute name for any existing internal uses.
+        self.trim_10p_threshold = self.trim_low_threshold
 
     # ---------- trimming policy (fixed per row based on n_min) ----------
 
