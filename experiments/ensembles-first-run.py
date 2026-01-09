@@ -48,55 +48,12 @@ def ensure_m4_monthly_csvs(data_dir="data/m4"):
 
 
 def melt_train_test_monthly_period(train_wide, test_wide, ids, start="2000-01"):
-    # ---- train ----
-    tr = train_wide[train_wide["V1"].isin(ids)].copy()
-    tr_long = (
-        tr.melt(id_vars="V1", var_name="t", value_name="y")
-        .dropna()
-        .rename(columns={"V1": "unique_id"})
-    )
-    tr_long["k"] = tr_long.groupby("unique_id").cumcount()
+    """Backward-compatible wrapper around the optimized monthly melt function.
 
-    # per-series lengths
-    n_train = tr_long.groupby("unique_id")["k"].max() + 1  # Series: unique_id -> len
-
-    # month-end ds for train
-    def _train_ds(uid, k):
-        pr = pd.period_range(start=start, periods=int(n_train[uid]), freq="M")
-        return pr.to_timestamp(how="end")[k]
-
-    tr_long["ds"] = tr_long.apply(
-        lambda r: _train_ds(r["unique_id"], int(r["k"])), axis=1
-    )
-    tr_long = tr_long[["unique_id", "ds", "y"]]
-
-    # ---- test ----
-    te = test_wide[test_wide["V1"].isin(ids)].copy()
-    te_long = (
-        te.melt(id_vars="V1", var_name="t", value_name="y")
-        .dropna()
-        .rename(columns={"V1": "unique_id"})
-    )
-    te_long["k"] = te_long.groupby("unique_id").cumcount()
-
-    # month-end ds for test continues after train
-    def _test_ds(uid, k):
-        pr = pd.period_range(
-            start=start,
-            periods=int(n_train[uid])
-            + int(te_long[te_long["unique_id"] == uid]["k"].max() + 1),
-            freq="M",
-        )
-        return pr.to_timestamp(how="end")[int(n_train[uid]) + k]
-
-    te_long["ds"] = te_long.apply(
-        lambda r: _test_ds(r["unique_id"], int(r["k"])), axis=1
-    )
-    te_long = te_long[["unique_id", "ds", "y"]]
-
-    return tr_long, te_long
-
-
+    This preserves the original API while delegating to the faster,
+    vectorized implementation in ``melt_train_test_monthly_fast``.
+    """
+    return melt_train_test_monthly_fast(train_wide, test_wide, ids, start=start)
 def melt_train_test_monthly_fast(train_wide, test_wide, ids, start="2000-01"):
     # --- train long ---
     tr = train_wide[train_wide["V1"].isin(ids)]
