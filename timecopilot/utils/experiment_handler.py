@@ -147,7 +147,7 @@ class ExperimentDatasetParser:
             if suffix in {"csv", "txt"}:
                 df = read_fn(io.StringIO(resp.text))  # type: ignore[arg-type]
             elif suffix in {"parquet"}:
-                import pyarrow as pa  # noqa: WPS433
+                import pyarrow as pa  
 
                 table = pa.ipc.open_file(pa.BufferReader(resp.content)).read_all()
                 df = table.to_pandas()
@@ -269,9 +269,8 @@ class ExperimentDataset:
             models=models,
             id_col="id_cutoff",
         )
-        if "cutoff" not in eval_df.columns:
-            if "id_cutoff" in eval_df.columns:
-                eval_df = eval_df.merge(cutoffs, on="id_cutoff", how="left")
+        if "cutoff" not in eval_df.columns and "id_cutoff" in eval_df.columns:
+            eval_df = eval_df.merge(cutoffs, on="id_cutoff", how="left")
 
         cols = ["unique_id", "cutoff", "metric"] + models
         cols = [c for c in cols if c in eval_df.columns]
