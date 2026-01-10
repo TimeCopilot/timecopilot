@@ -27,19 +27,19 @@ jobs:
 
       - name: free disk space
         # may switch to https://github.com/endersonmenezes/free-disk-space
-        uses: BRAINSia/free-disk-space@v2
+        uses: endersonmenezes/free-disk-space@v3
         with:
           # python is in tool-cache, can't delete it
           tool-cache: false
 
           #defaults
-          mandb: true
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
+          remove_android: true
+          remove_dotnet: true
+          remove_haskell: true
+          remove_packages: true
+          remove_packages_one_command: true
+          rm_cmd: "rmz"
+          rm_version: "3.1.1"
 
       - name: Cache huggingface models
         uses: actions/cache@v4
