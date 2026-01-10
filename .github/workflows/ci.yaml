@@ -36,8 +36,6 @@ jobs:
           remove_android: true
           remove_dotnet: true
           remove_haskell: true
-          remove_packages: true
-          remove_packages_one_command: true
           rm_cmd: "rmz"
           rmz_version: "3.1.1"
 
