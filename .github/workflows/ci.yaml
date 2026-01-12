@@ -33,13 +33,9 @@ jobs:
           tool-cache: false
 
           #defaults
-          mandb: true
           android: true
           dotnet: true
           haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
 
       - name: Cache huggingface models
         uses: actions/cache@v4
