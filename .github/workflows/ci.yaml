@@ -30,6 +30,24 @@ jobs:
         with:
           enable-cache: true
 
+      - name: Free disk space in action runner
+        # there are a couple different actions that can do this
+        # https://github.com/BRAINSia/free-disk-space
+        # https://github.com/endersonmenezes/free-disk-space
+        uses: endersonmenezes/free-disk-space@v3
+        with:
+          remove_android: true
+          remove_dotnet: true
+          remove_haskell: true
+          rm_cmd: "rmz"
+          rmz_version: "3.1.1"
+
+      - name: Cache HuggingFace Models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface/hub/
+          key: ${{ Runner.os }}-huggingface-${{ hashFiles('**/tests/') }}
+
       - name: Run tests 
         run: uv run pytest
         env:
