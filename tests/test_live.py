@@ -91,7 +91,6 @@ def test_is_queryable():
     tc.forecast(
         df=df,
         query=f"Please forecast the series with a horizon of {h} and frequency D.",
-        detect_anomalies=False,
     )
     assert tc.is_queryable()
     result = tc.query("how much will the series change?")
