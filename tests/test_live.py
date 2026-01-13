@@ -88,12 +88,12 @@ def test_is_queryable():
         retries=3,
     )
     assert not tc.is_queryable()
-    result = tc.forecast(
+    tc.forecast(
         df=df,
         query=f"Please forecast the series with a horizon of {h} and frequency D.",
     )
     assert tc.is_queryable()
-    result = tc.query("how much will change the series with id 0?")
+    result = tc.query("how much will the series change?")
     print(result.output)
 
 
@@ -148,7 +148,8 @@ async def test_async_is_queryable():
         query=f"Please forecast the series with a horizon of {h} and frequency D.",
     )
     assert tc.is_queryable()
-    answer = await tc.query("how much will change the series with id 0?")
+    series_id = df["unique_id"].iloc[0]
+    answer = await tc.query(f"how much will change the series with id {series_id}?")
     print(answer.output)
 
 
