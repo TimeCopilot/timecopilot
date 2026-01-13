@@ -93,8 +93,7 @@ def test_is_queryable():
         query=f"Please forecast the series with a horizon of {h} and frequency D.",
     )
     assert tc.is_queryable()
-    series_id = df["unique_id"].iloc[0]
-    result = tc.query(f"how much will change the series with id {series_id}?")
+    result = tc.query("how much will the series change?")
     print(result.output)
 
 
