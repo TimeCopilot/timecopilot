@@ -22,6 +22,7 @@ nav:
           - examples/agent-quickstart.ipynb
           - examples/llm-providers.ipynb
           - examples/aws-bedrock.ipynb
+          - examples/google-llms.ipynb
           - examples/forecaster-quickstart.ipynb
           - examples/anomaly-detection-forecaster-quickstart.ipynb
           - examples/ts-foundation-models-comparison-quickstart.ipynb
