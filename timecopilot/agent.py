@@ -33,6 +33,7 @@ from tsfeatures import (
 from tsfeatures.tsfeatures import _get_feats
 
 from .forecaster import Forecaster, TimeCopilotForecaster
+from .models.adapters.sktime import SKTimeAdapter
 from .models.prophet import Prophet
 from .models.stats import (
     ADIDA,
@@ -388,6 +389,18 @@ def _transform_anomalies_to_text(anomalies_df: pd.DataFrame) -> str:
     return output
 
 
+def _is_sktime_forecaster(obj: object) -> bool:
+    """
+    Helper function for checking if an object is an sktime model by checking if
+    sktime's BaseForecaster class is in its inheritance tree.
+    """
+    mro_types = type(obj).__mro__
+    for t in mro_types:
+        if t.__name__ == "BaseForecaster" and "sktime" in t.__module__:
+            return True
+    return False
+
+
 class TimeCopilot:
     """
     TimeCopilot: An AI agent for comprehensive time series analysis.
@@ -421,6 +434,24 @@ class TimeCopilot:
 
         if forecasters is None:
             forecasters = DEFAULT_MODELS
+        combined_forecasters = []
+        sktime_forecasters = []
+        for f in forecasters:
+            if _is_sktime_forecaster(f):
+                sktime_forecasters.append(f)
+            else:
+                combined_forecasters.append(f)
+        type_counts: dict[str, int] = {}
+        for f in sktime_forecasters:
+            alias = "sktime." + type(f).__name__
+            if type(f).__name__ in type_counts:
+                type_counts[type(f).__name__] += 1
+                alias += f"_{type_counts[type(f).__name__]}"
+            else:
+                type_counts[type(f).__name__] = 1
+            adapted = SKTimeAdapter(f, alias=alias)
+            combined_forecasters.append(adapted)
+        forecasters = combined_forecasters
         self.forecasters = {forecaster.alias: forecaster for forecaster in forecasters}
         if "SeasonalNaive" not in self.forecasters:
             self.forecasters["SeasonalNaive"] = SeasonalNaive()
