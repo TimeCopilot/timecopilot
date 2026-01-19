@@ -9,9 +9,7 @@ from timecopilot.agent import ForecastAgentOutput, TimeCopilot
 
 
 def build_stub_llm(output: dict) -> FunctionModel:  # noqa: D401
-    def _response_fn(
-        messages: list[ModelMessage], info: AgentInfo
-    ) -> ModelResponse:  # noqa: D401
+    def _response_fn(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:  # noqa: D401
         payload = json.dumps(output)
         return ModelResponse(
             parts=[ToolCallPart(tool_name="final_result", args=payload)]
