@@ -26,7 +26,7 @@ warnings.simplefilter(
 
 
 def _zero_to_nan_pd(s: pd.Series) -> pd.Series:
-    s = s.astype(float).copy()
+    s = s.astype(float)
     s[s == 0] = np.nan
     return s
 
@@ -37,7 +37,6 @@ def mase(
     seasonality: int,
     train_df: pd.DataFrame,
     id_col: str = "unique_id",
-    time_col: str = "ds",
     target_col: str = "y",
     cutoff_col: str = "cutoff",
 ) -> pd.DataFrame:
