@@ -37,6 +37,7 @@ def mase(
     seasonality: int,
     train_df: pd.DataFrame,
     id_col: str = "unique_id",
+    time_col: str = "ds",
     target_col: str = "y",
     cutoff_col: str = "cutoff",
 ) -> pd.DataFrame:
