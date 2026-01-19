@@ -193,7 +193,10 @@ class FlowState(Forecaster):
             for batch in tqdm(dataset)
         ]  # list of tuples
         fcsts_mean_tp, fcsts_quantiles_tp = zip(*fcsts, strict=False)
-        fcsts_mean_np = np.concatenate(fcsts_mean_tp)
+        # handle single item forecast output
+        fcsts_mean_np = fcsts_mean_tp[0]
+        if fcsts_mean_tp[0].shape != tuple():
+            fcsts_mean_np = np.concatenate(fcsts_mean_tp)
         if quantiles is not None:
             fcsts_quantiles_np = np.concatenate(fcsts_quantiles_tp)
         else:
