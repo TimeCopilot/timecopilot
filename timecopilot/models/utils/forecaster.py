@@ -9,6 +9,7 @@ from gluonts.time_feature.seasonality import (
 from gluonts.time_feature.seasonality import (
     get_seasonality as _get_seasonality,
 )
+from prophet import Prophet as ProphetBase
 from scipy import stats
 from tqdm import tqdm
 from utilsforecast.plotting import plot_series
@@ -304,6 +305,8 @@ class Forecaster:
         Args:
             df (pd.DataFrame):
                 DataFrame containing the time series to detect anomalies.
+                Minimum series length is `h + 1` for most models, for Prophet models
+                it is `h + 2`.
             h (int, optional):
                 Forecast horizon specifying how many future steps to predict.
                 In each cross validation window. If not provided, the seasonality
@@ -348,14 +351,19 @@ class Forecaster:
         min_series_length = df.groupby("unique_id").size().min()
         # we require at least one observation before the first forecast
         max_possible_windows = (min_series_length - 1) // h
+        # Prophet needs a slightly different calculation to guarantee 2 input rows
+        if isinstance(self, ProphetBase):
+            max_possible_windows = (min_series_length - 2) // h
         if n_windows is None:
             _n_windows = max_possible_windows
         else:
             _n_windows = min(n_windows, max_possible_windows)
         if _n_windows < 1:
+            # min series length should be 1 higher for Prophet than other models
+            exp_min_series_length = h + 2 if isinstance(self, ProphetBase) else h + 1
             raise ValueError(
                 f"Cannot perform anomaly detection: series too short. "
-                f"Minimum series length required: {h + 1}, "
+                f"Minimum series length required: {exp_min_series_length}, "
                 f"actual minimum length: {min_series_length}"
             )
         cv_results = self.cross_validation(
