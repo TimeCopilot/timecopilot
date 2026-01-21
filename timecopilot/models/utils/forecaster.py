@@ -305,7 +305,8 @@ class Forecaster:
         Args:
             df (pd.DataFrame):
                 DataFrame containing the time series to detect anomalies.
-                Minimum series length is 1 higher for Prophet than other models.
+                Minimum series length is `h + 1` for most models, for Prophet models
+                it is `h + 2`.
             h (int, optional):
                 Forecast horizon specifying how many future steps to predict.
                 In each cross validation window. If not provided, the seasonality
@@ -350,9 +351,9 @@ class Forecaster:
         min_series_length = df.groupby("unique_id").size().min()
         # we require at least one observation before the first forecast
         max_possible_windows = (min_series_length - 1) // h
-        # 3 row minimum for a df with Prophet
+        # Prophet needs a slightly different calculation to guarantee 2 input rows
         if isinstance(self, ProphetBase):
-            max_possible_windows -= 1
+            max_possible_windows = (min_series_length - 2) // h
         if n_windows is None:
             _n_windows = max_possible_windows
         else:
