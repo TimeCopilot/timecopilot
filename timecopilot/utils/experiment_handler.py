@@ -52,7 +52,8 @@ def mase(
     if cutoff_col in mean_abs_err.columns:
         cutoff = mean_abs_err[cutoff_col]
         mean_abs_err = mean_abs_err.drop(columns=[cutoff_col])
-
+    
+    train_df = train_df.sort_values([id_col, time_col])
     lagged = train_df.groupby(id_col, observed=True)[target_col].shift(seasonality)
     scale = train_df[target_col].sub(lagged).abs()
     scale = scale.groupby(train_df[id_col], observed=True).mean()
