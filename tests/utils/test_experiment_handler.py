@@ -7,6 +7,7 @@ from pydantic_ai.messages import ModelMessage, ModelResponse, ToolCallPart
 from pydantic_ai.models.function import AgentInfo, FunctionModel
 from utilsforecast.data import generate_series
 from utilsforecast.evaluation import evaluate
+from utilsforecast.losses import mase
 from utilsforecast.processing import (
     backtest_splits,
     drop_index_if_pandas,
@@ -24,7 +25,6 @@ from timecopilot.models.utils.forecaster import (
 from timecopilot.utils.experiment_handler import (
     ExperimentDataset,
     ExperimentDatasetParser,
-    mase,
 )
 
 
