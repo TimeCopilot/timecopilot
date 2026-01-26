@@ -5,13 +5,12 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import pandas as pd
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 from pydantic_ai.agent import AgentRunResult
 from utilsforecast.evaluation import evaluate
-from utilsforecast.losses import mae
+from utilsforecast.losses import mase
 
 from ..models.utils.forecaster import (
     get_seasonality,
@@ -23,64 +22,6 @@ warnings.simplefilter(
     action="ignore",
     category=FutureWarning,
 )
-
-
-def _zero_to_nan_pd(s: pd.Series) -> pd.Series:
-    s = s.astype(float)
-    s[s == 0] = np.nan
-    return s
-
-
-def mase(
-    df: pd.DataFrame,
-    models: list[str],
-    seasonality: int,
-    train_df: pd.DataFrame,
-    id_col: str = "unique_id",
-    time_col: str = "ds",
-    target_col: str = "y",
-    cutoff_col: str = "cutoff",
-) -> pd.DataFrame:
-    mean_abs_err = mae(
-        df,
-        models,
-        id_col=id_col,
-        target_col=target_col,
-    ).set_index(id_col)
-
-    cutoff = None
-    if cutoff_col in mean_abs_err.columns:
-        cutoff = mean_abs_err[cutoff_col]
-        mean_abs_err = mean_abs_err.drop(columns=[cutoff_col])
-    
-    train_df = train_df.sort_values([id_col, time_col])
-    lagged = train_df.groupby(id_col, observed=True)[target_col].shift(seasonality)
-    scale = train_df[target_col].sub(lagged).abs()
-    scale = scale.groupby(train_df[id_col], observed=True).mean()
-    scale[scale < 1e-2] = 0.0
-
-    scale = _zero_to_nan_pd(scale).reindex(mean_abs_err.index)
-    res = mean_abs_err.div(scale, axis=0).fillna(0)
-
-    if cutoff is not None:
-        res.insert(0, cutoff_col, cutoff)
-
-    res.index.name = id_col
-    return res.reset_index()
-
-
-def generate_train_cv_splits(
-    df: pd.DataFrame,
-    cutoffs: pd.DataFrame,
-) -> pd.DataFrame:
-    """
-    based on `cutoffs` (columns `unique_id`, `cutoffs`)
-    generates train cv splits using `df`
-    """
-    df = df.merge(cutoffs, on="unique_id", how="outer")
-    df = df.query("ds <= cutoff")
-    df = df.reset_index(drop=True)
-    return df
 
 
 class DatasetParams(BaseModel):
@@ -148,7 +89,7 @@ class ExperimentDatasetParser:
             if suffix in {"csv", "txt"}:
                 df = read_fn(io.StringIO(resp.text))  # type: ignore[arg-type]
             elif suffix in {"parquet"}:
-                import pyarrow as pa
+                import pyarrow as pa  # noqa: WPS433
 
                 table = pa.ipc.open_file(pa.BufferReader(resp.content)).read_all()
                 df = table.to_pandas()
@@ -252,30 +193,14 @@ class ExperimentDataset:
             if forecast_df[model].isna().sum() > 0:
                 print(forecast_df.loc[forecast_df[model].isna()]["unique_id"].unique())
                 raise ValueError(f"model {model} has NaN values")
-        cutoffs = forecast_df[["unique_id", "cutoff"]].drop_duplicates()
-        train_cv_splits = generate_train_cv_splits(df=self.df, cutoffs=cutoffs)
 
-        def add_id_cutoff(df: pd.DataFrame):
-            df["id_cutoff"] = (
-                df["unique_id"].astype(str) + "-" + df["cutoff"].astype(str)
-            )
-
-        for df in [cutoffs, train_cv_splits, forecast_df]:
-            add_id_cutoff(df)
         partial_mase = partial(mase, seasonality=self.seasonality)
         eval_df = evaluate(
             df=forecast_df,
-            train_df=train_cv_splits,
+            train_df=self.df,
             metrics=[partial_mase],
             models=models,
-            id_col="id_cutoff",
         )
-        if "cutoff" not in eval_df.columns and "id_cutoff" in eval_df.columns:
-            eval_df = eval_df.merge(cutoffs, on="id_cutoff", how="left")
-
-        cols = ["unique_id", "cutoff", "metric"] + models
-        cols = [c for c in cols if c in eval_df.columns]
-        eval_df = eval_df[cols]
         return eval_df
 
 
