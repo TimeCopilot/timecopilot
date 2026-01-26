@@ -22,12 +22,14 @@ nav:
           - examples/agent-quickstart.ipynb
           - examples/llm-providers.ipynb
           - examples/aws-bedrock.ipynb
+          - examples/google-llms.ipynb
           - examples/forecaster-quickstart.ipynb
           - examples/anomaly-detection-forecaster-quickstart.ipynb
           - examples/ts-foundation-models-comparison-quickstart.ipynb
           - examples/gift-eval.ipynb
           - examples/chronos-family.ipynb
           - examples/cryptocurrency-quickstart.ipynb
+          - examples/sktime.ipynb
   - Experiments:
       - experiments/gift-eval.md
       - experiments/fev.md
@@ -43,6 +45,7 @@ nav:
       - api/models/ml.md
       - api/models/neural.md
       - api/models/ensembles.md
+      - api/models/adapters/adapters.md
       - api/models/utils/forecaster.md
       - api/gift-eval/gift-eval.md
   - Changelogs:
