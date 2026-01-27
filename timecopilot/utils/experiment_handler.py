@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 from pydantic_ai.agent import AgentRunResult
 from utilsforecast.evaluation import evaluate
-from utilsforecast.losses import _zero_to_nan, mae
+from utilsforecast.losses import mase
 
 from ..models.utils.forecaster import (
     get_seasonality,
@@ -22,41 +22,6 @@ warnings.simplefilter(
     action="ignore",
     category=FutureWarning,
 )
-
-
-def mase(
-    df: pd.DataFrame,
-    models: list[str],
-    seasonality: int,
-    train_df: pd.DataFrame,
-    id_col: str = "unique_id",
-    target_col: str = "y",
-) -> pd.DataFrame:
-    mean_abs_err = mae(df, models, id_col, target_col)
-    mean_abs_err = mean_abs_err.set_index(id_col)
-    # assume train_df is sorted
-    lagged = train_df.groupby(id_col, observed=True)[target_col].shift(seasonality)
-    scale = train_df[target_col].sub(lagged).abs()
-    scale = scale.groupby(train_df[id_col], observed=True).mean()
-    scale[scale < 1e-2] = 0.0
-    res = mean_abs_err.div(_zero_to_nan(scale), axis=0).fillna(0)
-    res.index.name = id_col
-    res = res.reset_index()
-    return res
-
-
-def generate_train_cv_splits(
-    df: pd.DataFrame,
-    cutoffs: pd.DataFrame,
-) -> pd.DataFrame:
-    """
-    based on `cutoffs` (columns `unique_id`, `cutoffs`)
-    generates train cv splits using `df`
-    """
-    df = df.merge(cutoffs, on="unique_id", how="outer")
-    df = df.query("ds <= cutoff")
-    df = df.reset_index(drop=True)
-    return df
 
 
 class DatasetParams(BaseModel):
@@ -228,27 +193,14 @@ class ExperimentDataset:
             if forecast_df[model].isna().sum() > 0:
                 print(forecast_df.loc[forecast_df[model].isna()]["unique_id"].unique())
                 raise ValueError(f"model {model} has NaN values")
-        cutoffs = forecast_df[["unique_id", "cutoff"]].drop_duplicates()
-        train_cv_splits = generate_train_cv_splits(df=self.df, cutoffs=cutoffs)
 
-        def add_id_cutoff(df: pd.DataFrame):
-            df["id_cutoff"] = (
-                df["unique_id"].astype(str) + "-" + df["cutoff"].astype(str)
-            )
-
-        for df in [cutoffs, train_cv_splits, forecast_df]:
-            add_id_cutoff(df)
         partial_mase = partial(mase, seasonality=self.seasonality)
         eval_df = evaluate(
             df=forecast_df,
-            train_df=train_cv_splits,
+            train_df=self.df,
             metrics=[partial_mase],
             models=models,
-            id_col="id_cutoff",
         )
-        eval_df = eval_df.merge(cutoffs, on=["id_cutoff"])
-        eval_df = eval_df.drop(columns=["id_cutoff"])
-        eval_df = eval_df[["unique_id", "cutoff", "metric"] + models]
         return eval_df
 
 

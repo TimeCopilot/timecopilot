@@ -7,6 +7,7 @@ from pydantic_ai.messages import ModelMessage, ModelResponse, ToolCallPart
 from pydantic_ai.models.function import AgentInfo, FunctionModel
 from utilsforecast.data import generate_series
 from utilsforecast.evaluation import evaluate
+from utilsforecast.losses import mase
 from utilsforecast.processing import (
     backtest_splits,
     drop_index_if_pandas,
@@ -24,8 +25,6 @@ from timecopilot.models.utils.forecaster import (
 from timecopilot.utils.experiment_handler import (
     ExperimentDataset,
     ExperimentDatasetParser,
-    generate_train_cv_splits,
-    mase,
 )
 
 
@@ -230,36 +229,6 @@ def test_parse_params_no_query_infers_all():
             h=expected_h,
             seasonality=expected_seasonality,
         ),
-    )
-
-
-@pytest.mark.parametrize(
-    "freq,n_windows,h,step_size",
-    [
-        ("H", 3, 2, 1),
-        ("H", 1, 12, None),
-        ("MS", 3, 2, 2),
-    ],
-)
-def test_generate_train_cv_splits(freq, n_windows, h, step_size):
-    df = generate_series(n_series=5, freq=freq)
-    df["unique_id"] = df["unique_id"].astype(int)
-    df_cv = generate_train_cv_splits_from_backtest_splits(
-        df=df,
-        n_windows=n_windows,
-        step_size=step_size,
-        h=h,
-        freq=freq,
-    )
-    cutoffs = df_cv[["unique_id", "cutoff"]].drop_duplicates()
-    train_cv_splits = generate_train_cv_splits(
-        df=df,
-        cutoffs=cutoffs,
-    )
-    p_sort_df = partial(sort_df, cols=["unique_id", "cutoff", "ds"])
-    pd.testing.assert_frame_equal(
-        p_sort_df(df_cv),
-        p_sort_df(train_cv_splits),
     )
 
 
