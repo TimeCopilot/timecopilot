@@ -79,7 +79,7 @@ license = "MIT"
 name = "timecopilot"
 readme = "README.md"
 requires-python = ">=3.10"
-version = "0.0.22"
+version = "0.0.23"
 
 [project.scripts]
 timecopilot = "timecopilot._cli:main"
