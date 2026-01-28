@@ -25,6 +25,11 @@ docs = [
   "modal>=1.0.4",
   "ruff>=0.12.1",
 ]
+dataframes = [
+  "dask[dataframe]>=2024.9.1",
+  "pyspark>=3.5.1",
+  "ray[data]>=2.52.1",
+]
 
 [project]
 authors = [

@@ -14,10 +14,17 @@ TimeCopilot is available on PyPI as [timecopilot](https://pypi.org/project/timec
     uv add timecopilot
     ```
 
+!!! tip
+
+    Optional dataframe dependencies (Spark, Ray, Dask) can be installed with:
+
+    ```bash
+    uv sync --group dataframes
+    ```
+
 
 Requires Python 3.10 or later.
 
 !!! tip
 
     If you don't have a prior experience with `uv`, go to [uv getting started](https://docs.astral.sh/uv/getting-started/) section.
-
