@@ -31,8 +31,9 @@ def test_to_pandas_with_dask():
 def test_to_pandas_with_ray():
     ray = pytest.importorskip("ray")
     ray_data = pytest.importorskip("ray.data")
-    if not ray.is_initialized():
-        ray.init(ignore_reinit_error=True)
+    if ray.is_initialized():
+        ray.shutdown()
+    ray.init(ignore_reinit_error=True)
     try:
         df = _make_frame()
         ray_df = ray_data.from_pandas(df)
@@ -54,3 +55,8 @@ def test_to_pandas_with_spark():
         pd.testing.assert_frame_equal(out.sort_values("ds").reset_index(drop=True), df)
     finally:
         spark.stop()
+
+
+def test_to_pandas_unsupported_type():
+    with pytest.raises(TypeError, match="Unsupported dataframe type"):
+        to_pandas(["not", "a", "dataframe"])

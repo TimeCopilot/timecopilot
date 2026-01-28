@@ -79,6 +79,11 @@ dependencies = [
   "tsfeatures",
   "utilsforecast[plotting]>=0.2.15",
 ]
+optional-dependencies = { dataframes = [
+  "dask[dataframe]>=2024.9.1",
+  "pyspark>=3.5.1",
+  "ray[data]>=2.52.1",
+] }
 description = "The GenAI Forecasting Agent · LLMs × Time Series Foundation Models"
 license = "MIT"
 name = "timecopilot"

@@ -19,6 +19,12 @@ TimeCopilot is available on PyPI as [timecopilot](https://pypi.org/project/timec
     Optional dataframe dependencies (Spark, Ray, Dask) can be installed with:
 
     ```bash
+    pip install "timecopilot[dataframes]"
+    ```
+
+    or
+
+    ```bash
     uv sync --group dataframes
     ```
 
