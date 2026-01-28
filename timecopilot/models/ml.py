@@ -4,6 +4,7 @@ import pandas as pd
 from mlforecast.auto import AutoLightGBM, AutoMLForecast
 
 from .utils.forecaster import Forecaster, get_seasonality
+from ..utils.df_utils import to_pandas
 
 os.environ["NIXTLA_ID_AS_COL"] = "true"
 
@@ -84,6 +85,7 @@ class AutoLGBM(Forecaster):
         if level is not None or quantiles is not None:
             raise ValueError("Level and quantiles are not supported for AutoLGBM yet.")
 
+        df = to_pandas(df)
         freq = self._maybe_infer_freq(df, freq)
         mf = AutoMLForecast(
             models=[AutoLightGBM()],

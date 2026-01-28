@@ -3,6 +3,7 @@ from sklearn.isotonic import IsotonicRegression
 
 from ... import TimeCopilotForecaster
 from ..utils.forecaster import Forecaster, QuantileConverter
+from ..utils.df_utils import to_pandas
 
 
 class MedianEnsemble(Forecaster):
@@ -116,6 +117,7 @@ class MedianEnsemble(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         qc = QuantileConverter(level=level, quantiles=quantiles)
         _fcst_df = self.tcf._call_models(
             "forecast",

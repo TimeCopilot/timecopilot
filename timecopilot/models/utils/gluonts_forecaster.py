@@ -12,6 +12,7 @@ from huggingface_hub import hf_hub_download
 from tqdm import tqdm
 
 from .forecaster import Forecaster, QuantileConverter
+from ..utils.df_utils import to_pandas
 
 
 def fix_freq(freq: str) -> str:
@@ -163,6 +164,7 @@ class GluonTSForecaster(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         df = maybe_convert_col_to_float32(df, "y")
         freq = self._maybe_infer_freq(df, freq)
         qc = QuantileConverter(level=level, quantiles=quantiles)

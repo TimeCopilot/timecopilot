@@ -9,6 +9,7 @@ from toto.model.toto import Toto as TotoModel
 from tqdm import tqdm
 
 from ..utils.forecaster import Forecaster, QuantileConverter
+from ...utils.df_utils import to_pandas
 from .utils import TimeSeriesDataset
 
 
@@ -222,6 +223,7 @@ class Toto(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         freq = self._maybe_infer_freq(df, freq)
         qc = QuantileConverter(level=level, quantiles=quantiles)
         dataset = TimeSeriesDataset.from_df(df, batch_size=self.batch_size)

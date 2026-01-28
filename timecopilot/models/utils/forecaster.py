@@ -23,6 +23,8 @@ from utilsforecast.processing import (
 )
 from utilsforecast.validation import ensure_time_dtype
 
+from ...utils.df_utils import to_pandas
+
 
 def get_seasonality(
     freq: str,
@@ -74,6 +76,7 @@ def maybe_infer_freq(df: pd.DataFrame, freq: str | None) -> str:
     # based on https://github.com/Nixtla/nixtla/blob/bf67c76fd473a61c72b1f54725ffbcb51a3048c5/nixtla/nixtla_client.py#L208C1-L235C25
     if freq is not None:
         return freq
+    df = to_pandas(df)
     sizes = df["unique_id"].value_counts(sort=True)
     times = df.loc[df["unique_id"] == sizes.index[0], "ds"].sort_values()
     if times.dt.tz is not None:
@@ -89,6 +92,7 @@ def maybe_infer_freq(df: pd.DataFrame, freq: str | None) -> str:
 
 
 def maybe_convert_col_to_datetime(df: pd.DataFrame, col_name: str) -> pd.DataFrame:
+    df = to_pandas(df)
     if not pd.api.types.is_datetime64_any_dtype(df[col_name]):
         df = df.copy()
         df[col_name] = pd.to_datetime(df[col_name])
@@ -236,6 +240,7 @@ class Forecaster:
                     - prediction intervals if `level` is specified.
                     - quantile forecasts if `quantiles` is specified.
         """
+        df = to_pandas(df)
         freq = self._maybe_infer_freq(df, freq)
         df = maybe_convert_col_to_datetime(df, "ds")
         # mlforecast cv code
@@ -344,6 +349,7 @@ class Forecaster:
                         an anomaly is defined as a value that is outside of the
                         prediction interval (True or False).
         """
+        df = to_pandas(df)
         freq = self._maybe_infer_freq(df, freq)
         df = maybe_convert_col_to_datetime(df, "ds")
         if h is None:

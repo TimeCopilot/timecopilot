@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from ..utils.forecaster import Forecaster
+from ..utils.df_utils import to_pandas
 
 # from sktime.forecasting.base import BaseForecaster, ForecastingHorizon
 
@@ -128,6 +129,7 @@ class SKTimeAdapter(Forecaster):
                 "Level and quantiles are not supported for adapted sktime models yet."
             )
         # NOTE: may not be needed
+        df = to_pandas(df)
         freq = self._maybe_infer_freq(df, freq)
         forecast_horizon = np.arange(1, 1 + h)
         id_col = "unique_id"
