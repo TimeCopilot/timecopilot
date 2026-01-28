@@ -137,6 +137,7 @@ import pandas as pd
 from timecopilot import TimeCopilot
 
 # Load the dataset
+# TimeCopilot accepts pandas DataFrames or Polars DataFrames (via narwhals).
 # The DataFrame must include at least the following columns:
 # - unique_id: Unique identifier for each time series (string)
 # - ds: Date column (datetime format)

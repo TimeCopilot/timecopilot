@@ -54,6 +54,7 @@ dependencies = [
   "lightgbm>=4.6.0",
   "logfire>=4.7.0",
   "mlforecast>=1.0.2",
+  "narwhals>=2.7.0",
   "neuralforecast>=3.0.2",
   "nixtla>=0.6.6",
   "openai>=1.99.7",
