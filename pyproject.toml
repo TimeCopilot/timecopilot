@@ -50,7 +50,7 @@ classifiers = [
 dependencies = [
   "fire",
   "gluonts[torch]",
-  "huggingface-hub>=0.34.4",
+  "huggingface-hub>=0.36.0",
   "lightgbm>=4.6.0",
   "logfire>=4.7.0",
   "mlforecast>=1.0.2",
