@@ -4,6 +4,7 @@ import pandas as pd
 from nixtla import NixtlaClient
 
 from ..utils.forecaster import Forecaster
+from ...utils.df_utils import to_pandas
 
 
 class TimeGPT(Forecaster):
@@ -129,6 +130,7 @@ class TimeGPT(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         freq = self._maybe_infer_freq(df, freq)
         client = self._get_client()
         fcst_df = client.forecast(

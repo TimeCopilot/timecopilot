@@ -12,6 +12,7 @@ from timesfm_v1.timesfm_base import DEFAULT_QUANTILES as DEFAULT_QUANTILES_TFM
 from tqdm import tqdm
 
 from ..utils.forecaster import Forecaster, QuantileConverter
+from ...utils.df_utils import to_pandas
 from .utils import TimeSeriesDataset
 
 
@@ -88,6 +89,7 @@ class _TimesFMV1(Forecaster):
         level: list[int | float] | None = None,
         quantiles: list[float] | None = None,
     ) -> pd.DataFrame:
+        df = to_pandas(df)
         freq = self._maybe_infer_freq(df, freq)
         qc = QuantileConverter(level=level, quantiles=quantiles)
         if qc.quantiles is not None and len(qc.quantiles) != len(DEFAULT_QUANTILES_TFM):
@@ -197,6 +199,7 @@ class _TimesFMV2_p5(Forecaster):
         level: list[int | float] | None = None,
         quantiles: list[float] | None = None,
     ) -> pd.DataFrame:
+        df = to_pandas(df)
         freq = self._maybe_infer_freq(df, freq)
         qc = QuantileConverter(level=level, quantiles=quantiles)
         if qc.quantiles is not None and len(qc.quantiles) != len(DEFAULT_QUANTILES_TFM):
