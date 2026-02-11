@@ -30,6 +30,7 @@ nav:
           - examples/chronos-family.ipynb
           - examples/cryptocurrency-quickstart.ipynb
           - examples/sktime.ipynb
+          - examples/skforecast.ipynb
   - Experiments:
       - experiments/gift-eval.md
       - experiments/fev.md
