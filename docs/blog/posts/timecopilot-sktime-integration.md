@@ -37,7 +37,9 @@ All models use the familiar scikit-learn `fit`/`predict` interface:
 
 ```python
 from sktime.forecasting.trend import TrendForecaster
+from sktime.datasets import load_airline
 
+y = load_airline()
 forecaster = TrendForecaster()
 forecaster.fit(y)
 y_pred = forecaster.predict(fh=[1, 2, 3])
