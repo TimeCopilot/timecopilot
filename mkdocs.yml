@@ -73,6 +73,7 @@ nav:
 
 theme:
   name: "material"
+  custom_dir: docs/overrides
   logo: https://timecopilot.s3.amazonaws.com/public/logos/logo-white.svg
   favicon: https://timecopilot.s3.amazonaws.com/public/logos/favicon-white.svg
   palette:
