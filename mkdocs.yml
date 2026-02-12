@@ -21,6 +21,7 @@ nav:
       - Examples:
           - examples/agent-quickstart.ipynb
           - examples/llm-providers.ipynb
+          - examples/interactive-mode.ipynb
           - examples/aws-bedrock.ipynb
           - examples/google-llms.ipynb
           - examples/forecaster-quickstart.ipynb

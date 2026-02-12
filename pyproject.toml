@@ -60,6 +60,7 @@ dependencies = [
   "pandas>=2.2.0 ; python_full_version >= '3.13'",
   "prophet>=1.1.7",
   "pydantic-ai>=0.7.0",
+  "python-dotenv>=1.0.0",
   "scipy<=1.15.3",
   "statsforecast",
   "tabpfn-time-series==1.0.3 ; python_full_version < '3.13'",

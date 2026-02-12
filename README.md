@@ -85,41 +85,20 @@ uvx timecopilot forecast https://otexts.com/fpppy/data/AirPassengers.csv \
 
 ## Installation and Setup
 
-TimeCopilot is available on PyPI as [`timecopilot`](https://pypi.org/project/timecopilot/) for Python development. Installation and setup is a simple three-step process:
+TimeCopilot is available on PyPI as [`timecopilot`](https://pypi.org/project/timecopilot/) for Python development.
 
 1. Install TimeCopilot by running:
   ```bash
   pip install timecopilot
   ```
-  or 
+  or
   ```bash
   uv add timecopilot
   ```
-2. Generate an OpenAI API Key:
-    1. Create an [openai](https://auth.openai.com/log-in) account.
-    2. Visit the [API key](https://platform.openai.com/api-keys) page.
-    3. Generate a new secret key.  
-    Make sure to copy it, as you’ll need it in the next step. 
 
-3. Export your OpenAI API key as an environment variable by running:
+2. Launch interactive mode by running `timecopilot`. The first-time onboarding lets you pick an LLM provider and enter your API key — see the [Interactive Mode example](https://timecopilot.dev/examples/interactive-mode/) for details.
 
-   On Linux:
-    ```
-    export OPENAI_API_KEY="your-new-secret-key"
-    ```
-   On Windows (PowerShell):
-    ```
-    setx OPENAI_API_KEY "your-new-secret-key"
-    ```
-   Remember to restart session after doing so in order to preserve the changes in the environment variables (Windows).
-   You can also do this through python:
-
-   ```
-   import openai
-   os.environ["OPENAI_API_KEY"] = "your-new-secret-key"
-   ```
-   
-and that's it!
+3. API keys are stored in `timecopilot/.env` inside your project directory. If you skip interactive mode (e.g. using the Python API directly), create this file manually or export the key as an environment variable.
 
 !!! Important
     - TimeCopilot requires Python 3.10+. Additionally, it currently does not support macOS running on Intel processors (x86_64). If you’re using this setup, you may encounter installation issues with some dependencies like PyTorch. If you need support for this architecture, please create a new issue.
@@ -241,11 +220,9 @@ accuracy and reliability surpassing basic seasonal models.'
 
 ---
 
-## Non-OpenAI LLM endpoints
+## LLMs
 
-TimeCopilot uses [Pydantic](https://docs.pydantic.dev/latest/) to make calls to LLM endpoints, so it should be compatible with all endpoints [pydantic supports](https://ai.pydantic.dev/models/overview/). Instructions on using other models/endpoints with Pydantic can be found on the matching pydantic docs page, such as this page for [Google's models](https://ai.pydantic.dev/models/google/#api-key-generative-language-api).
-
-For more details go to the LLM Providers example in [TimeCopilot's documentation](http://timecopilot.dev/examples/llm-providers/).
+TimeCopilot supports any LLM provider compatible with [Pydantic AI](https://ai.pydantic.dev/). See the [LLM Providers example](https://timecopilot.dev/examples/llm-providers/) for supported providers, model naming conventions, and API key setup.
 
 Note: models need support for tool use to function properly with TimeCopilot.
 
