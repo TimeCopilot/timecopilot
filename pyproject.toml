@@ -47,10 +47,12 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
+# NOTE: dependency version notes
+# - huggingface-hub can't bump to v1 until transformers bumps to v5
 dependencies = [
   "fire",
   "gluonts[torch]",
-  "huggingface-hub>=0.36.0",
+  "huggingface-hub>=0.36.0,<1.0",
   "lightgbm>=4.6.0",
   "logfire>=4.7.0",
   "mlforecast>=1.0.2",

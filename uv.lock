@@ -6879,7 +6879,7 @@ docs = [
 requires-dist = [
     { name = "fire" },
     { name = "gluonts", extras = ["torch"] },
-    { name = "huggingface-hub", specifier = ">=0.36.0" },
+    { name = "huggingface-hub", specifier = ">=0.36.0,<1.0" },
     { name = "lightgbm", specifier = ">=4.6.0" },
     { name = "logfire", specifier = ">=4.7.0" },
     { name = "mlforecast", specifier = ">=1.0.2" },
