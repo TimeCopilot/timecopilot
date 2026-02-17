@@ -6,12 +6,12 @@ requires = ["hatchling"]
 dev = [
   "mktestdocs>=0.2.5",
   "pre-commit",
-  "pytest",
   "pytest-asyncio>=1.1.0",
   "pytest-cov",
   "pytest-mock>=3.15.1",
   "pytest-rerunfailures>=15.1",
   "pytest-xdist>=3.8.0",
+  "pytest>=8.4.2",
   "s3fs>=2025.3.0",
   "sktime>=0.40.1",
 ]
@@ -48,33 +48,57 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 # NOTE: dependency version notes
-# - huggingface-hub can't bump to v1 until transformers bumps to v5
+# - huggingface-hub can't bump to v1+ until transformers bumps to v5
+# - lightning and pytorch-lightning are the same library
+# NOTE: dependencies pinned for faster pip installs
+# versions chosen from uv's dependency resolution
+# list:
+# accelerate arch black datasets fsspec hydra-core lightning lightning-utilities matplotlib opentelemetry-api opentelemetry-instrumentation opentelemetry-sdk optuna plotly pytorch-lightning ray statsforecast tensorboard torchmetrics wandb
 dependencies = [
+  "accelerate>=1.10.1",
+  "arch>=7.2.0",
+  "black>=25.9.0",
+  "datasets>=4.1.1",
   "fire",
+  "fsspec>=2025.9.0",
   "gluonts[torch]",
-  "huggingface-hub>=0.36.0,<1.0",
+  "huggingface-hub>=0.36.2,<1.0",
+  "hydra-core>=1.3.2",
   "lightgbm>=4.6.0",
-  "logfire>=4.7.0",
+  "lightning-utilities>=0.15.2",
+  "lightning==2.4.0",
+  "logfire==4.11.0",
+  "matplotlib>=3.10.6",
   "mlforecast>=1.0.2",
   "neuralforecast>=3.0.2",
-  "nixtla>=0.6.6",
+  "nixtla>=0.7.0",
   "openai>=1.99.7",
+  "opentelemetry-api==1.37.0",
+  "opentelemetry-instrumentation>=0.58b0",
+  "opentelemetry-sdk==1.37.0",
+  "optuna>=4.5.0",
   "pandas>=2.2.0 ; python_full_version >= '3.13'",
+  "plotly>=6.3.1",
   "prophet>=1.1.7",
   "pydantic-ai>=0.7.0",
+  "pytorch-lightning==2.4.0",
+  "ray==2.49.2",
   "scipy<=1.15.3",
-  "statsforecast",
+  "statsforecast>=2.0.2",
   "tabpfn-time-series==1.0.3 ; python_full_version < '3.13'",
+  "tensorboard>=2.20.0",
   "timecopilot-chronos-forecasting>=0.2.0",
   "timecopilot-granite-tsfm>=0.1.1",
   "timecopilot-timesfm>=0.2.1",
   "timecopilot-tirex>=0.1.0 ; python_full_version >= '3.11'",
   "timecopilot-toto>=0.1.5",
   "timecopilot-uni2ts>=0.1.2 ; python_full_version < '3.14'",
+  "torchmetrics>=1.8.2",
   "transformers==4.40.1 ; python_full_version < '3.13'",
   "transformers>=4.48,<5 ; python_full_version >= '3.13'",
-  "tsfeatures",
+  "tsfeatures>=0.4.5",
   "utilsforecast[plotting]>=0.2.15",
+  "wandb==0.22.1",
 ]
 description = "The GenAI Forecasting Agent · LLMs × Time Series Foundation Models"
 license = "MIT"
