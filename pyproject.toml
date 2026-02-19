@@ -81,6 +81,13 @@ readme = "README.md"
 requires-python = ">=3.10"
 version = "0.0.23"
 
+[project.optional-dependencies]
+distributed = [
+  "dask<=2024.12.1",
+  "fugue[dask,ray,spark]>=0.9.0",
+  "ray<=2.44.0",
+]
+
 [project.scripts]
 timecopilot = "timecopilot._cli:main"
 
@@ -104,8 +111,9 @@ allow-direct-references = true
 disable_error_code = ["no-redef"] # for fasthtml
 
 [tool.pytest.ini_options]
-addopts = "-m 'not docs and not live and not gift_eval' -n auto"
+addopts = "-m 'not docs and not live and not gift_eval and not distributed' -n auto"
 markers = [
+  "distributed: marks tests that require distributed backends (spark, dask, ray)",
   "docs: marks tests related to documentation",
   "flaky: rerun failures (provided by pytest-rerunfailures)",
   "gift_eval: marks tests related to gift eval results replication",
