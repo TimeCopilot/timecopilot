@@ -11,7 +11,6 @@ from ..utils.parallel_forecaster import ParallelForecaster
 #           skforecast.base._forecaster_base.ForecasterBase
 
 
-# class SKForecastAdapter(Forecaster):
 class SKForecastAdapter(ParallelForecaster):
     def __init__(
         self,
@@ -147,7 +146,6 @@ class SKForecastAdapter(ParallelForecaster):
             ```
         """
         # fmt: on
-        # NOTE: single-series models need
         if level is not None or quantiles is not None:
             raise ValueError(
                 "Level and quantiles are not supported for adapted skforecast"
@@ -175,7 +173,6 @@ class SKForecastAdapter(ParallelForecaster):
         self.model.fit(df_dict)
         fcst_df: pd.DataFrame = self.model.predict(h)
         pred_col = "pred"
-        # fcst_df = fcst_df.reindex()
         fcst_df.reset_index(inplace=True)
         fcst_df.rename(
             columns={"level": id_col, "index": date_col, pred_col: self.alias},
