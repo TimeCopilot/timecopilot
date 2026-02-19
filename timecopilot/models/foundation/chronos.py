@@ -224,7 +224,9 @@ class Chronos(Forecaster):
         """
         freq = self._maybe_infer_freq(df, freq)
         qc = QuantileConverter(level=level, quantiles=quantiles)
-        dataset = TimeSeriesDataset.from_df(df, batch_size=self.batch_size, dtype=self.dtype)
+        dataset = TimeSeriesDataset.from_df(
+            df, batch_size=self.batch_size, dtype=self.dtype
+        )
         fcst_df = dataset.make_future_dataframe(h=h, freq=freq)
         with self._get_model() as model:
             fcsts_mean_np, fcsts_quantiles_np = self._predict(
