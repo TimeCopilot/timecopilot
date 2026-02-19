@@ -28,6 +28,7 @@ class Chronos(Forecaster):
         repo_id: str = "amazon/chronos-t5-large",
         batch_size: int = 16,
         alias: str = "Chronos",
+        dtype: torch.dtype = torch.float32,
     ):
         # ruff: noqa: E501
         """
@@ -45,6 +46,10 @@ class Chronos(Forecaster):
                 higher batch sizes (e.g., 256) are possible.
             alias (str, optional): Name to use for the model in output
                 DataFrames and logs. Defaults to "Chronos".
+            dtype (torch.dtype, optional): Data type for model weights and
+                input tensors. Defaults to torch.float32 for numerical
+                precision. Use torch.bfloat16 for reduced memory usage on
+                supported hardware.
 
         Notes:
             **Available models:**
@@ -77,13 +82,14 @@ class Chronos(Forecaster):
               available, otherwise CPU).
             - For best performance with large models (e.g., "chronos-t5-large"),
               a CUDA-compatible GPU is recommended.
-            - The model weights are loaded with torch_dtype=torch.float32 for
-              numerical precision.
+            - Model weights and input tensors use dtype (default: torch.float32)
+              for numerical precision. Can be overridden via the dtype parameter.
 
         """
         self.repo_id = repo_id
         self.batch_size = batch_size
         self.alias = alias
+        self.dtype = dtype
 
     @contextmanager
     def _get_model(self) -> BaseChronosPipeline:
@@ -91,7 +97,7 @@ class Chronos(Forecaster):
         model = BaseChronosPipeline.from_pretrained(
             self.repo_id,
             device_map=device_map,
-            torch_dtype=torch.float32,
+            torch_dtype=self.dtype,
         )
         try:
             yield model
@@ -218,7 +224,7 @@ class Chronos(Forecaster):
         """
         freq = self._maybe_infer_freq(df, freq)
         qc = QuantileConverter(level=level, quantiles=quantiles)
-        dataset = TimeSeriesDataset.from_df(df, batch_size=self.batch_size)
+        dataset = TimeSeriesDataset.from_df(df, batch_size=self.batch_size, dtype=self.dtype)
         fcst_df = dataset.make_future_dataframe(h=h, freq=freq)
         with self._get_model() as model:
             fcsts_mean_np, fcsts_quantiles_np = self._predict(
