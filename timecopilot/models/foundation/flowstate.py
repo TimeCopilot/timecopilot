@@ -168,7 +168,7 @@ class FlowState(Forecaster):
         ).prediction_outputs
         fcst = fcst.squeeze(-1).transpose(-1, -2)  # now shape is (batch, h, quantiles)
         fcst_mean = fcst[..., supported_quantiles.index(0.5)]
-        fcst_mean_np = fcst_mean.detach().numpy()
+        fcst_mean_np = fcst_mean.detach().numpy(force=True)
         fcst_quantiles_np = fcst.detach().numpy() if quantiles is not None else None
         return fcst_mean_np, fcst_quantiles_np
 
