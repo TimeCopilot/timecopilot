@@ -133,14 +133,22 @@ class SKForecastAdapter(ParallelForecaster):
 
         Example:
             ```python
+            from lightgbm import LGBMRegressor
             import pandas as pd
             from timecopilot import TimeCopilot
-            from timecopilot.models.adapters.sktime import SKTimeAdapter
-            from sktime.forecasting.trend import TrendForecaster
+            from timecopilot.models.adapters.skforecast import SKForecastAdapter
+            from skforecast.recursive import ForecasterRecursive
+            from skforecast.preprocessing import RollingFeatures
+
+            forecaster = ForecasterRecursive(
+                 estimator       = LGBMRegressor(random_state=123, verbose=-1),
+                 lags            = 10,
+                 window_features = RollingFeatures(stats=['mean'], window_sizes=10)
+             )
 
             df = pd.read_csv("https://timecopilot.s3.amazonaws.com/public/data/air_passengers.csv")
-            adapted_skt_model = SKTimeAdapter(TrendForecaster())
-            tc = TimeCopilot(llm="openai:gpt-4o", forecasters=[adapted_skt_model])
+            adapted_skf_model = SKForecastAdapter(forecaster)
+            tc = TimeCopilot(llm="openai:gpt-4o", forecasters=[adapted_skf_model])
             result = tc.forecast(df, h=12, freq="MS")
             print(result.output)
             ```
