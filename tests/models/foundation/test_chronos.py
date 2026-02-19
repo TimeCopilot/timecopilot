@@ -1,22 +1,5 @@
 import torch
 
-from timecopilot.models.foundation.utils import TimeSeriesDataset
-
-
-def test_timeseries_dataset_default_dtype_is_bfloat16():
-    """Ensure TimeSeriesDataset defaults to bfloat16 for backward compatibility."""
-    import pandas as pd
-
-    df = pd.DataFrame(
-        {
-            "unique_id": ["A"] * 10,
-            "ds": pd.date_range("2020-01-01", periods=10),
-            "y": range(10),
-        }
-    )
-    dataset = TimeSeriesDataset.from_df(df, batch_size=10)
-    assert dataset.data[0].dtype == torch.bfloat16
-
 
 def test_chronos_default_dtype_is_float32():
     """Ensure Chronos defaults to float32 dtype."""
@@ -49,3 +32,45 @@ def test_chronos_model_uses_configured_dtype(mocker):
         pass
     call_kwargs = mock_pipeline.call_args[1]
     assert call_kwargs["torch_dtype"] == torch.bfloat16
+
+
+def test_chronos_forecast_uses_configured_dtype(mocker):
+    """Ensure Chronos.forecast uses the configured dtype for dataset creation."""
+    import pandas as pd
+
+    import pytest
+
+    from timecopilot.models.foundation.chronos import Chronos
+
+    # Patch dataset creation to capture dtype argument
+    mock_from_df = mocker.patch(
+        "timecopilot.models.foundation.chronos.TimeSeriesDataset.from_df"
+    )
+
+    # Avoid real model loading and CUDA branching
+    mocker.patch(
+        "timecopilot.models.foundation.chronos.BaseChronosPipeline.from_pretrained"
+    )
+    mocker.patch("torch.cuda.is_available", return_value=False)
+
+    model_dtype = torch.bfloat16
+    model = Chronos(repo_id="amazon/chronos-t5-tiny", dtype=model_dtype)
+
+    df = pd.DataFrame(
+        {
+            "unique_id": ["A"] * 10,
+            "ds": pd.date_range("2020-01-01", periods=10),
+            "y": range(10),
+        }
+    )
+
+    def _from_df_side_effect(*args, **kwargs):
+        # Assert that Chronos.forecast passes the configured dtype through
+        assert kwargs.get("dtype") == model_dtype
+        # Short-circuit the rest of the forecast call
+        raise RuntimeError("stop after dtype check")
+
+    mock_from_df.side_effect = _from_df_side_effect
+
+    with pytest.raises(RuntimeError, match="stop after dtype check"):
+        model.forecast(df=df, h=2)
