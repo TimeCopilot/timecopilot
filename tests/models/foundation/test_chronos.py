@@ -37,7 +37,6 @@ def test_chronos_model_uses_configured_dtype(mocker):
 def test_chronos_forecast_uses_configured_dtype(mocker):
     """Ensure Chronos.forecast uses the configured dtype for dataset creation."""
     import pandas as pd
-
     import pytest
 
     from timecopilot.models.foundation.chronos import Chronos
