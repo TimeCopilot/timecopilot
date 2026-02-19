@@ -3,7 +3,7 @@ import torch
 from timecopilot.models.foundation.utils import TimeSeriesDataset
 
 
-def test_timeseries_dataset_default_dtype_is_bfloat16():
+def test_timeseries_dataset_class_default_dtype_is_bfloat16():
     """Ensure TimeSeriesDataset defaults to bfloat16 for backward compatibility."""
     import pandas as pd
 
