@@ -77,8 +77,8 @@ class Chronos(Forecaster):
               available, otherwise CPU).
             - For best performance with large models (e.g., "chronos-t5-large"),
               a CUDA-compatible GPU is recommended.
-            - The model weights are loaded with torch_dtype=torch.bfloat16 for
-              efficiency on supported hardware.
+            - The model weights are loaded with torch_dtype=torch.float32 for
+              numerical precision.
 
         """
         self.repo_id = repo_id
@@ -91,7 +91,7 @@ class Chronos(Forecaster):
         model = BaseChronosPipeline.from_pretrained(
             self.repo_id,
             device_map=device_map,
-            torch_dtype=torch.bfloat16,
+            torch_dtype=torch.float32,
         )
         try:
             yield model
