@@ -27,7 +27,7 @@ class TimeSeriesDataset:
         cls,
         df: pd.DataFrame,
         batch_size: int,
-        dtype: torch.dtype = torch.bfloat16,
+        dtype: torch.dtype = torch.float32,
     ):
         tensors = []
         df_sorted = df.sort_values(by=["unique_id", "ds"])
