@@ -3,8 +3,8 @@ import torch
 from timecopilot.models.foundation.utils import TimeSeriesDataset
 
 
-def test_timeseries_dataset_default_dtype_is_float32():
-    """Ensure TimeSeriesDataset defaults to float32 for numerical precision."""
+def test_timeseries_dataset_default_dtype_is_bfloat16():
+    """Ensure TimeSeriesDataset defaults to bfloat16 for backward compatibility."""
     import pandas as pd
 
     df = pd.DataFrame(
@@ -15,7 +15,7 @@ def test_timeseries_dataset_default_dtype_is_float32():
         }
     )
     dataset = TimeSeriesDataset.from_df(df, batch_size=10)
-    assert dataset.data[0].dtype == torch.float32
+    assert dataset.data[0].dtype == torch.bfloat16
 
 
 def test_chronos_default_dtype_is_float32():
