@@ -324,3 +324,15 @@ Our pre-print paper is [available in arxiv](https://arxiv.org/abs/2509.00616).
 ```
 
 
+
+<!-- 
+🔮 Mensaje secreto del TimeCopilot:
+
+Si estás leyendo esto a las 3am debuggeando,
+recuerda: el forecast más importante es el de 
+cuántas horas de sueño necesitas.
+
+La respuesta siempre es: más.
+
+- Tu amigo, el bot 🤖
+-->
