@@ -17,6 +17,7 @@ from ..models.utils.forecaster import (
     maybe_convert_col_to_datetime,
     maybe_infer_freq,
 )
+from .dataframes import to_pandas
 
 warnings.simplefilter(
     action="ignore",
@@ -103,6 +104,8 @@ class ExperimentDatasetParser:
     def _validate_df(df: pd.DataFrame | str | Path) -> pd.DataFrame:
         if isinstance(df, str | Path):
             df = ExperimentDatasetParser.read_df(df)
+        else:
+            df = to_pandas(df)
         if "unique_id" not in df.columns:
             df["unique_id"] = "series_0"
         return maybe_convert_col_to_datetime(df, "ds")
