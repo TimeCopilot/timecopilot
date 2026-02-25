@@ -1,3 +1,4 @@
+import json
 import os
 
 import pandas as pd
@@ -63,6 +64,7 @@ class TimeGPT(Forecaster):
         self.max_retries = max_retries
         self.model = model
         self.alias = alias
+        self.finetuned_model_id: str | None = None
 
     def _get_client(self) -> NixtlaClient:
         if self.api_key is None:  # noqa: SIM108
@@ -75,6 +77,75 @@ class TimeGPT(Forecaster):
             max_retries=self.max_retries,
         )
 
+    def fit(
+        self,
+        df: pd.DataFrame,
+        freq: str | None = None,
+        *,
+        finetune_steps: int = 10,
+        finetune_depth: int = 1,
+        finetune_loss: str = "default",
+        output_model_id: str | None = None,
+    ) -> str:
+        """Create a persistent fine-tuned model from training data.
+
+        Calls the Nixtla finetune endpoint to train on ``df`` and saves the
+        model server-side. The returned ID is stored on this instance and used
+        by ``forecast()`` unless overridden.
+
+        Args:
+            df: DataFrame with columns unique_id, ds, y (same format as forecast).
+            freq: Frequency of the series; inferred from data if None.
+            finetune_steps: Number of finetuning steps. Default 10.
+            finetune_depth: Finetune depth 1–5. Default 1.
+            finetune_loss: Loss name. Default "default".
+            output_model_id: Custom ID for the saved model; Nixtla assigns one if None.
+
+        Returns:
+            The fine-tuned model ID (assigned or from output_model_id).
+        """
+        freq = self._maybe_infer_freq(df, freq)
+        client = self._get_client()
+        self.finetuned_model_id = client.finetune(
+            df=df,
+            freq=freq,
+            finetune_steps=finetune_steps,
+            finetune_depth=finetune_depth,
+            finetune_loss=finetune_loss,
+            output_model_id=output_model_id,
+            model=self.model,
+        )
+        self._fit_freq = freq
+        self._finetune_params = {
+            "finetune_steps": finetune_steps,
+            "finetune_depth": finetune_depth,
+            "finetune_loss": finetune_loss,
+        }
+        return self.finetuned_model_id
+
+    def save_artifact(self, path: str) -> None:
+        """Write fine-tuned model ID and related params to a JSON file."""
+        payload = {
+            "finetuned_model_id": self.finetuned_model_id,
+            "model": self.model,
+            "freq": getattr(self, "_fit_freq", None),
+            "params": getattr(self, "_finetune_params", None),
+        }
+        with open(path, "w") as f:
+            json.dump(payload, f, indent=2)
+
+    def load_artifact(self, path: str) -> None:
+        """Load fine-tuned model ID and params from a JSON file (from save_artifact)."""
+        with open(path) as f:
+            payload = json.load(f)
+        self.finetuned_model_id = payload.get("finetuned_model_id")
+        if payload.get("model") is not None:
+            self.model = payload["model"]
+        if payload.get("freq") is not None:
+            self._fit_freq = payload["freq"]
+        if payload.get("params") is not None:
+            self._finetune_params = payload["params"]
+
     def forecast(
         self,
         df: pd.DataFrame,
@@ -82,12 +153,18 @@ class TimeGPT(Forecaster):
         freq: str | None = None,
         level: list[int | float] | None = None,
         quantiles: list[float] | None = None,
+        finetune_steps: int = 0,
+        finetune_depth: int = 1,
+        finetune_loss: str = "default",
+        finetuned_model_id: str | None = None,
     ) -> pd.DataFrame:
         """Generate forecasts for time series data using the model.
 
         This method produces point forecasts and, optionally, prediction
         intervals or quantile forecasts. The input DataFrame can contain one
-        or multiple time series in stacked (long) format.
+        or multiple time series in stacked (long) format. Uses a previously
+        fine-tuned model when ``finetuned_model_id`` is provided (argument or
+        set by ``fit()``); otherwise runs zero-shot.
 
         Args:
             df (pd.DataFrame):
@@ -117,6 +194,11 @@ class TimeGPT(Forecaster):
                 provided, the output DataFrame will contain additional columns
                 named in the format "model-q-{percentile}", where {percentile}
                 = 100 × quantile value.
+            finetune_steps (int): On-the-fly finetune steps (0 = off). Default 0.
+            finetune_depth (int): Finetune depth 1–5. Default 1.
+            finetune_loss (str): Loss for finetuning. Default "default".
+            finetuned_model_id (str, optional): ID of a saved fine-tuned model.
+                If not provided, uses the id set by ``fit()`` when present.
 
         Returns:
             pd.DataFrame:
@@ -130,15 +212,26 @@ class TimeGPT(Forecaster):
                 identifiers as the input DataFrame.
         """
         freq = self._maybe_infer_freq(df, freq)
-        client = self._get_client()
-        fcst_df = client.forecast(
-            df=df,
-            h=h,
-            freq=freq,
-            model=self.model,
-            level=level,
-            quantiles=quantiles,
+        effective_finetuned_id = (
+            finetuned_model_id
+            if finetuned_model_id is not None
+            else self.finetuned_model_id
         )
+        client = self._get_client()
+        forecast_kwargs: dict = {
+            "df": df,
+            "h": h,
+            "freq": freq,
+            "model": self.model,
+            "level": level,
+            "quantiles": quantiles,
+            "finetune_steps": finetune_steps,
+            "finetune_depth": finetune_depth,
+            "finetune_loss": finetune_loss,
+        }
+        if effective_finetuned_id is not None:
+            forecast_kwargs["finetuned_model_id"] = effective_finetuned_id
+        fcst_df = client.forecast(**forecast_kwargs)
         fcst_df["ds"] = pd.to_datetime(fcst_df["ds"])
         cols = [col.replace("TimeGPT", self.alias) for col in fcst_df.columns]
         fcst_df.columns = cols
