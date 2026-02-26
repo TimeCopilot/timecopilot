@@ -13,6 +13,90 @@ from tqdm import tqdm
 
 from .forecaster import Forecaster, QuantileConverter
 
+_COARSE_FREQ_PREFIXES = ("B", "D", "W", "M", "Q", "A", "Y")
+
+
+def _maybe_align_for_gluonts(
+    df: pd.DataFrame,
+    freq: str,
+    *,
+    id_col: str = "unique_id",
+    ts_col: str = "ds",
+    coarse_only: bool = True,
+    verbose: bool = True,
+):
+    """
+    GluonTS requires a regular grid. If timestamps are consistently "end-of-bin"
+    (e.g., 23:59:59 for daily close), GluonTS will anchor to the bin boundary
+    (midnight) and your output ds can look "shifted".
+
+    This function:
+      - builds an internal copy aligned to the freq grid (floor to bin boundary)
+      - stores the most common within-bin offset per series (anchor)
+      - returns (df_gluonts, anchor_by_id) so you can restore the offset in outputs
+
+    Returns:
+      df_gluonts: df aligned to grid (or original df if no action)
+      anchor: Series[timedelta] indexed by unique_id, or None if not applied
+    """
+    f = str(freq)
+
+    if coarse_only and not f.startswith(_COARSE_FREQ_PREFIXES):
+        return df, None
+
+    offset = pd.tseries.frequencies.to_offset(f)
+
+    g = df.sort_values([id_col, ts_col]).copy(deep=False)
+    ds = pd.to_datetime(g[ts_col])
+
+    # grid boundary for each timestamp, given the offset
+    base = ds.dt.floor(offset)
+    within = ds - base  # timedelta inside the bin (time-of-day for daily)
+
+    # use the anchor provided function
+    anchor = within.groupby(g[id_col]).apply(_compute_anchor_with_guard).dropna()
+
+    if anchor.empty:
+        return df, None
+
+    # apply only if any series is non-zero offset
+    if not (anchor != pd.Timedelta(0)).any():
+        return df, None
+
+    if verbose:
+        print(
+            f"[gluonts-align] Applied internal time alignment for freq='{f}': "
+            f"removed dominant within-bin offset(s) "
+            f"{', '.join(str(o) for o in anchor.value_counts().index)} "
+            f"from {anchor.shape[0]}/{g[id_col].nunique()} series; "
+            f"input data unchanged, offsets restored in forecasts."
+        )
+
+    df_gluonts = df.copy(deep=False)
+    df_gluonts[ts_col] = pd.to_datetime(df_gluonts[ts_col]).dt.floor(offset)
+
+    return df_gluonts, anchor
+
+
+def _compute_anchor_with_guard(
+    within: pd.Series, min_frac: float = 0.8, min_count: int = 10
+):
+    vc = within.value_counts()
+    top_offset = vc.index[0]
+    top_count = vc.iloc[0]
+    total = vc.sum()
+
+    if top_offset == pd.Timedelta(0):
+        return None
+
+    if top_count < min_count:
+        return None
+
+    if top_count / total < min_frac:
+        return None
+
+    return top_offset
+
 
 def fix_freq(freq: str) -> str:
     # see https://github.com/awslabs/gluonts/pull/2462/files
@@ -166,6 +250,15 @@ class GluonTSForecaster(Forecaster):
         df = maybe_convert_col_to_float32(df, "y")
         freq = self._maybe_infer_freq(df, freq)
         qc = QuantileConverter(level=level, quantiles=quantiles)
+
+        df_gluonts, anchor = _maybe_align_for_gluonts(
+            df,
+            fix_freq(freq),
+            coarse_only=True,  # set False if you want this
+            # to handle hourly/minutely end-stamps too
+            verbose=True,
+        )
+
         gluonts_dataset = PandasDataset.from_long_dataframe(
             df.copy(deep=False),
             target="y",
@@ -173,17 +266,27 @@ class GluonTSForecaster(Forecaster):
             timestamp="ds",
             freq=fix_freq(freq),
         )
+
         with self.get_predictor(prediction_length=h) as predictor:
             fcsts = predictor.predict(
                 gluonts_dataset,
                 num_samples=self.num_samples,
             )
+
+        fcsts_list = list(fcsts)  # materialize iterator once
+
         fcst_df = self.gluonts_fcsts_to_df(
-            fcsts,
-            freq=freq,
+            fcsts_list,
+            freq=fix_freq(freq),
             model_name=self.alias,
             quantiles=qc.quantiles,
         )
+
+        if anchor is not None:
+            fcst_df["ds"] = pd.to_datetime(fcst_df["ds"]) + fcst_df["unique_id"].map(
+                anchor
+            )
+
         if qc.quantiles is not None:
             fcst_df = qc.maybe_convert_quantiles_to_level(
                 fcst_df,
