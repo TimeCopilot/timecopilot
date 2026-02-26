@@ -1,6 +1,7 @@
 import pandas as pd
 
 from .models.utils.forecaster import Forecaster
+from .utils.dataframes import to_pandas
 
 
 class TimeCopilotForecaster(Forecaster):
@@ -73,6 +74,7 @@ class TimeCopilotForecaster(Forecaster):
         quantiles: list[float] | None,
         **kwargs,
     ) -> pd.DataFrame:
+        df = to_pandas(df)
         # infer just once to avoid multiple calls to _maybe_infer_freq
         freq = self._maybe_infer_freq(df, freq)
         res_df: pd.DataFrame | None = None
@@ -141,6 +143,8 @@ class TimeCopilotForecaster(Forecaster):
                     - "unique_id": an ID column to distinguish multiple series.
                     - "ds": a time column indicating timestamps or periods.
                     - "y": a target column with the observed values.
+                Spark, Ray, and Dask dataframes are accepted and converted to
+                pandas at entry.
 
             h (int):
                 Forecast horizon specifying how many future steps to predict.
@@ -207,6 +211,8 @@ class TimeCopilotForecaster(Forecaster):
                     - "unique_id": an ID column to distinguish multiple series.
                     - "ds": a time column indicating timestamps or periods.
                     - "y": a target column with the observed values.
+                Spark, Ray, and Dask dataframes are accepted and converted to
+                pandas at entry.
 
             h (int):
                 Forecast horizon specifying how many future steps to predict in
@@ -279,6 +285,8 @@ class TimeCopilotForecaster(Forecaster):
         Args:
             df (pd.DataFrame):
                 DataFrame containing the time series to detect anomalies.
+                Spark, Ray, and Dask dataframes are accepted and converted to
+                pandas at entry.
             h (int, optional):
                 Forecast horizon specifying how many future steps to predict.
                 In each cross validation window. If not provided, the seasonality

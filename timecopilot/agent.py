@@ -1221,8 +1221,9 @@ class TimeCopilot:
 
         Args:
             df: The time-series data. Can be one of:
-                - a *pandas* `DataFrame` with at least the columns
-                  `["unique_id", "ds", "y"]`.
+                - a *pandas*, Spark, Ray, or Dask dataframe with at least the
+                  columns `["unique_id", "ds", "y"]`. Non-pandas dataframes are
+                  converted to pandas at entry.
                 - a file path or URL pointing to a CSV / Parquet file with the
                   same columns (it will be read automatically).
             h: Forecast horizon. Number of future periods to predict. If
@@ -1284,8 +1285,9 @@ class TimeCopilot:
 
         Args:
             df: The time-series data. Can be one of:
-                - a *pandas* `DataFrame` with at least the columns
-                  `["unique_id", "ds", "y"]`.
+                - a *pandas*, Spark, Ray, or Dask dataframe with at least the
+                  columns `["unique_id", "ds", "y"]`. Non-pandas dataframes are
+                  converted to pandas at entry.
                 - a file path or URL pointing to a CSV / Parquet file with the
                   same columns (it will be read automatically).
             h: Forecast horizon. Number of future periods to predict. If
@@ -1440,8 +1442,9 @@ class AsyncTimeCopilot(TimeCopilot):
 
         Args:
             df: The time-series data. Can be one of:
-                - a *pandas* `DataFrame` with at least the columns
-                  `["unique_id", "ds", "y"]`.
+                - a *pandas*, Spark, Ray, or Dask dataframe with at least the
+                  columns `["unique_id", "ds", "y"]`. Non-pandas dataframes are
+                  converted to pandas at entry.
                 - You must always work with time series data with the columns
                   ds (date) and y (target value), if these are missing, attempt to
                   infer them from similar column names or, if unsure, request
@@ -1514,8 +1517,9 @@ class AsyncTimeCopilot(TimeCopilot):
 
         Args:
             df: The time-series data. Can be one of:
-                - a *pandas* `DataFrame` with at least the columns
-                  `["unique_id", "ds", "y"]`.
+                - a *pandas*, Spark, Ray, or Dask dataframe with at least the
+                  columns `["unique_id", "ds", "y"]`. Non-pandas dataframes are
+                  converted to pandas at entry.
                 - You must always work with time series data with the columns
                   ds (date) and y (target value), if these are missing, attempt to
                   infer them from similar column names or, if unsure, request

@@ -141,6 +141,7 @@ from timecopilot import TimeCopilot
 # - unique_id: Unique identifier for each time series (string)
 # - ds: Date column (datetime format)
 # - y: Target variable for forecasting (float format)
+# Spark, Ray, and Dask dataframes are accepted and converted to pandas at entry.
 # The pandas frequency will be inferred from the ds column, if not provided.
 # If the seasonality is not provided, it will be inferred based on the frequency. 
 # If the horizon is not set, it will default to 2 times the inferred seasonality.
@@ -322,5 +323,4 @@ Our pre-print paper is [available in arxiv](https://arxiv.org/abs/2509.00616).
       url={https://arxiv.org/abs/2509.00616}, 
 }
 ```
-
 
