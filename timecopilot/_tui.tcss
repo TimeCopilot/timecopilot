@@ -1,0 +1,309 @@
+/* Bloomberg Terminal-inspired dark theme for TimeCopilot TUI */
+
+Screen {
+    background: #1a1a2e;
+}
+
+Header {
+    background: #16213e;
+    color: #00d4ff;
+    text-style: bold;
+}
+
+Footer {
+    background: #16213e;
+    color: #a0a0b0;
+}
+
+/* Tab pane styling */
+TabbedContent {
+    background: #1a1a2e;
+    height: 1fr;
+}
+
+ContentSwitcher {
+    background: #1a1a2e;
+}
+
+TabPane {
+    background: #1a1a2e;
+    padding: 0;
+}
+
+Tabs {
+    background: #16213e;
+}
+
+Tab {
+    background: #16213e;
+    color: #a0a0b0;
+    padding: 0 2;
+}
+
+Tab.-active {
+    background: #0f3460;
+    color: #00d4ff;
+    text-style: bold;
+}
+
+Tab:hover {
+    background: #0f3460;
+    color: #00d4ff;
+}
+
+/* Chat tab layout */
+#chat-container {
+    height: 1fr;
+}
+
+#chat-log {
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border: solid #0f3460;
+    height: 1fr;
+    scrollbar-color: #0f3460;
+    scrollbar-color-hover: #00d4ff;
+    scrollbar-color-active: #00d4ff;
+}
+
+LoadingIndicator {
+    height: 1;
+    color: #00d4ff;
+    background: #16213e;
+}
+
+#chat-input {
+    background: #16213e;
+    color: #e0e0e0;
+    border: solid #0f3460;
+    height: 3;
+}
+
+#chat-input:focus {
+    border: solid #00d4ff;
+}
+
+#chat-input.-disabled {
+    opacity: 0.5;
+}
+
+/* Chart tab */
+#chart-wrapper {
+    height: 1fr;
+}
+
+#time-range-bar {
+    height: 3;
+    layout: horizontal;
+    background: #16213e;
+    padding: 0 1;
+    align: center middle;
+}
+
+#time-range-bar Button {
+    min-width: 6;
+    height: 3;
+    margin: 0 1;
+    background: #0f3460;
+    color: #a0a0b0;
+    border: none;
+}
+
+#time-range-bar Button:hover {
+    background: #1a5276;
+    color: #00d4ff;
+}
+
+#time-range-bar Button.-active {
+    background: #00d4ff;
+    color: #1a1a2e;
+    text-style: bold;
+}
+
+#chart-plot {
+    height: 1fr;
+    background: #1a1a2e;
+}
+
+#chart-empty {
+    height: 1fr;
+    content-align: center middle;
+    color: #a0a0b0;
+    text-style: italic;
+    background: #1a1a2e;
+}
+
+/* Analysis tab */
+#analysis-container {
+    height: 1fr;
+    padding: 1;
+}
+
+#features-table {
+    height: 1fr;
+    max-height: 50%;
+    background: #1a1a2e;
+    border: solid #0f3460;
+}
+
+#models-table {
+    height: auto;
+    max-height: 12;
+    background: #1a1a2e;
+    border: solid #0f3460;
+}
+
+#feature-analysis {
+    height: auto;
+    max-height: 12;
+    background: #1a1a2e;
+    border: solid #0f3460;
+    color: #e0e0e0;
+    padding: 1;
+    overflow-y: auto;
+}
+
+#model-comparison {
+    height: auto;
+    max-height: 12;
+    background: #1a1a2e;
+    border: solid #0f3460;
+    color: #e0e0e0;
+    padding: 1;
+    overflow-y: auto;
+}
+
+#analysis-empty {
+    height: 1fr;
+    content-align: center middle;
+    color: #a0a0b0;
+    text-style: italic;
+    background: #1a1a2e;
+}
+
+/* Forecast tab */
+#forecast-container {
+    height: 1fr;
+    padding: 1;
+}
+
+#forecast-table {
+    height: 1fr;
+    max-height: 50%;
+    background: #1a1a2e;
+    border: solid #0f3460;
+}
+
+#anomaly-summary {
+    height: auto;
+    max-height: 12;
+    background: #1a1a2e;
+    border: solid #0f3460;
+    color: #e0e0e0;
+    padding: 1;
+}
+
+#forecast-analysis {
+    height: auto;
+    max-height: 12;
+    background: #1a1a2e;
+    border: solid #0f3460;
+    color: #e0e0e0;
+    padding: 1;
+    overflow-y: auto;
+}
+
+#anomaly-analysis {
+    height: auto;
+    max-height: 12;
+    background: #1a1a2e;
+    border: solid #0f3460;
+    color: #e0e0e0;
+    padding: 1;
+    overflow-y: auto;
+}
+
+#forecast-empty {
+    height: 1fr;
+    content-align: center middle;
+    color: #a0a0b0;
+    text-style: italic;
+    background: #1a1a2e;
+}
+
+/* Settings tab */
+#settings-container {
+    height: 1fr;
+    padding: 1 2;
+}
+
+#settings-current-model {
+    height: auto;
+    margin-bottom: 1;
+    color: #00d4ff;
+    text-style: bold;
+}
+
+#settings-change-llm {
+    width: auto;
+    min-width: 16;
+    height: 3;
+    margin-bottom: 1;
+    background: #0f3460;
+    color: #00d4ff;
+    border: none;
+}
+
+#settings-change-llm:hover {
+    background: #1a5276;
+}
+
+#settings-log {
+    height: 1fr;
+    border: solid #0f3460;
+}
+
+#settings-input {
+    dock: bottom;
+    background: #16213e;
+    color: #e0e0e0;
+    border: solid #0f3460;
+    height: 3;
+}
+
+#settings-input:focus {
+    border: solid #00d4ff;
+}
+
+/* DataTable styling */
+DataTable {
+    background: #1a1a2e;
+    color: #e0e0e0;
+    scrollbar-color: #0f3460;
+    scrollbar-color-hover: #00d4ff;
+}
+
+DataTable > .datatable--header {
+    background: #0f3460;
+    color: #00d4ff;
+    text-style: bold;
+}
+
+DataTable > .datatable--cursor {
+    background: #1a5276;
+    color: #e0e0e0;
+}
+
+/* RichLog styling */
+RichLog {
+    background: #1a1a2e;
+    color: #e0e0e0;
+    scrollbar-color: #0f3460;
+    scrollbar-color-hover: #00d4ff;
+}
+
+/* Static text styling */
+Static {
+    background: #1a1a2e;
+    color: #e0e0e0;
+}

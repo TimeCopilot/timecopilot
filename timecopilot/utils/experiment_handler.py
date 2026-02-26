@@ -1,3 +1,4 @@
+import logging
 import warnings
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -17,6 +18,8 @@ from ..models.utils.forecaster import (
     maybe_convert_col_to_datetime,
     maybe_infer_freq,
 )
+
+logger = logging.getLogger(__name__)
 
 warnings.simplefilter(
     action="ignore",
@@ -191,7 +194,11 @@ class ExperimentDataset:
         """
         for model in models:
             if forecast_df[model].isna().sum() > 0:
-                print(forecast_df.loc[forecast_df[model].isna()]["unique_id"].unique())
+                logger.warning(
+                    "NaN values found in model %s for: %s",
+                    model,
+                    forecast_df.loc[forecast_df[model].isna()]["unique_id"].unique(),
+                )
                 raise ValueError(f"model {model} has NaN values")
 
         partial_mase = partial(mase, seasonality=self.seasonality)

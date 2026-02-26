@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TimeCopilot TUI - UI Elements Reference</title>
+<style>
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 40px auto; max-width: 900px; color: #222; line-height: 1.6; }
+  h1 { color: #0f3460; border-bottom: 3px solid #00d4ff; padding-bottom: 8px; }
+  h2 { color: #0f3460; margin-top: 36px; }
+  h3 { color: #1a5276; margin-top: 24px; }
+  .element-box { background: #f4f8fb; border-left: 4px solid #00d4ff; padding: 14px 18px; margin: 12px 0; border-radius: 4px; }
+  .element-box h3 { margin-top: 0; }
+  code { background: #e8eef3; padding: 2px 6px; border-radius: 3px; font-size: 0.95em; }
+  .label { display: inline-block; background: #0f3460; color: #fff; border-radius: 50%; width: 28px; height: 28px; text-align: center; line-height: 28px; font-weight: bold; font-size: 14px; margin-right: 8px; }
+  .diagram { background: #1a1a2e; color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 13px; padding: 16px; border-radius: 6px; overflow-x: auto; white-space: pre; line-height: 1.5; }
+  .cyan { color: #00d4ff; }
+  .green { color: #4caf50; }
+  .dim { color: #888; }
+  .yellow { color: #ffca28; }
+  .red { color: #ef5350; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+  th, td { border: 1px solid #ccc; padding: 10px 14px; text-align: left; }
+  th { background: #0f3460; color: #fff; }
+  tr:nth-child(even) { background: #f4f8fb; }
+  .file-ref { color: #666; font-size: 0.9em; }
+  @media print { body { margin: 20px; } .element-box { break-inside: avoid; } }
+</style>
+</head>
+<body>
+
+<h1>TimeCopilot TUI - UI Elements Reference</h1>
+<p><strong>Framework:</strong> Textual (Python terminal UI framework)<br>
+<strong>Source files:</strong> <code>timecopilot/_tui.py</code> (logic) &amp; <code>timecopilot/_tui.tcss</code> (styles)<br>
+<strong>App class:</strong> <code>TimeCopilotApp(App)</code></p>
+
+<!-- ===== ANNOTATED DIAGRAM ===== -->
+<h2>Annotated Layout</h2>
+<p>The numbers below correspond to the element descriptions that follow.</p>
+
+<div class="diagram">
++===========================================================================+
+| <span class="cyan">&#9312; HEADER</span>                                                              |
+|  O     TIMECOPILOT TERMINAL &mdash; model: anthropic:claude-sonnet-...        |
++===========================================================================+
+| <span class="cyan">&#9313; TAB BAR (Tabs)</span>                                                      |
+|  [<span class="cyan">Chat</span>]   Chart    Analysis    Forecast    Settings                     |
++===========================================================================+
+|                                                                           |
+|  <span class="cyan">&#9314; RICHLOG (#chat-log)</span>                                                |
+|                                                                           |
+|  Welcome back!                                                            |
+|  Current model: anthropic:claude-sonnet-4-5-20250929                      |
+|  Commands: help | llm | exit                                              |
+|  Tabs: F1 Chat | F2 Chart | F3 Analysis | F4 Forecast | ...              |
+|                                                                           |
+|  <span class="green">Using model: anthropic:claude-sonnet-4-5-20250929</span>                       |
+|                                                                           |
+|                                                                           |
+|                          (scrollable area)                                |
+|                                                                           |
+|                                                                           |
++===========================================================================+
+|  <span class="cyan">&#9315; LOADING INDICATOR</span>  (hidden unless busy)                             |
++---------------------------------------------------------------------------+
+|  <span class="cyan">&#9316; INPUT (#chat-input)</span>                                                 |
+|  <span class="dim">Let's forecast! Enter a file path or URL</span>                                |
++===========================================================================+
+| <span class="cyan">&#9317; FOOTER</span>                                                              |
+|  ^q ^Q Quit  f1 F1 Chat  f2 F2 Chart  f3 F3 Analysis  f4 ...  f5 ...    |
++===========================================================================+
+</div>
+
+<!-- ===== ELEMENT DETAILS ===== -->
+<h2>Element-by-Element Breakdown</h2>
+
+<div class="element-box">
+<h3><span class="label">1</span> Header</h3>
+<p><strong>Widget:</strong> <code>Header()</code> (Textual built-in)<br>
+<strong>What it shows:</strong> App title (<code>TITLE = "TIMECOPILOT TERMINAL"</code>) on the left, and the <code>sub_title</code> on the right (set to <code>"model: {self.llm}"</code> after onboarding).<br>
+<strong>CSS ID:</strong> None (styled via <code>Header { ... }</code> type selector)<br>
+<strong>Style:</strong> Dark navy background (<code>#16213e</code>), cyan text (<code>#00d4ff</code>), bold.</p>
+<p class="file-ref">Composed at: <code>_tui.py:183</code> &mdash; Styled at: <code>_tui.tcss:7-10</code></p>
+</div>
+
+<div class="element-box">
+<h3><span class="label">2</span> Tab Bar (Tabs + TabbedContent)</h3>
+<p><strong>Widget:</strong> <code>TabbedContent(id="tabs")</code><br>
+<strong>What it does:</strong> Renders a row of clickable tab labels at the top. Only one <code>TabPane</code> is visible at a time. The active tab is highlighted in cyan.<br>
+<strong>Tabs:</strong> Chat (F1) &bull; Chart (F2) &bull; Analysis (F3) &bull; Forecast (F4) &bull; Settings (F5)<br>
+<strong>Switching:</strong> Clicking a tab label, pressing F1-F5, or programmatically setting <code>self.query_one("#tabs", TabbedContent).active = tab_id</code>.<br>
+<strong>Key event:</strong> <code>on_tabbed_content_tab_activated</code> fires when a tab is activated &mdash; used for lazy-populating data tabs.</p>
+<p class="file-ref">Composed at: <code>_tui.py:184</code> &mdash; Bindings at: <code>_tui.py:146-153</code> &mdash; Styled at: <code>_tui.tcss:19-52</code></p>
+</div>
+
+<div class="element-box">
+<h3><span class="label">3</span> Chat Log (RichLog)</h3>
+<p><strong>Widget:</strong> <code>RichLog(id="chat-log", highlight=True, markup=True, wrap=True)</code><br>
+<strong>What it does:</strong> The main conversation display. Append-only scrollable log that renders Rich markup (colors, bold, etc.). All onboarding messages, user inputs, agent responses, and error messages appear here.<br>
+<strong>Key properties:</strong><br>
+&bull; <code>markup=True</code> &mdash; enables <code>[bold green]...[/]</code> Rich syntax<br>
+&bull; <code>wrap=True</code> &mdash; wraps long lines instead of horizontal scrolling<br>
+&bull; <code>highlight=True</code> &mdash; syntax highlights code snippets<br>
+<strong>Write to it:</strong> <code>log.write("message")</code> or via helper <code>self._log_to_chat("message")</code></p>
+<p class="file-ref">Composed at: <code>_tui.py:188-192</code> &mdash; Styled at: <code>_tui.tcss:59-67</code></p>
+</div>
+
+<div class="element-box">
+<h3><span class="label">4</span> Loading Indicator</h3>
+<p><strong>Widget:</strong> <code>LoadingIndicator(id="loading")</code><br>
+<strong>What it does:</strong> An animated spinner that appears between the chat log and the input field when the app is processing (analysis or query). Hidden by default.<br>
+<strong>Controlled by:</strong> The <code>is_busy</code> reactive property. When <code>is_busy</code> changes, <code>watch_is_busy()</code> toggles <code>display</code> and also disables the input field.</p>
+<p class="file-ref">Composed at: <code>_tui.py:194</code> &mdash; Hidden on mount: <code>_tui.py:245</code> &mdash; Styled at: <code>_tui.tcss:69-73</code></p>
+</div>
+
+<div class="element-box">
+<h3><span class="label">5</span> Chat Input</h3>
+<p><strong>Widget:</strong> <code>Input(id="chat-input", placeholder="Let's forecast! Enter a file path or URL")</code><br>
+<strong>What it does:</strong> Single-line text field where the user types commands and queries. Pressing Enter fires <code>on_input_submitted</code>.<br>
+<strong>Placeholder changes dynamically:</strong> During onboarding it shows prompts like "yes or no", "Enter a number or provider name", "Enter your API key", etc. After onboarding it resets to the default.<br>
+<strong>Disabled when busy:</strong> <code>watch_is_busy</code> sets <code>disabled=True</code> during analysis.</p>
+<p class="file-ref">Composed at: <code>_tui.py:195-198</code> &mdash; Styled at: <code>_tui.tcss:75-88</code></p>
+</div>
+
+<div class="element-box">
+<h3><span class="label">6</span> Footer</h3>
+<p><strong>Widget:</strong> <code>Footer()</code> (Textual built-in)<br>
+<strong>What it shows:</strong> Auto-generated from the <code>BINDINGS</code> list. Displays all keyboard shortcuts: <code>^Q Quit</code>, <code>F1 Chat</code>, <code>F2 Chart</code>, <code>F3 Analysis</code>, <code>F4 Forecast</code>, <code>F5 Settings</code>.<br>
+<strong>Note:</strong> Textual renders these automatically &mdash; you don't manually set footer text.</p>
+<p class="file-ref">Composed at: <code>_tui.py:239</code> &mdash; Styled at: <code>_tui.tcss:12-15</code></p>
+</div>
+
+<!-- ===== OTHER TABS ===== -->
+<h2>Other Tabs (Not Visible in Screenshot)</h2>
+<p>These tabs are pre-composed but hidden until an analysis is run. They are populated lazily when the user switches to them.</p>
+
+<div class="element-box">
+<h3>Chart Tab (F2)</h3>
+<p><strong>Pane:</strong> <code>TabPane("Chart", id="chart")</code></p>
+<table>
+<tr><th>Widget</th><th>ID</th><th>Purpose</th></tr>
+<tr><td><code>Horizontal</code></td><td><code>#time-range-bar</code></td><td>Row of time range filter buttons</td></tr>
+<tr><td><code>Button</code> &times;6</td><td><code>#range-3M</code>, <code>#range-6M</code>, <code>#range-1Y</code>, <code>#range-2Y</code>, <code>#range-5Y</code>, <code>#range-All</code></td><td>Filter chart to 3M/6M/1Y/2Y/5Y/All</td></tr>
+<tr><td><code>Static</code></td><td><code>#chart-empty</code></td><td>Placeholder: "Run an analysis..."</td></tr>
+<tr><td><code>PlotextPlot</code></td><td><code>#chart-plot</code></td><td>ASCII line chart (time series + forecast + anomalies)</td></tr>
+</table>
+<p class="file-ref">Composed at: <code>_tui.py:200-209</code> &mdash; Populated by: <code>_render_chart()</code></p>
+</div>
+
+<div class="element-box">
+<h3>Analysis Tab (F3)</h3>
+<p><strong>Pane:</strong> <code>TabPane("Analysis", id="analysis")</code></p>
+<table>
+<tr><th>Widget</th><th>ID</th><th>Purpose</th></tr>
+<tr><td><code>Static</code></td><td><code>#analysis-empty</code></td><td>Placeholder: "Run an analysis..."</td></tr>
+<tr><td><code>DataTable</code></td><td><code>#features-table</code></td><td>Feature/value pairs from tsfeatures</td></tr>
+<tr><td><code>DataTable</code></td><td><code>#models-table</code></td><td>Model name + MASE score (sorted best first)</td></tr>
+<tr><td><code>Static</code></td><td><code>#feature-analysis</code></td><td>LLM-generated feature analysis text</td></tr>
+<tr><td><code>Static</code></td><td><code>#model-comparison</code></td><td>LLM-generated model comparison text</td></tr>
+</table>
+<p class="file-ref">Composed at: <code>_tui.py:211-220</code> &mdash; Populated by: <code>_populate_analysis()</code></p>
+</div>
+
+<div class="element-box">
+<h3>Forecast Tab (F4)</h3>
+<p><strong>Pane:</strong> <code>TabPane("Forecast", id="forecast")</code></p>
+<table>
+<tr><th>Widget</th><th>ID</th><th>Purpose</th></tr>
+<tr><td><code>Static</code></td><td><code>#forecast-empty</code></td><td>Placeholder: "Run an analysis..."</td></tr>
+<tr><td><code>DataTable</code></td><td><code>#forecast-table</code></td><td>Period + forecasted value rows</td></tr>
+<tr><td><code>Static</code></td><td><code>#anomaly-summary</code></td><td>Anomaly count, rate, and dates</td></tr>
+<tr><td><code>Static</code></td><td><code>#forecast-analysis</code></td><td>LLM-generated forecast analysis</td></tr>
+<tr><td><code>Static</code></td><td><code>#anomaly-analysis</code></td><td>LLM-generated anomaly analysis</td></tr>
+</table>
+<p class="file-ref">Composed at: <code>_tui.py:222-231</code> &mdash; Populated by: <code>_populate_forecast()</code></p>
+</div>
+
+<div class="element-box">
+<h3>Settings Tab (F5)</h3>
+<p><strong>Pane:</strong> <code>TabPane("Settings", id="settings")</code></p>
+<table>
+<tr><th>Widget</th><th>ID</th><th>Purpose</th></tr>
+<tr><td><code>Static</code></td><td><code>#settings-current-model</code></td><td>Shows "Current model: ..." in cyan</td></tr>
+<tr><td><code>Button</code></td><td><code>#settings-change-llm</code></td><td>Starts the LLM provider/model selection flow</td></tr>
+<tr><td><code>RichLog</code></td><td><code>#settings-log</code></td><td>Displays provider/model lists during selection</td></tr>
+<tr><td><code>Input</code></td><td><code>#settings-input</code></td><td>Text input for selection (hidden until "Change LLM" is clicked)</td></tr>
+</table>
+<p class="file-ref">Composed at: <code>_tui.py:233-238</code> &mdash; Handlers: <code>_start_settings_llm_change()</code>, <code>_finish_settings_llm_change()</code></p>
+</div>
+
+<!-- ===== LAYOUT CONTAINERS ===== -->
+<h2>Layout Containers</h2>
+<p>These are invisible structural widgets that control how children are arranged.</p>
+<table>
+<tr><th>Container</th><th>ID</th><th>Parent Tab</th><th>Layout</th></tr>
+<tr><td><code>Vertical</code></td><td><code>#chat-container</code></td><td>Chat</td><td>Stacks log + loading + input vertically</td></tr>
+<tr><td><code>Vertical</code></td><td><code>#chart-wrapper</code></td><td>Chart</td><td>Stacks time-range bar + plot vertically</td></tr>
+<tr><td><code>Horizontal</code></td><td><code>#time-range-bar</code></td><td>Chart</td><td>Lays out range buttons side-by-side</td></tr>
+<tr><td><code>Vertical</code></td><td><code>#analysis-container</code></td><td>Analysis</td><td>Stacks tables + text blocks vertically</td></tr>
+<tr><td><code>Vertical</code></td><td><code>#forecast-container</code></td><td>Forecast</td><td>Stacks table + anomaly + text vertically</td></tr>
+<tr><td><code>Vertical</code></td><td><code>#settings-container</code></td><td>Settings</td><td>Stacks label + button + log + input vertically</td></tr>
+</table>
+
+<!-- ===== WIDGET TREE ===== -->
+<h2>Full Widget Tree</h2>
+<div class="diagram">
+TimeCopilotApp (App)
+ &#9500;&#9472; Header
+ &#9500;&#9472; TabbedContent #tabs
+ &#9474;   &#9500;&#9472; TabPane #chat  "Chat"
+ &#9474;   &#9474;   &#9492;&#9472; Vertical #chat-container
+ &#9474;   &#9474;       &#9500;&#9472; RichLog #chat-log
+ &#9474;   &#9474;       &#9500;&#9472; LoadingIndicator #loading
+ &#9474;   &#9474;       &#9492;&#9472; Input #chat-input
+ &#9474;   &#9500;&#9472; TabPane #chart  "Chart"
+ &#9474;   &#9474;   &#9492;&#9472; Vertical #chart-wrapper
+ &#9474;   &#9474;       &#9500;&#9472; Horizontal #time-range-bar
+ &#9474;   &#9474;       &#9474;   &#9500;&#9472; Button #range-3M
+ &#9474;   &#9474;       &#9474;   &#9500;&#9472; Button #range-6M
+ &#9474;   &#9474;       &#9474;   &#9500;&#9472; Button #range-1Y
+ &#9474;   &#9474;       &#9474;   &#9500;&#9472; Button #range-2Y
+ &#9474;   &#9474;       &#9474;   &#9500;&#9472; Button #range-5Y
+ &#9474;   &#9474;       &#9474;   &#9492;&#9472; Button #range-All
+ &#9474;   &#9474;       &#9500;&#9472; Static #chart-empty
+ &#9474;   &#9474;       &#9492;&#9472; PlotextPlot #chart-plot
+ &#9474;   &#9500;&#9472; TabPane #analysis  "Analysis"
+ &#9474;   &#9474;   &#9500;&#9472; Static #analysis-empty
+ &#9474;   &#9474;   &#9492;&#9472; Vertical #analysis-container
+ &#9474;   &#9474;       &#9500;&#9472; DataTable #features-table
+ &#9474;   &#9474;       &#9500;&#9472; DataTable #models-table
+ &#9474;   &#9474;       &#9500;&#9472; Static #feature-analysis
+ &#9474;   &#9474;       &#9492;&#9472; Static #model-comparison
+ &#9474;   &#9500;&#9472; TabPane #forecast  "Forecast"
+ &#9474;   &#9474;   &#9500;&#9472; Static #forecast-empty
+ &#9474;   &#9474;   &#9492;&#9472; Vertical #forecast-container
+ &#9474;   &#9474;       &#9500;&#9472; DataTable #forecast-table
+ &#9474;   &#9474;       &#9500;&#9472; Static #anomaly-summary
+ &#9474;   &#9474;       &#9500;&#9472; Static #forecast-analysis
+ &#9474;   &#9474;       &#9492;&#9472; Static #anomaly-analysis
+ &#9474;   &#9492;&#9472; TabPane #settings  "Settings"
+ &#9474;       &#9492;&#9472; Vertical #settings-container
+ &#9474;           &#9500;&#9472; Static #settings-current-model
+ &#9474;           &#9500;&#9472; Button #settings-change-llm
+ &#9474;           &#9500;&#9472; RichLog #settings-log
+ &#9474;           &#9492;&#9472; Input #settings-input
+ &#9492;&#9472; Footer
+</div>
+
+<h2>Key Bindings</h2>
+<table>
+<tr><th>Key</th><th>Action</th><th>Binding Definition</th></tr>
+<tr><td><code>Ctrl+Q</code></td><td>Quit the app</td><td><code>action_quit()</code> &rarr; <code>self.exit()</code></td></tr>
+<tr><td><code>F1</code></td><td>Switch to Chat tab</td><td><code>action_switch_tab("chat")</code></td></tr>
+<tr><td><code>F2</code></td><td>Switch to Chart tab</td><td><code>action_switch_tab("chart")</code></td></tr>
+<tr><td><code>F3</code></td><td>Switch to Analysis tab</td><td><code>action_switch_tab("analysis")</code></td></tr>
+<tr><td><code>F4</code></td><td>Switch to Forecast tab</td><td><code>action_switch_tab("forecast")</code></td></tr>
+<tr><td><code>F5</code></td><td>Switch to Settings tab</td><td><code>action_switch_tab("settings")</code></td></tr>
+</table>
+
+<h2>Color Palette (TCSS Theme)</h2>
+<table>
+<tr><th>Color</th><th>Hex</th><th>Usage</th></tr>
+<tr><td style="background:#1a1a2e;width:40px;">&nbsp;</td><td><code>#1a1a2e</code></td><td>Screen &amp; widget backgrounds (deep navy)</td></tr>
+<tr><td style="background:#16213e;width:40px;">&nbsp;</td><td><code>#16213e</code></td><td>Header, Footer, Input backgrounds</td></tr>
+<tr><td style="background:#0f3460;width:40px;">&nbsp;</td><td><code>#0f3460</code></td><td>Active tab, borders, buttons, scrollbars</td></tr>
+<tr><td style="background:#1a5276;width:40px;">&nbsp;</td><td><code>#1a5276</code></td><td>Hover states, cursor highlight</td></tr>
+<tr><td style="background:#00d4ff;width:40px;">&nbsp;</td><td><code>#00d4ff</code></td><td>Accent cyan &mdash; active tab text, focus borders, header text</td></tr>
+<tr><td style="background:#e0e0e0;width:40px;">&nbsp;</td><td><code>#e0e0e0</code></td><td>Default text color</td></tr>
+<tr><td style="background:#a0a0b0;width:40px;">&nbsp;</td><td><code>#a0a0b0</code></td><td>Dimmed/inactive text (footer, inactive tabs)</td></tr>
+</table>
+
+<p style="margin-top:40px;color:#888;font-size:0.85em;text-align:center;">
+TimeCopilot TUI Reference &mdash; Generated February 2026
+</p>
+
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TimeCopilot TUI - How It Works</title>
+<style>
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 40px auto; max-width: 900px; color: #222; line-height: 1.7; }
+  h1 { color: #0f3460; border-bottom: 3px solid #00d4ff; padding-bottom: 8px; }
+  h2 { color: #0f3460; margin-top: 40px; border-bottom: 1px solid #ccc; padding-bottom: 6px; }
+  h3 { color: #1a5276; margin-top: 24px; }
+  p { margin: 10px 0; }
+  code { background: #e8eef3; padding: 2px 6px; border-radius: 3px; font-size: 0.93em; }
+  .box { background: #f4f8fb; border-left: 4px solid #00d4ff; padding: 14px 18px; margin: 14px 0; border-radius: 4px; }
+  .box-green { background: #f0faf0; border-left: 4px solid #4caf50; padding: 14px 18px; margin: 14px 0; border-radius: 4px; }
+  .box-yellow { background: #fffde7; border-left: 4px solid #ffca28; padding: 14px 18px; margin: 14px 0; border-radius: 4px; }
+  .diagram { background: #1a1a2e; color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 13px; padding: 18px; border-radius: 6px; overflow-x: auto; white-space: pre; line-height: 1.5; }
+  .cyan { color: #00d4ff; }
+  .green { color: #4caf50; }
+  .yellow { color: #ffca28; }
+  .dim { color: #888; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+  th, td { border: 1px solid #ccc; padding: 10px 14px; text-align: left; }
+  th { background: #0f3460; color: #fff; }
+  tr:nth-child(even) { background: #f4f8fb; }
+  ol > li { margin-bottom: 8px; }
+  .arrow { color: #00d4ff; font-weight: bold; }
+  @media print { body { margin: 20px; } .box, .box-green, .box-yellow { break-inside: avoid; } }
+</style>
+</head>
+<body>
+
+<h1>TimeCopilot TUI &mdash; Architecture &amp; How It Works</h1>
+<p>A high-level guide to the framework, the core UI components, and the runtime behavior of the TimeCopilot terminal interface.</p>
+
+<!-- ===== SECTION 1 ===== -->
+<h2>1. The Framework: Textual</h2>
+
+<p>The TUI is built with <strong>Textual</strong>, a Python framework for building rich terminal applications. Textual brings concepts familiar from web and desktop UI development into the terminal:</p>
+
+<table>
+<tr><th>Web/Desktop Concept</th><th>Textual Equivalent</th><th>What It Means</th></tr>
+<tr><td>HTML elements</td><td><strong>Widgets</strong></td><td>Building blocks: buttons, text fields, logs, tables, etc. Each widget is a Python class.</td></tr>
+<tr><td>CSS stylesheets</td><td><strong>TCSS files</strong></td><td>A CSS-like language for colors, borders, padding, layout. Loaded via <code>CSS_PATH</code>.</td></tr>
+<tr><td>DOM tree</td><td><strong>Widget tree</strong></td><td>Widgets are nested in a parent-child hierarchy, built in the <code>compose()</code> method.</td></tr>
+<tr><td>Event listeners</td><td><strong><code>on_*</code> methods</strong></td><td>Widget events (click, submit, tab switch) are handled by naming convention: <code>on_input_submitted</code>, <code>on_button_pressed</code>, etc.</td></tr>
+<tr><td>Reactive state</td><td><strong><code>reactive</code> properties</strong></td><td>When a reactive value changes, Textual automatically calls a <code>watch_*</code> method to update the UI.</td></tr>
+<tr><td>CSS selectors</td><td><strong><code>query_one("#id")</code></strong></td><td>Look up any widget by its CSS ID from anywhere in the app.</td></tr>
+</table>
+
+<div class="box">
+<strong>Key insight:</strong> You never manually redraw the screen. You update widget state (set text, toggle <code>display</code>, add/remove CSS classes), and Textual handles the re-render automatically.
+</div>
+
+<!-- ===== SECTION 2 ===== -->
+<h2>2. The Core UI Components</h2>
+
+<p>Textual provides a library of built-in widgets. TimeCopilot uses these nine:</p>
+
+<h3>2.1 &mdash; App</h3>
+<p>The root of everything. <code>TimeCopilotApp</code> extends <code>App</code>. It owns:</p>
+<ul>
+<li>The <strong>event loop</strong> &mdash; processes keyboard/mouse events one at a time</li>
+<li>The <strong>widget tree</strong> &mdash; defined in <code>compose()</code></li>
+<li>The <strong>key bindings</strong> &mdash; defined in the <code>BINDINGS</code> list</li>
+<li>The <strong>stylesheet</strong> &mdash; loaded from <code>_tui.tcss</code></li>
+<li>The <strong>title bar</strong> &mdash; <code>TITLE</code> and <code>sub_title</code></li>
+</ul>
+
+<h3>2.2 &mdash; Header &amp; Footer</h3>
+<p><strong>Header</strong> is a top bar that displays the app title and subtitle. <strong>Footer</strong> is a bottom bar that auto-generates from the <code>BINDINGS</code> list, showing all available keyboard shortcuts. You don't manually write their content &mdash; Textual fills them in.</p>
+
+<h3>2.3 &mdash; TabbedContent &amp; TabPane</h3>
+<p><code>TabbedContent</code> is a container that holds multiple <code>TabPane</code> children. It renders a clickable tab bar and shows only one pane at a time. Think of it like browser tabs. Each <code>TabPane</code> has a label (e.g. "Chat") and an ID (e.g. <code>id="chat"</code>). You switch tabs by setting <code>TabbedContent.active = "chat"</code>.</p>
+
+<h3>2.4 &mdash; RichLog</h3>
+<p>A scrollable, <strong>append-only</strong> text area that renders Rich markup. This is the chat window. You call <code>log.write("[bold green]Hello[/]")</code> and it appears with formatting. It supports colors, bold/italic, and syntax highlighting. You cannot edit previous lines &mdash; only append new ones.</p>
+
+<h3>2.5 &mdash; Input</h3>
+<p>A single-line text field. When the user presses Enter, it fires an <code>Input.Submitted</code> event with the typed value. The <code>placeholder</code> attribute shows hint text when the field is empty. You can disable it, clear it, or change the placeholder dynamically.</p>
+
+<h3>2.6 &mdash; Static</h3>
+<p>A read-only text label. Unlike RichLog, you <strong>replace</strong> its content entirely with <code>.update("new text")</code>. Used for headings, status labels, and analysis summaries.</p>
+
+<h3>2.7 &mdash; Button</h3>
+<p>A clickable button. Fires <code>Button.Pressed</code> on click. Each button gets an ID so the handler can tell which button was pressed.</p>
+
+<h3>2.8 &mdash; DataTable</h3>
+<p>A spreadsheet-like widget with rows and columns. You add columns once with <code>add_columns()</code>, then populate rows with <code>add_row()</code>. Supports scrolling and cursor selection.</p>
+
+<h3>2.9 &mdash; PlotextPlot</h3>
+<p>A terminal-rendered chart powered by the Plotext library. Draws line charts, scatter plots, and more &mdash; all in ASCII characters. Provided by the <code>textual-plotext</code> plugin, not Textual core.</p>
+
+<h3>2.10 &mdash; Layout Containers: Vertical &amp; Horizontal</h3>
+<p>Invisible structural widgets. <code>Vertical</code> stacks children top-to-bottom. <code>Horizontal</code> lays children side-by-side. They don't render anything visible &mdash; they just control arrangement.</p>
+
+<h3>2.11 &mdash; LoadingIndicator</h3>
+<p>An animated spinner. Shown when the app is busy, hidden otherwise. Toggled via the <code>display</code> property.</p>
+
+<!-- ===== SECTION 3 ===== -->
+<h2>3. How the TUI Works: Lifecycle</h2>
+
+<p>The app goes through three phases: <strong>Build</strong>, <strong>Mount</strong>, and <strong>Run</strong>.</p>
+
+<div class="diagram">
+  <span class="cyan">Phase 1: BUILD</span>          <span class="cyan">Phase 2: MOUNT</span>          <span class="cyan">Phase 3: RUN</span>
+  compose() called       on_mount() called        Event loop running
+  &#9474;                      &#9474;                        &#9474;
+  &#9474; Build widget tree     &#9474; Hide placeholders      &#9474; User types in Input
+  &#9474; from yield stmts      &#9474; Load .env config        &#9474;   &#8594; on_input_submitted
+  &#9474;                      &#9474; Init table columns      &#9474; User clicks Button
+  &#9474;                      &#9474; Start onboarding        &#9474;   &#8594; on_button_pressed
+  &#9474;                      &#9474;                        &#9474; User switches Tab
+  &#9474;                      &#9474;                        &#9474;   &#8594; on_tabbed_content_tab_activated
+  &#9660;                      &#9660;                        &#9660;
+  Widget tree exists     UI ready, onboarding     Waiting for events...
+                         flow begins
+</div>
+
+<h3>3.1 &mdash; Build (<code>compose()</code>)</h3>
+<p>The <code>compose()</code> method is a generator that yields widgets in a nested structure using <code>with</code> blocks. This defines the entire widget tree declaratively &mdash; all tabs and their contents exist from the start, even if hidden.</p>
+
+<h3>3.2 &mdash; Mount (<code>on_mount()</code>)</h3>
+<p>Called once after the widget tree is built. This is where initialization happens:</p>
+<ul>
+<li>Hide the loading indicator and data tab contents</li>
+<li>Set up DataTable columns</li>
+<li>Load the <code>.env</code> config file</li>
+<li>Start the onboarding flow</li>
+</ul>
+
+<h3>3.3 &mdash; Run (Event Loop)</h3>
+<p>Textual runs an async event loop. It waits for user interactions and dispatches them to handler methods. The app stays running until <code>self.exit()</code> is called.</p>
+
+<!-- ===== SECTION 4 ===== -->
+<h2>4. How Input Routing Works</h2>
+
+<p>The TUI has <strong>two Input widgets</strong> (chat and settings), and a <strong>state machine</strong> that determines what happens when the user presses Enter.</p>
+
+<div class="diagram">
+  User presses Enter
+        &#9474;
+        &#9660;
+  on_input_submitted(event)
+        &#9474;
+        &#9500;&#9472; Is it the <span class="cyan">settings-input</span>?
+        &#9474;     YES &#8594; Route by <span class="cyan">_settings_state</span>:
+        &#9474;            "provider" &#8594; _handle_settings_provider_select()
+        &#9474;            "model"    &#8594; _handle_settings_model_select()
+        &#9474;            "api_key"  &#8594; _handle_settings_api_key()
+        &#9474;
+        &#9500;&#9472; Is <span class="yellow">_onboarding_state</span> not "ready"?
+        &#9474;     YES &#8594; Route by <span class="yellow">_onboarding_state</span>:
+        &#9474;            "select_llm" &#8594; _handle_select_llm()
+        &#9474;            "provider"   &#8594; _handle_provider_select()
+        &#9474;            "model"      &#8594; _handle_model_select()
+        &#9474;            "api_key"    &#8594; _handle_api_key()
+        &#9474;
+        &#9500;&#9472; Is it a <span class="green">command</span>? ("exit", "help", "llm")
+        &#9474;     YES &#8594; Execute command
+        &#9474;
+        &#9492;&#9472; Otherwise &#8594; Treat as <span class="green">user query</span>
+                      Has agent state? &#8594; _run_query()
+                      Has file path?   &#8594; _run_analysis()
+                      Neither?         &#8594; Show "provide a file path" hint
+</div>
+
+<div class="box">
+<strong>Two independent state machines:</strong>
+<ul style="margin:6px 0 0 0;">
+<li><code>_onboarding_state</code> &mdash; tracks the first-time setup flow in the Chat tab</li>
+<li><code>_settings_state</code> &mdash; tracks the LLM change flow in the Settings tab</li>
+</ul>
+They share the same underlying handler logic (provider list, model list, API key prompt) but are kept separate so one doesn't interfere with the other.
+</div>
+
+<!-- ===== SECTION 5 ===== -->
+<h2>5. How Analysis &amp; Queries Run</h2>
+
+<p>Heavy AI work runs in a <strong>separate subprocess</strong> so the UI stays responsive.</p>
+
+<div class="diagram">
+  <span class="cyan">TUI Process (event loop)</span>             <span class="green">Worker Subprocess</span>
+        &#9474;                                       &#9474;
+  1. User submits query                       &#9474;
+  2. Set is_busy = True                       &#9474;
+     (spinner appears, input disabled)        &#9474;
+  3. Serialize request to temp .pkl file      &#9474;
+  4. Spawn subprocess &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#8594; 5. Read request .pkl
+     (stdin/stdout/stderr = DEVNULL)          6. Run agent (LLM + forecasting)
+        &#9474;                                    7. Write response .pkl
+  8. Read response .pkl &#8592;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
+  9. Update dataframes, write summary
+ 10. Set is_busy = False
+     (spinner hides, input enabled)
+ 11. Mark data tabs as dirty
+</div>
+
+<div class="box-yellow">
+<strong>Why a subprocess?</strong> The forecasting agent uses LLM APIs, statistical models, and data processing that can take seconds to minutes. Running this in the same process would freeze the terminal UI. The subprocess approach lets the event loop keep handling keyboard/mouse events while the heavy work happens elsewhere.
+</div>
+
+<h3>The <code>@work</code> Decorator</h3>
+<p><code>@work(exclusive=True)</code> is a Textual decorator that runs an async method as a background worker. The <code>exclusive=True</code> flag means only one instance can run at a time &mdash; starting a new analysis cancels any in-progress one.</p>
+
+<h3>Pickle-Based IPC</h3>
+<p>The TUI and worker communicate through temporary pickle files on disk:</p>
+<ol>
+<li>TUI writes a request dict to a <code>.pkl</code> file (action, llm, file path, query, state)</li>
+<li>Worker reads it, runs the agent, writes a response dict to another <code>.pkl</code> file</li>
+<li>TUI reads the response and updates the UI</li>
+<li>Both temp files are cleaned up in a <code>finally</code> block</li>
+</ol>
+
+<!-- ===== SECTION 6 ===== -->
+<h2>6. Lazy Tab Population</h2>
+
+<p>Data tabs (Chart, Analysis, Forecast) don't render their content immediately after an analysis completes. Instead:</p>
+
+<ol>
+<li>When analysis finishes, the app stores the result dataframes and marks tabs as <strong>dirty</strong>: <code>self._dirty_tabs = {"chart", "analysis", "forecast"}</code></li>
+<li>When the user <strong>switches to a tab</strong>, <code>on_tabbed_content_tab_activated</code> checks if it's dirty</li>
+<li>If dirty, it shows the data container (hides the empty placeholder) and calls the populate method</li>
+<li>The tab is removed from the dirty set so it won't re-populate on every switch</li>
+<li>If a new analysis or query runs, tabs are marked dirty again</li>
+</ol>
+
+<div class="box-green">
+<strong>Why lazy?</strong> Rendering a chart, filling DataTables, and formatting analysis text all take CPU time. Doing all three immediately after analysis would cause a visible freeze. By populating only the tab the user actually looks at, the UI stays snappy.
+</div>
+
+<!-- ===== SECTION 7 ===== -->
+<h2>7. Reactive Properties</h2>
+
+<p>Textual's <code>reactive</code> system automatically triggers side effects when a value changes:</p>
+
+<table>
+<tr><th>Property</th><th>Type</th><th>Watcher Method</th><th>What It Does</th></tr>
+<tr><td><code>is_busy</code></td><td><code>bool</code></td><td><code>watch_is_busy()</code></td><td>Shows/hides the LoadingIndicator, enables/disables the chat Input</td></tr>
+<tr><td><code>active_range</code></td><td><code>str</code></td><td>(none &mdash; read in <code>_render_chart</code>)</td><td>Stores the selected time range ("3M", "6M", etc.) for chart filtering</td></tr>
+</table>
+
+<p>When you write <code>self.is_busy = True</code>, Textual automatically calls <code>watch_is_busy(True)</code>. No manual wiring needed.</p>
+
+<!-- ===== SECTION 8 ===== -->
+<h2>8. CSS &amp; Styling</h2>
+
+<p>Textual uses its own CSS dialect (TCSS), not browser CSS. The file <code>_tui.tcss</code> controls the visual appearance.</p>
+
+<h3>How widgets are targeted:</h3>
+<table>
+<tr><th>Selector Type</th><th>Example</th><th>Meaning</th></tr>
+<tr><td>Type selector</td><td><code>Header { ... }</code></td><td>All Header widgets</td></tr>
+<tr><td>ID selector</td><td><code>#chat-log { ... }</code></td><td>The widget with <code>id="chat-log"</code></td></tr>
+<tr><td>Class selector</td><td><code>Button.-active { ... }</code></td><td>Buttons with the <code>-active</code> CSS class</td></tr>
+<tr><td>Pseudo-class</td><td><code>#chat-input:focus { ... }</code></td><td>The input when it has keyboard focus</td></tr>
+</table>
+
+<h3>Key layout properties:</h3>
+<table>
+<tr><th>Property</th><th>Example</th><th>What It Does</th></tr>
+<tr><td><code>height: 1fr</code></td><td>RichLog, PlotextPlot</td><td>Takes up all remaining vertical space (like CSS <code>flex: 1</code>)</td></tr>
+<tr><td><code>dock: bottom</code></td><td>Settings Input</td><td>Pins the widget to the bottom of its container</td></tr>
+<tr><td><code>display: False</code></td><td>LoadingIndicator</td><td>Hides the widget completely (set in Python, not TCSS)</td></tr>
+<tr><td><code>layout: horizontal</code></td><td>Time range bar</td><td>Children flow left-to-right instead of top-to-bottom</td></tr>
+</table>
+
+<!-- ===== SECTION 9 ===== -->
+<h2>9. Putting It All Together</h2>
+
+<p>Here's the complete flow from app launch to user interaction:</p>
+
+<div class="diagram">
+  <span class="cyan">uv run timecopilot</span>
+        &#9474;
+        &#9660;
+  TimeCopilotApp() created
+  &bull; Sets default llm, empty state
+        &#9474;
+        &#9660;
+  compose() builds the widget tree
+  &bull; All 5 tabs created
+  &bull; All widgets exist in memory
+        &#9474;
+        &#9660;
+  on_mount() initializes
+  &bull; Hides loading spinner
+  &bull; Hides data tab contents
+  &bull; Loads .env configuration
+  &bull; Starts onboarding
+        &#9474;
+        &#9660;
+  Onboarding checks:
+  &bull; CLI passed --llm? &#8594; Use that model
+  &bull; Saved model in .env? &#8594; "Welcome back!"
+  &bull; Neither? &#8594; "Would you like to select an LLM?"
+        &#9474;
+        &#9660;
+  Event loop running <span class="dim">(waiting for user input)</span>
+        &#9474;
+  &#9500;&#9472; User types in Chat Input &#8594; on_input_submitted &#8594; route by state
+  &#9500;&#9472; User clicks a Button &#8594; on_button_pressed &#8594; check button ID
+  &#9500;&#9472; User presses F1-F5 &#8594; action_switch_tab &#8594; change active tab
+  &#9500;&#9472; User presses Ctrl+Q &#8594; action_quit &#8594; exit
+  &#9474;
+  &#9492;&#9472; When analysis is triggered:
+        &#9474;
+        &#9500;&#9472; is_busy = True  <span class="dim">(spinner on, input off)</span>
+        &#9500;&#9472; Spawn subprocess <span class="dim">(worker runs LLM + forecasting)</span>
+        &#9500;&#9472; Subprocess returns results
+        &#9500;&#9472; Store dataframes, write summary to chat log
+        &#9500;&#9472; Mark data tabs dirty
+        &#9492;&#9472; is_busy = False  <span class="dim">(spinner off, input on)</span>
+              &#9474;
+              &#9492;&#9472; User switches to Chart/Analysis/Forecast tab
+                    &#8594; Lazy populate that tab's widgets from stored data
+</div>
+
+<p style="margin-top:40px;color:#888;font-size:0.85em;text-align:center;">
+TimeCopilot TUI Architecture Reference &mdash; Generated February 2026
+</p>
+
+</body>
+</html>
