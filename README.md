@@ -250,6 +250,60 @@ For more details go to the LLM Providers example in [TimeCopilot's documentation
 Note: models need support for tool use to function properly with TimeCopilot.
 
 ---
+## Using open-source models (Ollama + `gpt-oss`)
+
+* Method 1: pass the model name directly to `TimeCopilot` (simple).
+* Method 2: construct an `OpenAIChatModel` instance with an `OllamaProvider` and pass it to `TimeCopilot` (explicit provider).
+
+### Prerequisites
+
+* Ollama running locally (or reachable) — the examples below assume `http://localhost:11434/v1`.
+* You want to use the `gpt-oss` models (we used `gpt-oss:20b` in examples).
+
+---
+
+### 1. Quick method (set base URL + pass model string)
+
+1. Set the Ollama base URL in your shell:
+
+```bash
+export OLLAMA_BASE_URL='http://localhost:11434/v1'
+```
+
+2. Initialize the forecasting agent:
+
+```python
+from timecopilot import TimeCopilot
+
+# Pass the Ollama model directly by name
+tc = TimeCopilot(llm="ollama:gpt-oss:20b")
+```
+
+---
+
+### 2. Explicit provider method (construct model + provider)
+
+1. Construct an `OpenAIChatModel` that uses an `OllamaProvider`:
+
+```python
+from some_module import OpenAIChatModel, OllamaProvider  # adjust imports to your package layout
+
+llm = OpenAIChatModel(
+    model_name="llama3.1:latest",
+    provider=OllamaProvider(base_url="http://localhost:11434/v1"),
+)
+```
+
+> **Note:** remove any stray trailing spaces in model names (e.g., `"llama3.1:latest "` → `"llama3.1:latest"`).
+
+2. Initialize the forecasting agent with that model:
+
+```python
+from timecopilot import TimeCopilot
+
+tc = TimeCopilot(llm=llm)
+```
+---
 
 ## Ask about the future
 
