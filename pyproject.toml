@@ -70,6 +70,7 @@ dependencies = [
   "logfire==4.11.0",
   "matplotlib>=3.10.6",
   "mlforecast>=1.0.2",
+  "narwhals>=2.7.0",
   "neuralforecast>=3.0.2",
   "nixtla>=0.7.0",
   "openai>=1.99.7",

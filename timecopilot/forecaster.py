@@ -1,6 +1,7 @@
 import pandas as pd
 
 from .models.utils.forecaster import Forecaster
+from .utils.df_utils import to_pandas
 
 
 class TimeCopilotForecaster(Forecaster):
@@ -73,6 +74,7 @@ class TimeCopilotForecaster(Forecaster):
         quantiles: list[float] | None,
         **kwargs,
     ) -> pd.DataFrame:
+        df = to_pandas(df)
         # infer just once to avoid multiple calls to _maybe_infer_freq
         freq = self._maybe_infer_freq(df, freq)
         res_df: pd.DataFrame | None = None
@@ -173,6 +175,7 @@ class TimeCopilotForecaster(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         return self._call_models(
             "forecast",
             merge_on=["unique_id", "ds"],
@@ -247,6 +250,7 @@ class TimeCopilotForecaster(Forecaster):
                     - prediction intervals if `level` is specified.
                     - quantile forecasts if `quantiles` is specified.
         """
+        df = to_pandas(df)
         return self._call_models(
             "cross_validation",
             merge_on=["unique_id", "ds", "cutoff"],
@@ -316,6 +320,7 @@ class TimeCopilotForecaster(Forecaster):
                         an anomaly is defined as a value that is outside of the
                         prediction interval (True or False).
         """
+        df = to_pandas(df)
         return self._call_models(
             "detect_anomalies",
             merge_on=["unique_id", "ds", "cutoff"],

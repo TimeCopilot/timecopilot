@@ -5,6 +5,7 @@ from multiprocessing import Pool
 import pandas as pd
 
 from .forecaster import Forecaster
+from ..utils.df_utils import to_pandas
 
 
 class ParallelForecaster(Forecaster):
@@ -102,6 +103,7 @@ class ParallelForecaster(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         freq = self._maybe_infer_freq(df, freq)
         fcst_df = self._apply_parallel(
             df.groupby("unique_id"),

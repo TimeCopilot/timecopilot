@@ -41,6 +41,7 @@ from statsforecast.models import (
 from statsforecast.utils import ConformalIntervals
 
 from .utils.forecaster import Forecaster, QuantileConverter, get_seasonality
+from ..utils.df_utils import to_pandas
 
 os.environ["NIXTLA_ID_AS_COL"] = "true"
 
@@ -144,6 +145,7 @@ class ADIDA(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         inferred_freq = self._maybe_infer_freq(df, freq)
         fcst_df = run_statsforecast_model(
             model=_ADIDA(alias=self.alias),
@@ -329,6 +331,7 @@ class AutoARIMA(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         inferred_freq = self._maybe_infer_freq(df, freq)
         season_length = self._maybe_get_seasonality(inferred_freq)
         fcst_df = run_statsforecast_model(
@@ -458,6 +461,7 @@ class AutoCES(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         inferred_freq = self._maybe_infer_freq(df, freq)
         season_length = self._maybe_get_seasonality(inferred_freq)
         fcst_df = run_statsforecast_model(
@@ -564,6 +568,7 @@ class AutoETS(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         inferred_freq = self._maybe_infer_freq(df, freq)
         season_length = self._maybe_get_seasonality(inferred_freq)
         fcst_df = run_statsforecast_model(
@@ -656,6 +661,7 @@ class CrostonClassic(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         inferred_freq = self._maybe_infer_freq(df, freq)
         fcst_df = run_statsforecast_model(
             model=_CrostonClassic(
@@ -744,6 +750,7 @@ class DynamicOptimizedTheta(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         inferred_freq = self._maybe_infer_freq(df, freq)
         season_length = self._maybe_get_seasonality(inferred_freq)
         fcst_df = run_statsforecast_model(
@@ -833,6 +840,7 @@ class HistoricAverage(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         inferred_freq = self._maybe_infer_freq(df, freq)
         fcst_df = run_statsforecast_model(
             model=_HistoricAverage(
@@ -921,6 +929,7 @@ class IMAPA(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         inferred_freq = self._maybe_infer_freq(df, freq)
         fcst_df = run_statsforecast_model(
             model=_IMAPA(
@@ -1009,6 +1018,7 @@ class SeasonalNaive(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         inferred_freq = self._maybe_infer_freq(df, freq)
         season_length = self._maybe_get_seasonality(inferred_freq)
         fcst_df = run_statsforecast_model(
@@ -1099,6 +1109,7 @@ class Theta(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         inferred_freq = self._maybe_infer_freq(df, freq)
         season_length = self._maybe_get_seasonality(inferred_freq)
         fcst_df = run_statsforecast_model(
@@ -1188,6 +1199,7 @@ class ZeroModel(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         inferred_freq = self._maybe_infer_freq(df, freq)
         fcst_df = run_statsforecast_model(
             model=_ZeroModel(

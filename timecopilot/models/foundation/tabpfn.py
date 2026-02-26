@@ -26,6 +26,7 @@ from tabpfn_time_series.features.feature_generator_base import (
 )
 
 from ..utils.forecaster import Forecaster, QuantileConverter
+from ...utils.df_utils import to_pandas
 
 
 class TabPFN(Forecaster):
@@ -199,6 +200,7 @@ class TabPFN(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
+        df = to_pandas(df)
         freq = self._maybe_infer_freq(df, freq)
         qc = QuantileConverter(level=level, quantiles=quantiles)
         if qc.quantiles is not None and not np.allclose(

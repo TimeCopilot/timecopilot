@@ -4,6 +4,8 @@ import pandas as pd
 import torch
 from utilsforecast.processing import make_future_dataframe
 
+from ...utils.df_utils import to_pandas
+
 
 class TimeSeriesDataset:
     def __init__(
@@ -29,6 +31,7 @@ class TimeSeriesDataset:
         batch_size: int,
         dtype: torch.dtype = torch.bfloat16,
     ):
+        df = to_pandas(df)
         tensors = []
         df_sorted = df.sort_values(by=["unique_id", "ds"])
         for _, group in df_sorted.groupby("unique_id"):
