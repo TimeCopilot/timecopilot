@@ -1,4 +1,8 @@
 from contextlib import contextmanager
+import logging
+from datetime import datetime
+from pathlib import Path
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -15,6 +19,7 @@ from ..utils.forecaster import Forecaster, QuantileConverter
 from .utils import TimeSeriesDataset
 
 
+logger = logging.getLogger(__name__)
 class Chronos(Forecaster):
     """
     Chronos models are large pre-trained models for time series forecasting,
@@ -246,3 +251,295 @@ class Chronos(Forecaster):
                 models=[self.alias],
             )
         return fcst_df
+
+
+
+class ChronosFinetuner:
+    def __init__(
+        self,
+        repo_id: str,
+        device: Optional[str] = None,
+        dtype: torch.dtype = torch.float32,
+    ):
+        self.repo_id = repo_id
+        self.device = device or ("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.dtype = dtype
+        self._infer_model_family()
+
+    def _infer_model_family(self) -> None:
+        repo_lower = self.repo_id.lower()
+        if "chronos-2" in repo_lower or "chronos2" in repo_lower:
+            self.model_family = "chronos-2"
+        elif "chronos-bolt" in repo_lower or "bolt" in repo_lower:
+            self.model_family = "chronos-bolt"
+        elif "chronos-t5" in repo_lower or "t5" in repo_lower:
+            self.model_family = "chronos-t5"
+        else:
+            self.model_family = "unknown"
+            logger.warning(
+                "Could not infer model family from %s. Will attempt at runtime.",
+                self.repo_id,
+            )
+
+    @staticmethod
+    def prepare_arrow_dataset(
+        time_series: list[np.ndarray],
+        output_path: Union[str, Path],
+        start_date: str = "2000-01-01",
+        compression: str = "lz4",
+    ) -> Path:
+        try:
+            from gluonts.dataset.arrow import ArrowWriter
+        except ImportError as e:
+            raise ImportError(
+                f"prepare_arrow_dataset requires gluonts: {e}\n"
+                "Install with: pip install gluonts"
+            )
+
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        start = np.datetime64(start_date, "s")
+        dataset = [{"start": start, "target": ts} for ts in time_series]
+
+        logger.info("Writing %d series to Arrow: %s", len(dataset), output_path)
+        ArrowWriter(compression=compression).write_to_file(dataset, path=output_path)
+        return output_path
+
+    def finetune_chronos2(
+        self,
+        inputs: Union[torch.Tensor, np.ndarray, list, pd.DataFrame],
+        prediction_length: int,
+        validation_inputs: Optional[Union[torch.Tensor, np.ndarray, list]] = None,
+        finetune_mode: str = "full",
+        lora_config: Optional[dict] = None,
+        context_length: Optional[int] = None,
+        learning_rate: float = 1e-6,
+        num_steps: int = 1000,
+        batch_size: int = 256,
+        output_dir: Optional[Union[str, Path]] = None,
+        min_past: Optional[int] = None,
+        warmup_steps: int = 0,
+        weight_decay: float = 0.0,
+        **extra_trainer_kwargs,
+    ) -> Chronos2Pipeline:
+        if self.model_family not in ("chronos-2", "unknown"):
+            raise ValueError(
+                f"finetune_chronos2 requires Chronos-2, got {self.repo_id} "
+                f"(family: {self.model_family})"
+            )
+
+        pipeline = Chronos2Pipeline.from_pretrained(
+            self.repo_id,
+            device_map=self.device,
+            torch_dtype=self.dtype,
+        )
+
+        if output_dir is None:
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            output_dir = Path("chronos-2-finetuned") / timestamp
+        else:
+            output_dir = Path(output_dir)
+
+        logger.info(
+            "Chronos-2 finetune: mode=%s lr=%s steps=%s bs=%s out=%s",
+            finetune_mode,
+            learning_rate,
+            num_steps,
+            batch_size,
+            output_dir,
+        )
+
+        return pipeline.fit(
+            inputs=inputs,
+            prediction_length=prediction_length,
+            validation_inputs=validation_inputs,
+            finetune_mode=finetune_mode,
+            lora_config=lora_config,
+            context_length=context_length,
+            learning_rate=learning_rate,
+            num_steps=num_steps,
+            batch_size=batch_size,
+            output_dir=output_dir,
+            min_past=min_past,
+            warmup_steps=warmup_steps,
+            weight_decay=weight_decay,
+            **extra_trainer_kwargs,
+        )
+
+    def finetune_chronos_t5(
+        self,
+        data_path: Union[str, Path],
+        context_length: int = 512,
+        prediction_length: int = 64,
+        learning_rate: float = 1e-3,
+        max_steps: int = 10_000,
+        per_device_batch_size: int = 32,
+        save_steps: int = 500,
+        log_steps: int = 100,
+        output_dir: Optional[Union[str, Path]] = None,
+        gradient_accumulation_steps: int = 1,
+        warmup_ratio: float = 0.0,
+        max_missing_prop: float = 0.1,
+        min_past: Optional[int] = None,
+        seed: int = 42,
+        torch_compile: bool = False,
+        tf32: bool = True,
+        dataloader_num_workers: int = 1,
+        **extra_trainer_kwargs,
+    ) -> Path:
+        if self.model_family not in ("chronos-t5", "unknown"):
+            raise ValueError(
+                f"finetune_chronos_t5 requires Chronos-T5, got {self.repo_id} "
+                f"(family: {self.model_family})"
+            )
+
+        try:
+            from gluonts.dataset.common import FileDataset
+            from gluonts.transform import (
+                ExpectedNumInstanceSampler,
+                FilterTransformation,
+                InstanceSplitter,
+            )
+            from transformers import (
+                AutoConfig,
+                AutoModelForSeq2SeqLM,
+                Trainer,
+                TrainingArguments,
+            )
+        except ImportError as e:
+            raise ImportError(
+                f"Chronos-T5 finetuning requires extra deps: {e}\n"
+                "Install with: pip install transformers gluonts"
+            )
+
+        data_path = Path(data_path)
+        if not data_path.exists():
+            raise FileNotFoundError(f"Data file not found: {data_path}")
+
+        if min_past is None:
+            min_past = prediction_length
+
+        if output_dir is None:
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            output_dir = Path("chronos-t5-finetuned") / timestamp
+        else:
+            output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        config = AutoConfig.from_pretrained(self.repo_id)
+        model = AutoModelForSeq2SeqLM.from_pretrained(
+            self.repo_id, torch_dtype=self.dtype
+        )
+        model = model.to(self.device)
+
+        gts_dataset = FileDataset(path=data_path, freq="D")
+
+        instance_splitter = InstanceSplitter(
+            target_field="target",
+            is_pad_field="is_pad",
+            start_field="start",
+            forecast_start_field="forecast_start",
+            instance_sampler=ExpectedNumInstanceSampler(
+                num_instances=1.0,
+                min_instances=1,
+                min_past=min_past,
+                min_future=prediction_length,
+            ),
+            past_length=context_length,
+            future_length=prediction_length,
+            dummy_value=np.nan,
+        )
+
+        transformed_data = gts_dataset.transform(instance_splitter)
+        transformed_data = transformed_data.transform(
+            FilterTransformation(
+                lambda x: len(x["target"]) >= min_past + prediction_length
+                and np.isnan(x["target"]).mean() <= max_missing_prop
+            )
+        )
+
+        from chronos import ChronosConfig
+
+        chronos_config = ChronosConfig(**config.chronos_config)
+        tokenizer = chronos_config.create_tokenizer()
+
+        class T5TrainingDataset:
+            def __iter__(self):
+                for entry in transformed_data:
+                    target = np.array(entry["target"], dtype=np.float32)
+                    ctx = target[:-prediction_length]
+                    label = target[-prediction_length:]
+
+                    if len(ctx) < min_past:
+                        continue
+                    if np.isnan(label).mean() > max_missing_prop:
+                        continue
+
+                    ctx_token, ctx_mask, scale = tokenizer.context_input_transform(
+                        torch.tensor(ctx).unsqueeze(0)
+                    )
+                    label_token, _, _ = tokenizer.label_input_transform(
+                        torch.tensor(label).unsqueeze(0), scale
+                    )
+
+                    yield {
+                        "input_ids": ctx_token[0],
+                        "attention_mask": ctx_mask[0],
+                        "labels": label_token[0],
+                    }
+
+        training_args = TrainingArguments(
+            output_dir=str(output_dir),
+            per_device_train_batch_size=per_device_batch_size,
+            learning_rate=learning_rate,
+            lr_scheduler_type="linear",
+            warmup_ratio=warmup_ratio,
+            max_steps=max_steps,
+            save_steps=save_steps,
+            logging_steps=log_steps,
+            gradient_accumulation_steps=gradient_accumulation_steps,
+            dataloader_num_workers=dataloader_num_workers,
+            seed=seed,
+            tf32=tf32,
+            torch_compile=torch_compile,
+            save_total_limit=1,
+            save_strategy="steps",
+            report_to="none",
+            remove_unused_columns=False,
+            **extra_trainer_kwargs,
+        )
+
+        trainer = Trainer(
+            model=model,
+            args=training_args,
+            train_dataset=T5TrainingDataset(),
+        )
+
+        logger.info("Starting Chronos-T5 training...")
+        trainer.train()
+
+        checkpoints = list(output_dir.glob("checkpoint-*"))
+        if checkpoints:
+            return sorted(checkpoints, key=lambda p: int(p.name.split("-")[-1]))[-1]
+        return output_dir
+
+    def finetune_chronos_bolt(self, *args, **kwargs):
+        raise NotImplementedError("Chronos-Bolt fine-tuning not implemented here.")
+
+    def load_finetuned(self) -> Union[ChronosPipeline, Chronos2Pipeline]:
+        if self.model_family == "chronos-2":
+            return Chronos2Pipeline.from_pretrained(
+                self.repo_id,
+                device_map=self.device,
+                torch_dtype=self.dtype,
+            )
+        if self.model_family == "chronos-t5":
+            return ChronosPipeline.from_pretrained(
+                self.repo_id,
+                device_map=self.device,
+                torch_dtype=self.dtype,
+            )
+        if self.model_family == "chronos-bolt":
+            raise NotImplementedError("load_finetuned not supported for Chronos-Bolt.")
+        raise ValueError(f"Unknown model family: {self.model_family}")
