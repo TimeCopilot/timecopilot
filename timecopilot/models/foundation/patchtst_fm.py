@@ -7,8 +7,8 @@ from gluonts.transform import LastValueImputation
 from tqdm import tqdm
 from tsfm_public import PatchTSTFMForPrediction
 
-from timecopilot.models.foundation.utils import TimeSeriesDataset
-from timecopilot.models.utils.forecaster import Forecaster, QuantileConverter
+from ..utils.forecaster import Forecaster, QuantileConverter
+from .utils import TimeSeriesDataset
 
 # default to the median quantile
 # PatchTST-FM supports quantiles from 0.01 to 0.99
