@@ -19,7 +19,7 @@ body:
       options:
         - label: I confirm that I'm using the latest version of TimeCopilot.
           required: true
-        - label: I confirm that I've reviewed my issue at https://github.com/TimeCopilot/timecopilot/issues before opening this one. 
+        - label: I confirm that I've reviewed my issue at https://github.com/TimeCopilot/timecopilot/issues before opening this one.
           required: true
 
   - type: textarea
