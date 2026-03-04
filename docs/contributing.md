@@ -122,5 +122,5 @@ TimeCopilot uses some forked Python packages, maintained under custom names on P
 
 - **uni2ts**:
     - Forked from: [SalesforceAIResearch/uni2ts](https://github.com/SalesforceAIResearch/uni2ts)
-    - TimeCopilot fork: [AzulGarza/uni2ts](https://github.com/AzulGarza/uni2ts)
+    - TimeCopilot fork: [TimeCopilot/uni2ts](https://github.com/TimeCopilot/uni2ts)
     - Published on PyPI as: [`timecopilot-uni2ts`](https://pypi.org/project/timecopilot-uni2ts/)
