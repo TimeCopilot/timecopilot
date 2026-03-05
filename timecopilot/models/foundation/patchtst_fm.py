@@ -155,7 +155,6 @@ class PatchTSTFM(Forecaster):
         batch: list[torch.Tensor] | torch.Tensor,
         h: int,
         quantiles: list[float] | None,
-        supported_quantiles: list[float],
         # scale_factor: float,
     ) -> tuple[np.ndarray, np.ndarray | None]:
         context = self._prepare_and_validate_context(batch)
@@ -196,7 +195,6 @@ class PatchTSTFM(Forecaster):
         dataset: TimeSeriesDataset,
         h: int,
         quantiles: list[float] | None,
-        supported_quantiles: list[float],
         # scale_factor: float,
     ) -> tuple[np.ndarray, np.ndarray | None]:
         fcsts = [
@@ -205,7 +203,6 @@ class PatchTSTFM(Forecaster):
                 batch,
                 h,
                 quantiles,
-                supported_quantiles,
                 # scale_factor,
             )
             for batch in tqdm(dataset)
@@ -307,7 +304,6 @@ class PatchTSTFM(Forecaster):
                 dataset,
                 h,
                 quantiles=qc.quantiles,
-                supported_quantiles=supported_quantiles,
                 # scale_factor=scale_factor,
             )
 
