@@ -32,7 +32,7 @@ class PatchTSTFM(Forecaster):
         self,
         repo_id: str = "ibm-research/patchtst-fm-r1",
         # scale_factor: float | None = None,
-        context_length: int = 2_048,
+        context_length: int = 8192,  # default from granite-tsfm
         batch_size: int = 2_048,
         alias: str = "PatchTST-FM",
     ):
@@ -82,12 +82,12 @@ class PatchTSTFM(Forecaster):
         # NOTE: 'mps' may not be 100% reliable, initial tests with the
         # patchtst-fm gift_eval notebook resulted in predictions of 0 across
         # the board. for now use mps when available, change if it becomes an issue.
-        # self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.device = (
-            "cuda"
-            if torch.cuda.is_available()
-            else ("mps" if torch.mps.is_available() else "cpu")
-        )
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        # self.device = (
+        #     "cuda"
+        #     if torch.cuda.is_available()
+        #     else ("mps" if torch.mps.is_available() else "cpu")
+        # )
         self.alias = alias
         self.dtype = torch.float32
 
@@ -181,7 +181,7 @@ class PatchTSTFM(Forecaster):
         # may not be the ideal solution, but this should be more adaptable
         # when quantiles can vary.
         # there is no guarantee that 0.5 will be in the list of quantiles.
-        mean = fcst.mean(dim=2).squeeze()
+        mean = fcst.mean(dim=-1).squeeze() if fcst.ndim >= 3 else fcst.squeeze()
         # fcst_mean = fcst[..., quantile_levels.index(0.5)].squeeze()
         fcst_mean = mean
         fcst_mean_np = fcst_mean.detach().numpy(force=True)
@@ -276,6 +276,11 @@ class PatchTSTFM(Forecaster):
                 identifiers as the input DataFrame.
         """
         freq = self._maybe_infer_freq(df, freq)
+        # When support for levels is added remove PatchTST-FM
+        # from the list of models that throw this exception in
+        # tests/models/test_models:test_using_level()
+        if level is not None:
+            raise ValueError("Level is not supported for patchtst-fm yet.")
         qc = QuantileConverter(level=level, quantiles=quantiles)
         dataset = TimeSeriesDataset.from_df(
             df,
@@ -293,7 +298,8 @@ class PatchTSTFM(Forecaster):
                 raise ValueError(
                     "PatchTSTFM only supports the default quantiles, "
                     f"supported quantiles are {supported_quantiles}, "
-                    "please use the default quantiles or default level, "
+                    f"quantiles provided are {qc.quantiles}",
+                    "please use the default quantiles or default level, ",
                 )
 
             fcsts_mean_np, fcsts_quantiles_np = self._predict(
