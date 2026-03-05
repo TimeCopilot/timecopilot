@@ -17,14 +17,14 @@ DEFAULT_QUANTILES = [0.5]
 
 class PatchTSTFM(Forecaster):
     """
-    FlowState is the first time-scale adjustable Time Series Foundation Model (TSFM),
-    open-sourced by IBM Research. Combining a State Space Model (SSM) Encoder with a
-    Functional Basis Decoder allows FlowState to transition into a timescale invariant
-    coefficient space and make a continuous forecast from this space. This allows
-    FlowState to seamlessly adjust to all possible sampling rates.
+    PatchTST-FM is a Time Series Foundation Model (TSFM) from IBM Research based on a
+    standard patch Transformer. This generic architecture achieves state-of-the-art
+    zero-shot forecasting performance with a straightforward training protocol. The
+    work provides a transparent, reproducible baseline with comprehensive ablations
+    on model scaling, data composition, and training techniques.
 
     See the [official repo](https://github.com/ibm-granite/granite-tsfm) and
-    [paper](https://arxiv.org/abs/2508.05287) for more details.
+    [paper](https://arxiv.org/abs/2602.06909) for more details.
     """
 
     # NOTE: may want to adjust default context_length, default on granite_tsfm is 8192
