@@ -47,7 +47,7 @@ class PatchTSTFM(Forecaster):
 
             context_length (int, optional): Maximum context length (input window size)
                 for the model. Controls how much history is used for each forecast.
-                Defaults to 2,048. The model supports flexible context lengths.
+                Defaults to 8,192. The model supports flexible context lengths.
             batch_size (int, optional): Batch size for inference. Defaults to 2,048.
                 Adjust based on available memory and model size. Larger batch sizes
                 can improve throughput but require more GPU memory.
