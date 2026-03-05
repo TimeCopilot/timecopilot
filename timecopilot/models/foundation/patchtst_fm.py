@@ -307,14 +307,14 @@ class PatchTSTFM(Forecaster):
                 # scale_factor=scale_factor,
             )
 
-        fcst_df[self.alias] = fcsts_mean_np.reshape(-1, 1)
+        fcst_df[self.alias] = fcsts_mean_np.reshape(-1)
 
         # should only enter when quantiles are used
         if qc.quantiles is not None and fcsts_quantiles_np is not None:
             for i, q in enumerate(qc.quantiles):
                 fcst_df[f"{self.alias}-q-{int(q * 100)}"] = fcsts_quantiles_np[
                     ..., i
-                ].reshape(-1, 1)
+                ].reshape(-1)
             fcst_df = qc.maybe_convert_quantiles_to_level(
                 fcst_df,
                 models=[self.alias],
