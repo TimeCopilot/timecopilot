@@ -295,8 +295,8 @@ class PatchTSTFM(Forecaster):
                 raise ValueError(
                     "PatchTSTFM only supports the default quantiles, "
                     f"supported quantiles are {supported_quantiles}, "
-                    f"quantiles provided are {qc.quantiles}",
-                    "please use the default quantiles or default level, ",
+                    f"quantiles provided are {qc.quantiles}, "
+                    "please use the default quantiles or default level."
                 )
 
             fcsts_mean_np, fcsts_quantiles_np = self._predict(
