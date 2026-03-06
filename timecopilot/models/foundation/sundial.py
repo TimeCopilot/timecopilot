@@ -1,17 +1,17 @@
 import sys
 from contextlib import contextmanager
+from typing import TYPE_CHECKING
 
-if sys.version_info >= (3, 13):
+if sys.version_info >= (3, 13) and not TYPE_CHECKING:
     raise ImportError("Sundial requires Python < 3.13")
 
 import numpy as np
 import pandas as pd
 import torch
-from gluonts.transform import LastValueImputation
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM
 
-from ..utils.forecaster import Forecaster, QuantileConverter
+from ..utils.forecaster import Forecaster, QuantileConverter, _DataProcessor
 from .utils import TimeSeriesDataset
 
 
@@ -91,50 +91,6 @@ class Sundial(Forecaster):
             del model
             torch.cuda.empty_cache()
 
-    def _left_pad_and_stack_1D(self, tensors: list[torch.Tensor]) -> torch.Tensor:
-        max_len = max(len(c) for c in tensors)
-        padded = []
-        for c in tensors:
-            assert isinstance(c, torch.Tensor)
-            assert c.ndim == 1
-            padding = torch.full(
-                size=(max_len - len(c),),
-                fill_value=torch.nan,
-                device=c.device,
-                dtype=c.dtype,
-            )
-            padded.append(torch.concat((padding, c), dim=-1))
-        return torch.stack(padded)
-
-    def _prepare_and_validate_context(
-        self,
-        context: list[torch.Tensor] | torch.Tensor,
-    ) -> torch.Tensor:
-        if isinstance(context, list):
-            context = self._left_pad_and_stack_1D(context)
-        assert isinstance(context, torch.Tensor)
-        if context.ndim == 1:
-            context = context.unsqueeze(0)
-        assert context.ndim == 2
-
-        return context
-
-    def _maybe_impute_missing(self, batch: torch.Tensor) -> torch.Tensor:
-        if torch.isnan(batch).any():
-            batch = batch.float().numpy()
-            imputed_rows = []
-            for i in range(batch.shape[0]):
-                row = batch[i]
-                imputed_row = LastValueImputation()(row)
-                imputed_rows.append(imputed_row)
-            batch = np.vstack(imputed_rows)
-            batch = torch.tensor(
-                batch,
-                dtype=self.dtype,
-                device=self.device,
-            )
-        return batch
-
     def _predict_batch(
         self,
         model: AutoModelForCausalLM,
@@ -142,10 +98,11 @@ class Sundial(Forecaster):
         h: int,
         quantiles: list[float] | None,
     ) -> tuple[np.ndarray, np.ndarray | None]:
-        context = self._prepare_and_validate_context(batch)
+        data_processor = _DataProcessor(dtype=self.dtype, device=self.device)
+        context = data_processor._prepare_and_validate_context(batch)
         if context.shape[1] > self.context_length:
             context = context[..., -self.context_length :]
-        context = self._maybe_impute_missing(context)
+        context = data_processor._maybe_impute_missing(context)
         context = context.to(self.device)
         with torch.autocast(device_type=self.device, dtype=self.dtype):
             # (batch_size, num_samples, h)
