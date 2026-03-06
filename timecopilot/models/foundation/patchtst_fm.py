@@ -14,7 +14,7 @@ from .utils import TimeSeriesDataset
 DEFAULT_QUANTILES = [0.5]
 
 
-class PatchTSTFM(Forecaster):
+class PatchTSTFM(Forecaster, _DataProcessor):
     """
     PatchTST-FM is a Time Series Foundation Model (TSFM) from IBM Research based on a
     standard patch Transformer. This generic architecture achieves state-of-the-art
@@ -111,11 +111,10 @@ class PatchTSTFM(Forecaster):
         quantiles: list[float] | None,
         # scale_factor: float,
     ) -> tuple[np.ndarray, np.ndarray | None]:
-        data_processor = _DataProcessor(dtype=self.dtype, device=self.device)
-        context = data_processor._prepare_and_validate_context(batch)
+        context = self._prepare_and_validate_context(batch)
         if context.shape[1] > self.context_length:
             context = context[..., -self.context_length :]
-        context = data_processor._maybe_impute_missing(context)
+        context = self._maybe_impute_missing(context)
         # context is (batch, context_length)
 
         # input data is grouped by id

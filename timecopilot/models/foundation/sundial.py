@@ -15,7 +15,7 @@ from ..utils.forecaster import Forecaster, QuantileConverter, _DataProcessor
 from .utils import TimeSeriesDataset
 
 
-class Sundial(Forecaster):
+class Sundial(Forecaster, _DataProcessor):
     """
     Sundial is a family of generative time series foundation models,
     pre-trained on TimeBench (10^12 time points). It uses the TimeFlow Loss to
@@ -98,11 +98,10 @@ class Sundial(Forecaster):
         h: int,
         quantiles: list[float] | None,
     ) -> tuple[np.ndarray, np.ndarray | None]:
-        data_processor = _DataProcessor(dtype=self.dtype, device=self.device)
-        context = data_processor._prepare_and_validate_context(batch)
+        context = self._prepare_and_validate_context(batch)
         if context.shape[1] > self.context_length:
             context = context[..., -self.context_length :]
-        context = data_processor._maybe_impute_missing(context)
+        context = self._maybe_impute_missing(context)
         context = context.to(self.device)
         with torch.autocast(device_type=self.device, dtype=self.dtype):
             # (batch_size, num_samples, h)

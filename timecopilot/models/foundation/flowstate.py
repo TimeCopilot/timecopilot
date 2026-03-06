@@ -11,7 +11,7 @@ from ..utils.forecaster import Forecaster, QuantileConverter, _DataProcessor
 from .utils import TimeSeriesDataset
 
 
-class FlowState(Forecaster):
+class FlowState(Forecaster, _DataProcessor):
     """
     FlowState is the first time-scale adjustable Time Series Foundation Model (TSFM),
     open-sourced by IBM Research. Combining a State Space Model (SSM) Encoder with a
@@ -107,11 +107,10 @@ class FlowState(Forecaster):
         supported_quantiles: list[float],
         scale_factor: float,
     ) -> tuple[np.ndarray, np.ndarray | None]:
-        data_processor = _DataProcessor(dtype=self.dtype, device=self.device)
-        context = data_processor._prepare_and_validate_context(batch)
+        context = self._prepare_and_validate_context(batch)
         if context.shape[1] > self.context_length:
             context = context[..., -self.context_length :]
-        context = data_processor._maybe_impute_missing(context)
+        context = self._maybe_impute_missing(context)
         # context is (batch, context_length)
         # then we convert it to (context_length, batch, 1)
         context = context.unsqueeze(-1).transpose(0, 1)
