@@ -6934,7 +6934,7 @@ requires-dist = [
   {name = "statsforecast", specifier = ">=2.0.2"},
   {name = "tensorboard", specifier = ">=2.20.0"},
   {name = "timecopilot-chronos-forecasting", specifier = ">=0.2.0"},
-  {name = "timecopilot-granite-tsfm", specifier = ">=0.1.1"},
+  {name = "timecopilot-granite-tsfm", specifier = ">=0.1.2"},
   {name = "timecopilot-timesfm", specifier = ">=0.2.1"},
   {name = "timecopilot-toto", specifier = ">=0.1.5"},
   {name = "torchmetrics", specifier = ">=1.8.2"},
@@ -6999,15 +6999,16 @@ dependencies = [
   {marker = "python_full_version >= '3.13'", name = "scikit-learn", source = {registry = "https://pypi.org/simple"}, version = "1.7.2"},
   {name = "datasets"},
   {name = "deprecated"},
+  {name = "einops"},
   {name = "torch"},
   {name = "urllib3"},
 ]
 name = "timecopilot-granite-tsfm"
-sdist = {hash = "sha256:2de37c562a3d680cc339ae9501d0955c8116c0cc2529b59d420b098a8961b429", size = 16593234, upload-time = "2025-10-08T16:33:46.143Z", url = "https://files.pythonhosted.org/packages/01/03/485fe233a13d63f53be40681a5fc84fef553ef4ce7ebcea4e8d6db553991/timecopilot_granite_tsfm-0.1.1.tar.gz"}
+sdist = {hash = "sha256:bb415be3863468acec46d86086f53d944ea7a6717b1b14a1eb7038e3d5fffd79", size = 16607701, upload-time = "2026-02-27T19:20:57.794Z", url = "https://files.pythonhosted.org/packages/df/0d/ac0ee5d93c197e150928a3bf0f65217c8e5d8cb49432ea22bf29732be8e4/timecopilot_granite_tsfm-0.1.2.tar.gz"}
 source = {registry = "https://pypi.org/simple"}
-version = "0.1.1"
+version = "0.1.2"
 wheels = [
-  {hash = "sha256:8967dc197373f5c1a7f72ae2f4669b21c4778d4e367c19c9e0c7f9033e0fbd85", size = 3814636, upload-time = "2025-10-08T16:33:42.611Z", url = "https://files.pythonhosted.org/packages/02/1a/66fe9f1e140c7fac0d8b9507696e739546cc89e87ff90bbd156cfa4a36d7/timecopilot_granite_tsfm-0.1.1-py3-none-any.whl"},
+  {hash = "sha256:3daaa365bbe1b5183df2d132f0fca873fb7f1da5f5d881731a71d1c32e5cd526", size = 3825899, upload-time = "2026-02-27T19:20:54.214Z", url = "https://files.pythonhosted.org/packages/42/f4/0625d8f5720041318c6baca0da7a7ee73060cf62ac8673d968a63da19008/timecopilot_granite_tsfm-0.1.2-py3-none-any.whl"},
 ]
 
 [[package]]

@@ -88,7 +88,7 @@ dependencies = [
   "tabpfn-time-series==1.0.3 ; python_full_version < '3.13'",
   "tensorboard>=2.20.0",
   "timecopilot-chronos-forecasting>=0.2.0",
-  "timecopilot-granite-tsfm>=0.1.1",
+  "timecopilot-granite-tsfm>=0.1.2",
   "timecopilot-timesfm>=0.2.1",
   "timecopilot-tirex>=0.1.0 ; python_full_version >= '3.11'",
   "timecopilot-toto>=0.1.5",

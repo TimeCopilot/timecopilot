@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotly.graph_objects
+import torch
 import utilsforecast.processing as ufp
 from gluonts.time_feature.seasonality import (
     DEFAULT_SEASONALITIES,
@@ -9,6 +10,7 @@ from gluonts.time_feature.seasonality import (
 from gluonts.time_feature.seasonality import (
     get_seasonality as _get_seasonality,
 )
+from gluonts.transform import LastValueImputation
 from prophet import Prophet as ProphetBase
 from scipy import stats
 from tqdm import tqdm
@@ -614,3 +616,54 @@ class QuantileConverter:
                     df = ufp.assign_columns(df, hi_tgt, df[hi_src])
                     out_cols.extend([lo_tgt, hi_tgt])
         return df[out_cols]
+
+
+class _DataProcessor:
+    def __init__(self, dtype: torch.dtype, device: torch.device) -> None:
+        self.dtype = dtype
+        self.device = device
+
+    def _left_pad_and_stack_1D(self, tensors: list[torch.Tensor]) -> torch.Tensor:
+        max_len = max(len(c) for c in tensors)
+        padded = []
+        for c in tensors:
+            assert isinstance(c, torch.Tensor)
+            assert c.ndim == 1
+            padding = torch.full(
+                size=(max_len - len(c),),
+                fill_value=torch.nan,
+                device=c.device,
+                dtype=c.dtype,
+            )
+            padded.append(torch.concat((padding, c), dim=-1))
+        return torch.stack(padded)
+
+    def _prepare_and_validate_context(
+        self,
+        context: list[torch.Tensor] | torch.Tensor,
+    ) -> torch.Tensor:
+        if isinstance(context, list):
+            context = self._left_pad_and_stack_1D(context)
+        assert isinstance(context, torch.Tensor)
+        if context.ndim == 1:
+            context = context.unsqueeze(0)
+        assert context.ndim == 2
+        return context
+
+    def _maybe_impute_missing(
+        self, batch: torch.Tensor, dtype=torch.float32
+    ) -> torch.Tensor:
+        if torch.isnan(batch).any():
+            batch = batch.to(dtype=dtype).detach().cpu().numpy()
+            imputed_rows = []
+            for i in range(batch.shape[0]):
+                row = batch[i]
+                imputed_row = LastValueImputation()(row)
+                imputed_rows.append(imputed_row)
+            batch = np.vstack(imputed_rows)
+            batch = torch.tensor(
+                batch,
+                dtype=self.dtype,
+                device=self.device,
+            )
+        return batch
