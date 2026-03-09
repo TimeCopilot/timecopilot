@@ -314,14 +314,77 @@ def _transform_time_series_to_text(df: pd.DataFrame) -> str:
     return output
 
 
-def _transform_features_to_text(features_df: pd.DataFrame) -> str:
-    output = (
-        "these are the time series features in json format where the key is "
-        "the identifier of the time series and the values is also a json of "
-        "feature names and their values."
-        f"{features_df.to_json(orient='index')}"
+def _summarize_time_series_for_llm(df: pd.DataFrame, max_series: int = 50) -> str:
+    summaries = []
+
+    grouped = df.groupby("unique_id")
+
+    for i, (uid, g) in enumerate(grouped):
+        if i >= max_series:
+            break
+
+        y = g["y"]
+
+        summaries.append(
+            {
+                "series": uid[:12],  # shorten UUID
+                "n_points": int(len(g)),
+                "mean": round(float(y.mean()), 3),
+                "std": round(float(y.std()), 3),
+                "q25": round(float(y.quantile(0.25)), 3),
+                "median": round(float(y.median()), 3),
+                "q75": round(float(y.quantile(0.75)), 3),
+                "min": round(float(y.min()), 3),
+                "max": round(float(y.max()), 3),
+            }
+        )
+
+    dataset_summary = {
+        "n_series_total": int(df["unique_id"].nunique()),
+        "n_series_sampled": len(summaries),
+        "series_sample": summaries,
+    }
+
+    return (
+        "Summary statistics for a sample of the dataset time series. "
+        "The dataset contains many series; only a subset is shown for context. "
+        f"{dataset_summary}"
     )
-    return output
+
+
+# def _transform_features_to_text(features_df: pd.DataFrame) -> str:
+#     output = (
+#         "these are the time series features in json format where the key is "
+#         "the identifier of the time series and the values is also a json of "
+#         "feature names and their values."
+#         f"{features_df.to_json(orient='index')}"
+#     )
+#     return output
+
+
+def _transform_features_to_text(features_df: pd.DataFrame) -> str:
+    # Base on similarly named function, edited to involve the summary
+
+    summaries = []
+
+    for uid, row in features_df.iterrows():
+        summaries.append(
+            {
+                "series": uid,
+                "trend_strength": float(row.get("trend_strength", 0)),
+                "seasonal_strength": float(row.get("seasonal_strength", 0)),
+                "spikiness": float(row.get("spikiness", 0)),
+                "lumpiness": float(row.get("lumpiness", 0)),
+                "entropy": float(row.get("entropy", 0)),
+                "acf1": float(row.get("acf1", 0)),
+            }
+        )
+
+    return (
+        "Key time series diagnostic features extracted from the dataset. "
+        "These features describe structural properties of each series. "
+        f"{summaries}"
+    )
 
 
 def _transform_eval_to_text(eval_df: pd.DataFrame, models: list[str]) -> str:
@@ -329,64 +392,136 @@ def _transform_eval_to_text(eval_df: pd.DataFrame, models: list[str]) -> str:
     return output
 
 
+# def _transform_fcst_to_text(fcst_df: pd.DataFrame) -> str:
+#     df_agg = fcst_df.groupby("unique_id").agg(list)
+#     output = (
+#         "these are the forecasted values in json format where the key is the "
+#         "identifier of the time series and the values is also a json of two "
+#         "elements: the first element is the date column and the second "
+#         "element is the value column."
+#         f"{df_agg.to_json(orient='index')}"
+#     )
+#     return output
+
+
 def _transform_fcst_to_text(fcst_df: pd.DataFrame) -> str:
-    df_agg = fcst_df.groupby("unique_id").agg(list)
-    output = (
-        "these are the forecasted values in json format where the key is the "
-        "identifier of the time series and the values is also a json of two "
-        "elements: the first element is the date column and the second "
-        "element is the value column."
-        f"{df_agg.to_json(orient='index')}"
+    summaries = []
+    # Identically named function commented out for tokenization ease purposes.
+
+    for uid, g in fcst_df.groupby("unique_id"):
+        value_cols = [c for c in g.columns if c not in ["unique_id", "ds"]]
+
+        for col in value_cols:
+            y = g[col]
+
+            summaries.append(
+                {
+                    "series": uid,
+                    "model": col,
+                    "horizon": int(len(g)),
+                    "start_forecast": str(g["ds"].min()),
+                    "end_forecast": str(g["ds"].max()),
+                    "mean_forecast": float(y.mean()),
+                    "std_forecast": float(y.std()),
+                    "min_forecast": float(y.min()),
+                    "q25_forecast": float(y.quantile(0.25)),
+                    "median_forecast": float(y.median()),
+                    "q75_forecast": float(y.quantile(0.75)),
+                    "max_forecast": float(y.max()),
+                }
+            )
+
+    return (
+        "These are summary statistics of the generated forecasts. "
+        "Each entry corresponds to one forecast series and model. "
+        "The values describe the forecast distribution across the "
+        " horizon, not the raw predictions. "
+        f"{summaries}"
     )
-    return output
+
+
+# def _transform_anomalies_to_text(anomalies_df: pd.DataFrame) -> str:
+#     """Transform anomaly detection results to text for the agent."""
+#     # Get anomaly columns
+#     anomaly_cols = [col for col in anomalies_df.columns if col.endswith("-anomaly")]
+
+#     if not anomaly_cols:
+#         return "No anomaly detection results available."
+
+#     # Count anomalies per series
+#     anomaly_summary = {}
+#     for unique_id in anomalies_df["unique_id"].unique():
+#         series_data = anomalies_df[anomalies_df["unique_id"] == unique_id]
+#         series_summary = {}
+
+#         for anomaly_col in anomaly_cols:
+#             if anomaly_col in series_data.columns:
+#                 anomaly_count = series_data[anomaly_col].sum()
+#                 total_points = len(series_data)
+#                 anomaly_rate = (
+#                     (anomaly_count / total_points) * 100 if total_points > 0 else 0
+#                 )
+
+#                 # Get timestamps of anomalies
+#                 anomalies = series_data[series_data[anomaly_col]]
+#                 anomaly_dates = (
+#                     anomalies["ds"].dt.strftime("%Y-%m-%d").tolist()
+#                     if len(anomalies) > 0
+#                     else []
+#                 )
+
+#                 series_summary[anomaly_col] = {
+#                     "count": int(anomaly_count),
+#                     "rate_percent": round(anomaly_rate, 2),
+#                     "dates": anomaly_dates[:10],  # Limit to first 10
+#                     "total_points": int(total_points),
+#                 }
+
+#         anomaly_summary[unique_id] = series_summary
+
+#     output = (
+#         "these are the anomaly detection results in json format where the key is the "
+#         "identifier of the time series and the values contain anomaly statistics "
+#         "including count, rate, and timestamps of detected anomalies. "
+#         f"{anomaly_summary}"
+#     )
+#     return output
 
 
 def _transform_anomalies_to_text(anomalies_df: pd.DataFrame) -> str:
-    """Transform anomaly detection results to text for the agent."""
-    # Get anomaly columns
+    # Creating equally named function that will summarise information regarding
+    # anomalies to reduce tokenization traffic towards LLM
     anomaly_cols = [col for col in anomalies_df.columns if col.endswith("-anomaly")]
 
     if not anomaly_cols:
         return "No anomaly detection results available."
 
-    # Count anomalies per series
-    anomaly_summary = {}
-    for unique_id in anomalies_df["unique_id"].unique():
-        series_data = anomalies_df[anomalies_df["unique_id"] == unique_id]
-        series_summary = {}
+    summaries = []
+
+    for uid, g in anomalies_df.groupby("unique_id"):
+        total_points = int(len(g))
 
         for anomaly_col in anomaly_cols:
-            if anomaly_col in series_data.columns:
-                anomaly_count = series_data[anomaly_col].sum()
-                total_points = len(series_data)
-                anomaly_rate = (
-                    (anomaly_count / total_points) * 100 if total_points > 0 else 0
-                )
+            anomaly_count = int(g[anomaly_col].sum())
+            anomaly_rate = (
+                (anomaly_count / total_points) * 100 if total_points > 0 else 0
+            )
 
-                # Get timestamps of anomalies
-                anomalies = series_data[series_data[anomaly_col]]
-                anomaly_dates = (
-                    anomalies["ds"].dt.strftime("%Y-%m-%d").tolist()
-                    if len(anomalies) > 0
-                    else []
-                )
-
-                series_summary[anomaly_col] = {
-                    "count": int(anomaly_count),
-                    "rate_percent": round(anomaly_rate, 2),
-                    "dates": anomaly_dates[:10],  # Limit to first 10
-                    "total_points": int(total_points),
+            summaries.append(
+                {
+                    "series": uid,
+                    "model": anomaly_col.replace("-anomaly", ""),
+                    "total_points": total_points,
+                    "anomaly_count": anomaly_count,
+                    "anomaly_rate_pct": round(anomaly_rate, 3),
                 }
+            )
 
-        anomaly_summary[unique_id] = series_summary
-
-    output = (
-        "these are the anomaly detection results in json format where the key is the "
-        "identifier of the time series and the values contain anomaly statistics "
-        "including count, rate, and timestamps of detected anomalies. "
-        f"{anomaly_summary}"
+    return (
+        "These are summary statistics of anomaly detection results. "
+        "Each entry reports how many anomalies were detected for a series and model. "
+        f"{summaries}"
     )
-    return output
 
 
 def _is_sktime_forecaster(obj: object) -> bool:
@@ -456,11 +591,12 @@ class TimeCopilot:
         if "SeasonalNaive" not in self.forecasters:
             self.forecasters["SeasonalNaive"] = SeasonalNaive()
         self.system_prompt = f"""
-        You're a forecasting expert. You will be given a time series 
-        as a list of numbers and your task is to determine the best model for it. 
+        You're a forecasting expert. You will be given summary statistics
+        describing one or more time series, and your task is to determine
+        the best forecasting model for them.
         You have access to the following tools:
 
-        1. tsfeatures_tool: Calculates time series features to help 
+        1. tsfeatures_tool: Calculates time series features to help
         with model selection.
         Available features are: {", ".join(TSFEATURES.keys())}
 
@@ -930,7 +1066,9 @@ class TimeCopilot:
         async def add_time_series(
             ctx: RunContext[ExperimentDataset],
         ) -> str:
-            return _transform_time_series_to_text(ctx.deps.df)
+            # return _transform_time_series_to_text(ctx.deps.df)
+            # keeping things traceable regarding previously used function
+            return _summarize_time_series_for_llm(ctx.deps.df)
 
         @self.forecasting_agent.tool
         async def tsfeatures_tool(
