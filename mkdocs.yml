@@ -31,6 +31,7 @@ nav:
           - examples/cryptocurrency-quickstart.ipynb
           - examples/sktime.ipynb
           - examples/skforecast.ipynb
+          - examples/patchtst-fm.ipynb
   - Experiments:
       - experiments/gift-eval.md
       - experiments/fev.md

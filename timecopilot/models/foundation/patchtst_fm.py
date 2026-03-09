@@ -4,140 +4,151 @@ import numpy as np
 import pandas as pd
 import torch
 from tqdm import tqdm
-from tsfm_public import FlowStateForPrediction
-from tsfm_public.models.flowstate.utils.utils import get_fixed_factor
+from tsfm_public import PatchTSTFMForPrediction
 
 from ..utils.forecaster import Forecaster, QuantileConverter, _DataProcessor
 from .utils import TimeSeriesDataset
 
+# default to the median quantile
+# PatchTST-FM supports quantiles from 0.01 to 0.99
+DEFAULT_QUANTILES = [0.5]
 
-class FlowState(Forecaster, _DataProcessor):
+
+class PatchTSTFM(Forecaster, _DataProcessor):
     """
-    FlowState is the first time-scale adjustable Time Series Foundation Model (TSFM),
-    open-sourced by IBM Research. Combining a State Space Model (SSM) Encoder with a
-    Functional Basis Decoder allows FlowState to transition into a timescale invariant
-    coefficient space and make a continuous forecast from this space. This allows
-    FlowState to seamlessly adjust to all possible sampling rates.
+    PatchTST-FM is a Time Series Foundation Model (TSFM) from IBM Research based on a
+    standard patch Transformer. This generic architecture achieves state-of-the-art
+    zero-shot forecasting performance with a straightforward training protocol. The
+    work provides a transparent, reproducible baseline with comprehensive ablations
+    on model scaling, data composition, and training techniques.
 
     See the [official repo](https://github.com/ibm-granite/granite-tsfm) and
-    [paper](https://arxiv.org/abs/2508.05287) for more details.
+    [paper](https://arxiv.org/abs/2602.06909) for more details.
     """
 
+    # NOTE: may want to adjust default context_length, default on granite_tsfm is 8192
     def __init__(
         self,
-        repo_id: str = "ibm-research/flowstate",
-        scale_factor: float | None = None,
-        context_length: int = 2_048,
-        batch_size: int = 1_024,
-        alias: str = "FlowState",
+        repo_id: str = "ibm-research/patchtst-fm-r1",
+        # scale_factor: float | None = None,
+        context_length: int = 8192,  # default from granite-tsfm
+        batch_size: int = 2_048,
+        alias: str = "PatchTST-FM",
     ):
         """
-        Initialize FlowState time series foundation model.
+        Initialize PatchTSTFM time series foundation model.
 
         Args:
             repo_id (str, optional): The Hugging Face Hub model ID or local path to
-                load the FlowState model from. Supported models:
+                load the PatchTST-FM model from. Supported models:
 
-                - `ibm-research/flowstate` (default)
-                - `ibm-granite/granite-timeseries-flowstate-r1`.
+                - `ibm-research/patchtst-fm-r1`
 
-            scale_factor (float, optional): Scale factor for temporal adaptation.
-                If None, will be automatically determined based on the time series
-                frequency. The scale factor adjusts the model to different sampling
-                rates. For example, if your data has seasonality every N=96 time steps
-                (quarter hourly with daily cycle), scale_factor = 24/96 = 0.25.
             context_length (int, optional): Maximum context length (input window size)
                 for the model. Controls how much history is used for each forecast.
-                Defaults to 2,048. The model supports flexible context lengths.
-            batch_size (int, optional): Batch size for inference. Defaults to 1,024.
+                Defaults to 8,192. The model supports flexible context lengths.
+            batch_size (int, optional): Batch size for inference. Defaults to 2,048.
                 Adjust based on available memory and model size. Larger batch sizes
                 can improve throughput but require more GPU memory.
             alias (str, optional): Name to use for the model in output DataFrames and
-                logs. Defaults to "FlowState".
+                logs. Defaults to "PatchTST-FM".
 
         Notes:
             **Academic Reference:**
 
-            - Paper: [FlowState: Sampling Rate Invariant Time Series Forecasting](https://arxiv.org/abs/2508.05287)
+            - Paper: [Revisiting the Generic Transformer: Deconstructing a
+            Strong Baseline for Time Series Foundation Models](
+            https://arxiv.org/abs/2602.06909)
 
             **Resources:**
 
             - GitHub: [ibm-granite/granite-tsfm](https://github.com/ibm-granite/granite-tsfm)
-            - HuggingFace Models: [ibm-granite/granite-timeseries-flowstate-r1](
-                https://huggingface.co/ibm-granite/granite-timeseries-flowstate-r1
-              ), [ibm-research/flowstate](https://huggingface.co/ibm-research/flowstate).
+            - HuggingFace Models: [ibm-research/patchtst-fm-r1](https://huggingface.co/ibm-research/patchtst-fm-r1)
 
             **Technical Details:**
 
             - The model is loaded onto the best available device (GPU if
               available, otherwise CPU).
-            - FlowState uses State Space Model (SSM) encoder with Functional
-              Basis Decoder (FBD) for time-scale invariant forecasting.
-            - Recommended forecasting horizon: no more than 30 seasons.
 
             **Supported Models:**
 
-            - `ibm-research/flowstate` (default)
-            - `ibm-granite/granite-timeseries-flowstate-r1`.
+            - `ibm-research/patchtst-fm-r1` (default)
         """
         self.repo_id = repo_id
-        self.scale_factor = scale_factor
+        # self.scale_factor = scale_factor
         self.context_length = context_length
         self.batch_size = batch_size
-        self.alias = alias
+        # NOTE: 'mps' may not be 100% reliable, initial tests with the
+        # patchtst-fm gift_eval notebook resulted in predictions of 0 across
+        # the board. for now use mps when available, change if it becomes an issue.
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        # self.device = (
+        #     "cuda"
+        #     if torch.cuda.is_available()
+        #     else ("mps" if torch.mps.is_available() else "cpu")
+        # )
+        self.alias = alias
         self.dtype = torch.float32
 
     @contextmanager
-    def _get_model(self) -> FlowStateForPrediction:
-        model = FlowStateForPrediction.from_pretrained(self.repo_id).to(self.device)
+    def _get_model(self) -> PatchTSTFMForPrediction:
+        model = PatchTSTFMForPrediction.from_pretrained(self.repo_id).to(self.device)
         try:
             model.eval()
             yield model
         finally:
             del model
-            torch.cuda.empty_cache()
+            if self.device.startswith("cuda"):
+                torch.cuda.empty_cache()
+            elif self.device.startswith("mps"):
+                torch.mps.empty_cache()
 
     def _predict_batch(
         self,
-        model: FlowStateForPrediction,
-        batch: list[torch.Tensor],
+        model: PatchTSTFMForPrediction,
+        batch: list[torch.Tensor] | torch.Tensor,
         h: int,
         quantiles: list[float] | None,
-        supported_quantiles: list[float],
-        scale_factor: float,
+        # scale_factor: float,
     ) -> tuple[np.ndarray, np.ndarray | None]:
         context = self._prepare_and_validate_context(batch)
         if context.shape[1] > self.context_length:
             context = context[..., -self.context_length :]
         context = self._maybe_impute_missing(context)
         # context is (batch, context_length)
-        # then we convert it to (context_length, batch, 1)
-        context = context.unsqueeze(-1).transpose(0, 1)
-        context = context.to(self.device)
-        # (batch, quantiles, h, n_ch)
+
+        # input data is grouped by id
+        # input shape: (id_group/batch, data)
+        # output shape: (batch/id, quantiles, h)
+        quantile_levels = DEFAULT_QUANTILES if quantiles is None else quantiles
+
         fcst = model(
             context,
             prediction_length=h,
-            scale_factor=scale_factor,
-            batch_first=False,
-        ).prediction_outputs
+            quantile_levels=quantile_levels,
+            # scale_factor=scale_factor,
+            # batch_first=False,
+        ).quantile_predictions
         fcst = fcst.squeeze(-1).transpose(-1, -2)  # now shape is (batch, h, quantiles)
-        fcst_mean = fcst[..., supported_quantiles.index(0.5)]
-        fcst_mean_np = fcst_mean.detach().numpy(force=True)
+
+        # may not be the ideal solution, but this should be more adaptable
+        # when quantiles can vary.
+        # there is no guarantee that 0.5 will be in the list of quantiles.
+        fcst_mean = fcst.mean(dim=-1).squeeze() if fcst.ndim >= 3 else fcst.squeeze()
+        # fcst_mean = fcst[..., quantile_levels.index(0.5)].squeeze()
+        fcst_mean_np = fcst_mean.detach().cpu().numpy()
         fcst_quantiles_np = (
-            fcst.detach().numpy(force=True) if quantiles is not None else None
+            fcst.detach().cpu().numpy() if quantiles is not None else None
         )
         return fcst_mean_np, fcst_quantiles_np
 
     def _predict(
         self,
-        model: FlowStateForPrediction,
+        model: PatchTSTFMForPrediction,
         dataset: TimeSeriesDataset,
         h: int,
         quantiles: list[float] | None,
-        supported_quantiles: list[float],
-        scale_factor: float,
+        # scale_factor: float,
     ) -> tuple[np.ndarray, np.ndarray | None]:
         fcsts = [
             self._predict_batch(
@@ -145,8 +156,7 @@ class FlowState(Forecaster, _DataProcessor):
                 batch,
                 h,
                 quantiles,
-                supported_quantiles,
-                scale_factor,
+                # scale_factor,
             )
             for batch in tqdm(dataset)
         ]  # list of tuples
@@ -216,6 +226,11 @@ class FlowState(Forecaster, _DataProcessor):
                 identifiers as the input DataFrame.
         """
         freq = self._maybe_infer_freq(df, freq)
+        # When support for levels is added remove PatchTST-FM
+        # from the list of models that throw this exception in
+        # tests/models/test_models:test_using_level()
+        if level is not None:
+            raise ValueError("Level is not supported for patchtst-fm yet.")
         qc = QuantileConverter(level=level, quantiles=quantiles)
         dataset = TimeSeriesDataset.from_df(
             df,
@@ -223,33 +238,36 @@ class FlowState(Forecaster, _DataProcessor):
             dtype=self.dtype,
         )
         fcst_df = dataset.make_future_dataframe(h=h, freq=freq)
-        scale_factor = self.scale_factor or get_fixed_factor(freq)
+        # scale_factor = self.scale_factor or get_fixed_factor(freq)
         with self._get_model() as model:
             cfg = model.config
-            supported_quantiles = cfg.quantiles
-            if qc.quantiles is not None and not np.allclose(
-                qc.quantiles,
-                supported_quantiles,
+            supported_quantiles = cfg.quantile_levels
+            if qc.quantiles is not None and not set(qc.quantiles).issubset(
+                supported_quantiles
             ):
                 raise ValueError(
-                    "FlowState only supports the default quantiles, "
+                    "PatchTSTFM only supports the default quantiles, "
                     f"supported quantiles are {supported_quantiles}, "
-                    "please use the default quantiles or default level, "
+                    f"quantiles provided are {qc.quantiles}, "
+                    "please use the default quantiles or default level."
                 )
+
             fcsts_mean_np, fcsts_quantiles_np = self._predict(
                 model,
                 dataset,
                 h,
                 quantiles=qc.quantiles,
-                supported_quantiles=supported_quantiles,
-                scale_factor=scale_factor,
+                # scale_factor=scale_factor,
             )
-        fcst_df[self.alias] = fcsts_mean_np.reshape(-1, 1)
+
+        fcst_df[self.alias] = fcsts_mean_np.reshape(-1)
+
+        # should only enter when quantiles are used
         if qc.quantiles is not None and fcsts_quantiles_np is not None:
             for i, q in enumerate(qc.quantiles):
                 fcst_df[f"{self.alias}-q-{int(q * 100)}"] = fcsts_quantiles_np[
                     ..., i
-                ].reshape(-1, 1)
+                ].reshape(-1)
             fcst_df = qc.maybe_convert_quantiles_to_level(
                 fcst_df,
                 models=[self.alias],
