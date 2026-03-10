@@ -175,7 +175,8 @@ def _set_module_by_qualname(
     root: nn.Module, qualname: str, new_module: nn.Module
 ) -> None:
     """
-    Replace a submodule inside `root` by its qualified name (as produced by named_modules()).
+    Replace a submodule inside `root` by its qualified name
+    (as produced by named_modules()).
     """
     parts = qualname.split(".")
     parent = root
@@ -663,8 +664,9 @@ class _TimesFMV1(Forecaster):
 
     def create_finetuner(self, *args: Any, **kwargs: Any) -> TimesFMFineTuner:
         raise NotImplementedError(
-            "Fine-tuning is only supported for torch-native TimesFM models in this integration. "
-            "Use a TimesFM 2.5 pytorch checkpoint (google/timesfm-2.5-200m-pytorch)."
+            "Fine-tuning is only supported for torch-native TimesFM models in this "
+            "integration. Use a TimesFM 2.5 pytorch checkpoint "
+            "(google/timesfm-2.5-200m-pytorch)."
         )
 
 
@@ -798,7 +800,8 @@ class _TimesFMV2_p5(Forecaster):
             return tfm.model
 
         raise TypeError(
-            "Loaded TimesFM 2.5 object does not expose a torch.nn.Module for fine-tuning."
+            "Loaded TimesFM 2.5 object does not expose a torch.nn.Module"
+            " for fine-tuning."
         )
 
     def create_finetuner(self, config: TimesFMFineTuningConfig) -> TimesFMFineTuner:

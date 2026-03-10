@@ -305,7 +305,7 @@ class ChronosFinetuner:
             raise ImportError(
                 f"prepare_arrow_dataset requires gluonts: {e}\n"
                 "Install with: pip install gluonts"
-            )
+            ) from e
 
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -454,7 +454,7 @@ class ChronosFinetuner:
             raise ImportError(
                 f"Chronos-T5 finetuning requires extra deps: {e}\n"
                 "Install with: pip install transformers gluonts"
-            )
+            ) from e
 
         data_path = Path(data_path)
         if not data_path.exists():
