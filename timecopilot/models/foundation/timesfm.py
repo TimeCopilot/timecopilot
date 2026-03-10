@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -156,7 +156,7 @@ class _LoRALinearWrapper(nn.Module):
         return self.base.weight
 
     @property
-    def bias(self) -> Optional[torch.Tensor]:
+    def bias(self) -> torch.Tensor | None:
         return self.base.bias
 
     @property
@@ -171,7 +171,9 @@ class _LoRALinearWrapper(nn.Module):
         return self.base(x) + self.adapter(x)
 
 
-def _set_module_by_qualname(root: nn.Module, qualname: str, new_module: nn.Module) -> None:
+def _set_module_by_qualname(
+    root: nn.Module, qualname: str, new_module: nn.Module
+) -> None:
     """
     Replace a submodule inside `root` by its qualified name (as produced by named_modules()).
     """
@@ -196,7 +198,7 @@ class FineTuningStrategy(ABC):
         pass
 
     @abstractmethod
-    def get_trainable_params(self) -> List[nn.Parameter]:
+    def get_trainable_params(self) -> list[nn.Parameter]:
         """Get parameters that should be trained."""
         pass
 
@@ -209,11 +211,13 @@ class LoRAFineTuning(FineTuningStrategy):
         for param in self.model.parameters():
             param.requires_grad = False
 
-        self.lora_layers: List[Tuple[str, LoRALayer]] = []
+        self.lora_layers: list[tuple[str, LoRALayer]] = []
 
         # Inject wrappers into Linear layers that look like transformer blocks.
         for name, module in list(self.model.named_modules()):
-            if isinstance(module, nn.Linear) and ("transformer" in name or "stacked_transformer" in name):
+            if isinstance(module, nn.Linear) and (
+                "transformer" in name or "stacked_transformer" in name
+            ):
                 lora_layer = LoRALayer(
                     module.in_features,
                     module.out_features,
@@ -225,8 +229,8 @@ class LoRAFineTuning(FineTuningStrategy):
                 _set_module_by_qualname(self.model, name, wrapped)
                 self.lora_layers.append((name, lora_layer))
 
-    def get_trainable_params(self) -> List[nn.Parameter]:
-        params: List[nn.Parameter] = []
+    def get_trainable_params(self) -> list[nn.Parameter]:
+        params: list[nn.Parameter] = []
         for _, lora_layer in self.lora_layers:
             params.extend(list(lora_layer.parameters()))
         return params
@@ -240,10 +244,12 @@ class DoRAFineTuning(FineTuningStrategy):
         for param in self.model.parameters():
             param.requires_grad = False
 
-        self.dora_layers: List[Tuple[str, DoRALayer]] = []
+        self.dora_layers: list[tuple[str, DoRALayer]] = []
 
         for name, module in list(self.model.named_modules()):
-            if isinstance(module, nn.Linear) and ("transformer" in name or "stacked_transformer" in name):
+            if isinstance(module, nn.Linear) and (
+                "transformer" in name or "stacked_transformer" in name
+            ):
                 dora_layer = DoRALayer(
                     module.in_features,
                     module.out_features,
@@ -255,8 +261,8 @@ class DoRAFineTuning(FineTuningStrategy):
                 _set_module_by_qualname(self.model, name, wrapped)
                 self.dora_layers.append((name, dora_layer))
 
-    def get_trainable_params(self) -> List[nn.Parameter]:
-        params: List[nn.Parameter] = []
+    def get_trainable_params(self) -> list[nn.Parameter]:
+        params: list[nn.Parameter] = []
         for _, dora_layer in self.dora_layers:
             params.extend(list(dora_layer.parameters()))
         return params
@@ -272,7 +278,7 @@ class LinearProbingFineTuning(FineTuningStrategy):
             else:
                 param.requires_grad = True
 
-    def get_trainable_params(self) -> List[nn.Parameter]:
+    def get_trainable_params(self) -> list[nn.Parameter]:
         return [p for p in self.model.parameters() if p.requires_grad]
 
 
@@ -283,7 +289,7 @@ class FullFineTuning(FineTuningStrategy):
         for param in self.model.parameters():
             param.requires_grad = True
 
-    def get_trainable_params(self) -> List[nn.Parameter]:
+    def get_trainable_params(self) -> list[nn.Parameter]:
         return [p for p in self.model.parameters() if p.requires_grad]
 
 
@@ -305,8 +311,8 @@ class TimeSeriesFineTuningDataset(Dataset):
         self.data = df[value_col].values.astype(np.float32)
         self.indices = self._create_indices()
 
-    def _create_indices(self) -> List[Tuple[int, int]]:
-        indices: List[Tuple[int, int]] = []
+    def _create_indices(self) -> list[tuple[int, int]]:
+        indices: list[tuple[int, int]] = []
         max_start = len(self.data) - self.context_length - self.prediction_length
         for i in range(max_start + 1):
             indices.append((i, i + self.context_length))
@@ -315,7 +321,7 @@ class TimeSeriesFineTuningDataset(Dataset):
     def __len__(self) -> int:
         return len(self.indices)
 
-    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+    def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
         context_start, target_start = self.indices[idx]
 
         context = torch.tensor(
@@ -333,7 +339,9 @@ class TimeSeriesFineTuningDataset(Dataset):
             target = torch.cat(
                 [
                     target,
-                    torch.zeros(self.prediction_length - len(target), dtype=torch.float32),
+                    torch.zeros(
+                        self.prediction_length - len(target), dtype=torch.float32
+                    ),
                 ]
             )
 
@@ -354,7 +362,7 @@ class TimesFMFineTuner:
 
         self.best_val_loss = float("inf")
         self.patience_counter = 0
-        self.training_history: Dict[str, List[float]] = {
+        self.training_history: dict[str, list[float]] = {
             "train_loss": [],
             "val_loss": [],
             "learning_rate": [],
@@ -364,7 +372,9 @@ class TimesFMFineTuner:
         logger = logging.getLogger(__name__)
         if not logger.handlers:
             handler = logging.StreamHandler()
-            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+            formatter = logging.Formatter(
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
         logger.setLevel(logging.INFO)
@@ -387,8 +397,8 @@ class TimesFMFineTuner:
     def finetune(
         self,
         train_dataset: Dataset,
-        val_dataset: Optional[Dataset] = None,
-    ) -> Dict[str, Any]:
+        val_dataset: Dataset | None = None,
+    ) -> dict[str, Any]:
         self.model = self.model.to(self.device)
 
         train_loader = DataLoader(
@@ -412,7 +422,11 @@ class TimesFMFineTuner:
             weight_decay=self.config.weight_decay,
         )
 
-        scheduler = self._create_cosine_scheduler(optimizer, train_loader) if self.config.use_cosine_schedule else None
+        scheduler = (
+            self._create_cosine_scheduler(optimizer, train_loader)
+            if self.config.use_cosine_schedule
+            else None
+        )
 
         self.logger.info("Starting fine-tuning for %d epochs", self.config.num_epochs)
         self.logger.info("Training samples: %d", len(train_dataset))
@@ -422,7 +436,9 @@ class TimesFMFineTuner:
         for epoch in range(self.config.num_epochs):
             train_loss = self._train_epoch(train_loader, optimizer, scheduler)
             self.training_history["train_loss"].append(train_loss)
-            self.training_history["learning_rate"].append(optimizer.param_groups[0]["lr"])
+            self.training_history["learning_rate"].append(
+                optimizer.param_groups[0]["lr"]
+            )
 
             self.logger.info(
                 "Epoch %d/%d - Train Loss: %.6f",
@@ -453,12 +469,14 @@ class TimesFMFineTuner:
         self,
         train_loader: DataLoader,
         optimizer: optim.Optimizer,
-        scheduler: Optional[Any] = None,
+        scheduler: Any | None = None,
     ) -> float:
         self.model.train()
         total_loss = 0.0
 
-        for batch_idx, (context, target) in enumerate(tqdm(train_loader, desc="Training")):
+        for batch_idx, (context, target) in enumerate(
+            tqdm(train_loader, desc="Training")
+        ):
             context = context.to(self.device)
             target = target.to(self.device)
 
@@ -501,7 +519,9 @@ class TimesFMFineTuner:
 
         return total_loss / max(1, len(val_loader))
 
-    def _create_cosine_scheduler(self, optimizer: optim.Optimizer, train_loader: DataLoader) -> Any:
+    def _create_cosine_scheduler(
+        self, optimizer: optim.Optimizer, train_loader: DataLoader
+    ) -> Any:
         from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 
         total_steps = len(train_loader) * self.config.num_epochs
@@ -515,7 +535,9 @@ class TimesFMFineTuner:
 
     def _save_checkpoint(self, epoch: int) -> None:
         os.makedirs(self.config.checkpoint_dir, exist_ok=True)
-        checkpoint_path = os.path.join(self.config.checkpoint_dir, f"checkpoint_epoch_{epoch:03d}.pt")
+        checkpoint_path = os.path.join(
+            self.config.checkpoint_dir, f"checkpoint_epoch_{epoch:03d}.pt"
+        )
         torch.save(
             {
                 "epoch": epoch,
@@ -639,7 +661,6 @@ class _TimesFMV1(Forecaster):
             fcst_df = fcst_df[["unique_id", "ds", self.alias]]
         return fcst_df
 
-
     def create_finetuner(self, *args: Any, **kwargs: Any) -> TimesFMFineTuner:
         raise NotImplementedError(
             "Fine-tuning is only supported for torch-native TimesFM models in this integration. "
@@ -754,7 +775,6 @@ class _TimesFMV2_p5(Forecaster):
             )
         return fcst_df
 
-
     def _load_torch_backbone(self) -> nn.Module:
         """
         Load the underlying torch model for fine-tuning.
@@ -774,8 +794,8 @@ class _TimesFMV2_p5(Forecaster):
         # Prefer a torch nn.Module if present
         if isinstance(tfm, nn.Module):
             return tfm
-        if hasattr(tfm, "model") and isinstance(getattr(tfm, "model"), nn.Module):
-            return getattr(tfm, "model")
+        if hasattr(tfm, "model") and isinstance(tfm.model, nn.Module):
+            return tfm.model
 
         raise TypeError(
             "Loaded TimesFM 2.5 object does not expose a torch.nn.Module for fine-tuning."
@@ -792,7 +812,7 @@ class _TimesFMV2_p5(Forecaster):
         config: TimesFMFineTuningConfig,
         value_col: str = "y",
         train_split: float = 0.8,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Convenience helper:
         - builds a sliding-window dataset from df[value_col]
@@ -813,7 +833,9 @@ class _TimesFMV2_p5(Forecaster):
             value_col=value_col,
         )
         val_ds = None
-        if val_df is not None and len(val_df) >= (self.context_length + prediction_length + 1):
+        if val_df is not None and len(val_df) >= (
+            self.context_length + prediction_length + 1
+        ):
             val_ds = TimeSeriesFineTuningDataset(
                 df=val_df,
                 context_length=self.context_length,

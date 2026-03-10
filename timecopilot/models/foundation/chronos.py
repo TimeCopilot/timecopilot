@@ -1,8 +1,7 @@
-from contextlib import contextmanager
 import logging
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -17,7 +16,6 @@ from tqdm import tqdm
 
 from ..utils.forecaster import Forecaster, QuantileConverter
 from .utils import TimeSeriesDataset
-
 
 logger = logging.getLogger(__name__)
 
@@ -255,12 +253,11 @@ class Chronos(Forecaster):
         return fcst_df
 
 
-
 class ChronosFinetuner:
     def __init__(
         self,
         repo_id: str,
-        device: Optional[str] = None,
+        device: str | None = None,
         dtype: torch.dtype = torch.float32,
     ):
         """
@@ -298,7 +295,7 @@ class ChronosFinetuner:
     @staticmethod
     def prepare_arrow_dataset(
         time_series: list[np.ndarray],
-        output_path: Union[str, Path],
+        output_path: str | Path,
         start_date: str = "2000-01-01",
         compression: str = "lz4",
     ) -> Path:
@@ -353,17 +350,17 @@ class ChronosFinetuner:
 
     def _finetune_chronos2(
         self,
-        inputs: Union[torch.Tensor, np.ndarray, list, pd.DataFrame],
+        inputs: torch.Tensor | np.ndarray | list | pd.DataFrame,
         prediction_length: int,
-        validation_inputs: Optional[Union[torch.Tensor, np.ndarray, list]] = None,
+        validation_inputs: torch.Tensor | np.ndarray | list | None = None,
         finetune_mode: str = "full",
-        lora_config: Optional[dict] = None,
-        context_length: Optional[int] = None,
+        lora_config: dict | None = None,
+        context_length: int | None = None,
         learning_rate: float = 1e-6,
         num_steps: int = 1000,
         batch_size: int = 256,
-        output_dir: Optional[Union[str, Path]] = None,
-        min_past: Optional[int] = None,
+        output_dir: str | Path | None = None,
+        min_past: int | None = None,
         warmup_steps: int = 0,
         weight_decay: float = 0.0,
         **extra_trainer_kwargs,
@@ -414,7 +411,7 @@ class ChronosFinetuner:
 
     def _finetune_chronos_t5(
         self,
-        data_path: Union[str, Path],
+        data_path: str | Path,
         context_length: int = 512,
         prediction_length: int = 64,
         freq: str = "D",
@@ -423,11 +420,11 @@ class ChronosFinetuner:
         per_device_batch_size: int = 32,
         save_steps: int = 500,
         log_steps: int = 100,
-        output_dir: Optional[Union[str, Path]] = None,
+        output_dir: str | Path | None = None,
         gradient_accumulation_steps: int = 1,
         warmup_ratio: float = 0.0,
         max_missing_prop: float = 0.1,
-        min_past: Optional[int] = None,
+        min_past: int | None = None,
         seed: int = 42,
         torch_compile: bool = False,
         tf32: bool = True,
@@ -500,8 +497,10 @@ class ChronosFinetuner:
         transformed_data = gts_dataset.transform(instance_splitter)
         transformed_data = transformed_data.transform(
             FilterTransformation(
-                lambda x: len(x["target"]) >= min_past + prediction_length
-                and np.isnan(x["target"]).mean() <= max_missing_prop
+                lambda x: (
+                    len(x["target"]) >= min_past + prediction_length
+                    and np.isnan(x["target"]).mean() <= max_missing_prop
+                )
             )
         )
 
@@ -574,8 +573,8 @@ class ChronosFinetuner:
         raise NotImplementedError("Chronos-Bolt fine-tuning not implemented here.")
 
     def load_finetuned(
-        self, repo_id: Optional[str] = None
-    ) -> Union[ChronosPipeline, Chronos2Pipeline]:
+        self, repo_id: str | None = None
+    ) -> ChronosPipeline | Chronos2Pipeline:
         """Load a fine-tuned Chronos pipeline.
 
         Args:
