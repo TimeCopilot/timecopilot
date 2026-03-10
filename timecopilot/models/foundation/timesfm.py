@@ -1,32 +1,36 @@
+import logging
 import os
+from abc import ABC, abstractmethod
 from contextlib import contextmanager
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 import timesfm
 import timesfm_v1
 import torch
+import torch.nn as nn
+import torch.optim as optim
 from huggingface_hub import repo_exists
 from timesfm import TimesFM_2p5_200M_torch
 from timesfm_v1.timesfm_base import DEFAULT_QUANTILES as DEFAULT_QUANTILES_TFM
+from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
 from ..utils.forecaster import Forecaster, QuantileConverter
 from .utils import TimeSeriesDataset
 
-
-import logging
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
-
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader, Dataset
+__all__ = [
+    "TimesFM",
+    "TimesFMFineTuner",
+    "TimesFMFineTuningConfig",
+    "TimeSeriesFineTuningDataset",
+]
 
 
 @dataclass
-class FineTuningConfig:
+class TimesFMFineTuningConfig:
     """Configuration for TimesFM model fine-tuning."""
 
     # Training parameters
@@ -94,7 +98,19 @@ class LoRALayer(nn.Module):
 
 
 class DoRALayer(nn.Module):
-    """Directional LoRA layer - extends LoRA with magnitude/direction decomposition."""
+    """Magnitude-scaled LoRA adapter layer.
+
+    .. note::
+        This is a pragmatic approximation of the DoRA paper
+        (Liu et al., 2024, "DoRA: Weight-Decomposed Low-Rank Adaptation").
+        Strict DoRA decomposes the *combined* weight matrix
+        (base + LoRA delta) into a direction (column-normalized) and a
+        learnable per-output magnitude vector.  The implementation here
+        instead applies the magnitude vector directly to the LoRA output
+        activation, which is simpler but not equivalent to the paper's
+        formulation.  For exact DoRA semantics, use a PEFT library such as
+        ``peft`` (HuggingFace).
+    """
 
     def __init__(
         self,
@@ -169,7 +185,7 @@ def _set_module_by_qualname(root: nn.Module, qualname: str, new_module: nn.Modul
 class FineTuningStrategy(ABC):
     """Base class for fine-tuning strategies."""
 
-    def __init__(self, model: nn.Module, config: FineTuningConfig):
+    def __init__(self, model: nn.Module, config: TimesFMFineTuningConfig):
         self.model = model
         self.config = config
         self.logger = logging.getLogger(__name__)
@@ -327,7 +343,7 @@ class TimeSeriesFineTuningDataset(Dataset):
 class TimesFMFineTuner:
     """Fine-tuner for TimesFM torch models."""
 
-    def __init__(self, model: nn.Module, config: FineTuningConfig):
+    def __init__(self, model: nn.Module, config: TimesFMFineTuningConfig):
         self.model = model
         self.config = config
         self.device = torch.device(config.device)
@@ -398,10 +414,10 @@ class TimesFMFineTuner:
 
         scheduler = self._create_cosine_scheduler(optimizer, train_loader) if self.config.use_cosine_schedule else None
 
-        self.logger.info(f"Starting fine-tuning for {self.config.num_epochs} epochs")
-        self.logger.info(f"Training samples: {len(train_dataset)}")
+        self.logger.info("Starting fine-tuning for %d epochs", self.config.num_epochs)
+        self.logger.info("Training samples: %d", len(train_dataset))
         if val_dataset is not None:
-            self.logger.info(f"Validation samples: {len(val_dataset)}")
+            self.logger.info("Validation samples: %d", len(val_dataset))
 
         for epoch in range(self.config.num_epochs):
             train_loss = self._train_epoch(train_loader, optimizer, scheduler)
@@ -409,13 +425,16 @@ class TimesFMFineTuner:
             self.training_history["learning_rate"].append(optimizer.param_groups[0]["lr"])
 
             self.logger.info(
-                f"Epoch {epoch + 1}/{self.config.num_epochs} - Train Loss: {train_loss:.6f}"
+                "Epoch %d/%d - Train Loss: %.6f",
+                epoch + 1,
+                self.config.num_epochs,
+                train_loss,
             )
 
             if val_loader is not None:
                 val_loss = self._validate(val_loader)
                 self.training_history["val_loss"].append(val_loss)
-                self.logger.info(f"Val Loss: {val_loss:.6f}")
+                self.logger.info("Val Loss: %.6f", val_loss)
 
                 if val_loss < self.best_val_loss:
                     self.best_val_loss = val_loss
@@ -460,7 +479,7 @@ class TimesFMFineTuner:
             total_loss += float(loss.item())
 
             if (batch_idx + 1) % self.config.log_every_n_steps == 0:
-                self.logger.debug(f"Batch {batch_idx + 1} - Loss: {loss.item():.6f}")
+                self.logger.debug("Batch %d - Loss: %.6f", batch_idx + 1, loss.item())
 
         return total_loss / max(1, len(train_loader))
 
@@ -506,12 +525,12 @@ class TimesFMFineTuner:
             },
             checkpoint_path,
         )
-        self.logger.info(f"Checkpoint saved: {checkpoint_path}")
+        self.logger.info("Checkpoint saved: %s", checkpoint_path)
 
     def load_checkpoint(self, checkpoint_path: str) -> None:
         checkpoint = torch.load(checkpoint_path, map_location=self.device)
         self.model.load_state_dict(checkpoint["model_state_dict"])
-        self.logger.info(f"Checkpoint loaded: {checkpoint_path}")
+        self.logger.info("Checkpoint loaded: %s", checkpoint_path)
 
 
 class _TimesFMV1(Forecaster):
@@ -762,7 +781,7 @@ class _TimesFMV2_p5(Forecaster):
             "Loaded TimesFM 2.5 object does not expose a torch.nn.Module for fine-tuning."
         )
 
-    def create_finetuner(self, config: FineTuningConfig) -> TimesFMFineTuner:
+    def create_finetuner(self, config: TimesFMFineTuningConfig) -> TimesFMFineTuner:
         backbone = self._load_torch_backbone()
         return TimesFMFineTuner(backbone, config)
 
@@ -770,7 +789,7 @@ class _TimesFMV2_p5(Forecaster):
         self,
         df: pd.DataFrame,
         prediction_length: int,
-        config: FineTuningConfig,
+        config: TimesFMFineTuningConfig,
         value_col: str = "y",
         train_split: float = 0.8,
     ) -> Dict[str, Any]:

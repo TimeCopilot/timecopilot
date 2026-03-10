@@ -65,6 +65,8 @@ class TimeGPT(Forecaster):
         self.model = model
         self.alias = alias
         self.finetuned_model_id: str | None = None
+        self._fit_freq: str | None = None
+        self._finetune_params: dict | None = None
 
     def _get_client(self) -> NixtlaClient:
         if self.api_key is None:  # noqa: SIM108
@@ -128,8 +130,8 @@ class TimeGPT(Forecaster):
         payload = {
             "finetuned_model_id": self.finetuned_model_id,
             "model": self.model,
-            "freq": getattr(self, "_fit_freq", None),
-            "params": getattr(self, "_finetune_params", None),
+            "freq": self._fit_freq,
+            "params": self._finetune_params,
         }
         with open(path, "w") as f:
             json.dump(payload, f, indent=2)
@@ -153,18 +155,14 @@ class TimeGPT(Forecaster):
         freq: str | None = None,
         level: list[int | float] | None = None,
         quantiles: list[float] | None = None,
-        finetune_steps: int = 0,
-        finetune_depth: int = 1,
-        finetune_loss: str = "default",
-        finetuned_model_id: str | None = None,
     ) -> pd.DataFrame:
         """Generate forecasts for time series data using the model.
 
         This method produces point forecasts and, optionally, prediction
         intervals or quantile forecasts. The input DataFrame can contain one
         or multiple time series in stacked (long) format. Uses a previously
-        fine-tuned model when ``finetuned_model_id`` is provided (argument or
-        set by ``fit()``); otherwise runs zero-shot.
+        fine-tuned model when ``self.finetuned_model_id`` is set (from a prior
+        call to ``fit()``); otherwise runs zero-shot.
 
         Args:
             df (pd.DataFrame):
@@ -194,11 +192,6 @@ class TimeGPT(Forecaster):
                 provided, the output DataFrame will contain additional columns
                 named in the format "model-q-{percentile}", where {percentile}
                 = 100 × quantile value.
-            finetune_steps (int): On-the-fly finetune steps (0 = off). Default 0.
-            finetune_depth (int): Finetune depth 1–5. Default 1.
-            finetune_loss (str): Loss for finetuning. Default "default".
-            finetuned_model_id (str, optional): ID of a saved fine-tuned model.
-                If not provided, uses the id set by ``fit()`` when present.
 
         Returns:
             pd.DataFrame:
@@ -210,6 +203,62 @@ class TimeGPT(Forecaster):
 
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
+        """
+        freq = self._maybe_infer_freq(df, freq)
+        client = self._get_client()
+        forecast_kwargs: dict = {
+            "df": df,
+            "h": h,
+            "freq": freq,
+            "model": self.model,
+            "level": level,
+            "quantiles": quantiles,
+        }
+        if self.finetuned_model_id is not None:
+            forecast_kwargs["finetuned_model_id"] = self.finetuned_model_id
+        fcst_df = client.forecast(**forecast_kwargs)
+        fcst_df["ds"] = pd.to_datetime(fcst_df["ds"])
+        cols = [col.replace("TimeGPT", self.alias) for col in fcst_df.columns]
+        fcst_df.columns = cols
+        return fcst_df
+
+    def forecast_finetuned(
+        self,
+        df: pd.DataFrame,
+        h: int,
+        freq: str | None = None,
+        level: list[int | float] | None = None,
+        quantiles: list[float] | None = None,
+        finetune_steps: int = 0,
+        finetune_depth: int = 1,
+        finetune_loss: str = "default",
+        finetuned_model_id: str | None = None,
+    ) -> pd.DataFrame:
+        """Generate forecasts with explicit fine-tuning control.
+
+        Like ``forecast()``, but exposes on-the-fly and persistent fine-tuning
+        parameters for users who need explicit control over them.  When
+        ``finetuned_model_id`` is not provided, the ID stored by a previous
+        ``fit()`` call (``self.finetuned_model_id``) is used automatically.
+
+        Args:
+            df (pd.DataFrame): Time series DataFrame with columns
+                ``unique_id``, ``ds``, ``y``.
+            h (int): Forecast horizon.
+            freq (str, optional): Frequency alias. Inferred if None.
+            level (list[int | float], optional): Confidence levels for
+                prediction intervals.
+            quantiles (list[float], optional): Quantile levels to forecast.
+            finetune_steps (int): On-the-fly fine-tuning steps. 0 = disabled.
+                Default 0.
+            finetune_depth (int): Fine-tuning depth 1–5. Default 1.
+            finetune_loss (str): Loss function for fine-tuning. Default
+                "default".
+            finetuned_model_id (str, optional): ID of a saved fine-tuned
+                model. Falls back to ``self.finetuned_model_id`` when None.
+
+        Returns:
+            pd.DataFrame: Forecast results (same format as ``forecast()``).
         """
         freq = self._maybe_infer_freq(df, freq)
         effective_finetuned_id = (

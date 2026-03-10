@@ -20,6 +20,8 @@ from .utils import TimeSeriesDataset
 
 
 logger = logging.getLogger(__name__)
+
+
 class Chronos(Forecaster):
     """
     Chronos models are large pre-trained models for time series forecasting,
@@ -261,6 +263,18 @@ class ChronosFinetuner:
         device: Optional[str] = None,
         dtype: torch.dtype = torch.float32,
     ):
+        """
+        Args:
+            repo_id (str): The Hugging Face Hub model ID or local path to the
+                Chronos model to fine-tune. Examples: "amazon/chronos-2",
+                "amazon/chronos-t5-small", or a local directory.
+            device (str, optional): Device to use for fine-tuning (e.g. "cuda:0",
+                "cpu"). If not provided, defaults to "cuda:0" when a GPU is
+                available, otherwise "cpu".
+            dtype (torch.dtype, optional): Data type for model weights and tensors.
+                Defaults to torch.float32. Use torch.bfloat16 for reduced memory
+                usage on supported hardware.
+        """
         self.repo_id = repo_id
         self.device = device or ("cuda:0" if torch.cuda.is_available() else "cpu")
         self.dtype = dtype
@@ -270,9 +284,9 @@ class ChronosFinetuner:
         repo_lower = self.repo_id.lower()
         if "chronos-2" in repo_lower or "chronos2" in repo_lower:
             self.model_family = "chronos-2"
-        elif "chronos-bolt" in repo_lower or "bolt" in repo_lower:
+        elif "chronos-bolt" in repo_lower:
             self.model_family = "chronos-bolt"
-        elif "chronos-t5" in repo_lower or "t5" in repo_lower:
+        elif "chronos-t5" in repo_lower:
             self.model_family = "chronos-t5"
         else:
             self.model_family = "unknown"
@@ -306,7 +320,38 @@ class ChronosFinetuner:
         ArrowWriter(compression=compression).write_to_file(dataset, path=output_path)
         return output_path
 
-    def finetune_chronos2(
+    def finetune(
+        self,
+        *args,
+        **kwargs,
+    ):
+        """Dispatch to the appropriate fine-tuning method based on the model family.
+
+        All positional and keyword arguments are forwarded to the underlying
+        method (``_finetune_chronos2``, ``_finetune_chronos_t5``, or
+        ``_finetune_chronos_bolt``). See each method's docstring for the
+        accepted parameters.
+
+        Returns:
+            The result of the dispatched fine-tuning method.
+
+        Raises:
+            ValueError: If the model family could not be inferred from
+                ``self.repo_id``.
+        """
+        if self.model_family == "chronos-2":
+            return self._finetune_chronos2(*args, **kwargs)
+        if self.model_family == "chronos-t5":
+            return self._finetune_chronos_t5(*args, **kwargs)
+        if self.model_family == "chronos-bolt":
+            return self._finetune_chronos_bolt(*args, **kwargs)
+        raise ValueError(
+            f"Cannot determine fine-tuning method for repo_id '{self.repo_id}' "
+            f"(model_family='{self.model_family}'). "
+            "Ensure the repo_id contains 'chronos-2', 'chronos-bolt', or 'chronos-t5'."
+        )
+
+    def _finetune_chronos2(
         self,
         inputs: Union[torch.Tensor, np.ndarray, list, pd.DataFrame],
         prediction_length: int,
@@ -325,7 +370,7 @@ class ChronosFinetuner:
     ) -> Chronos2Pipeline:
         if self.model_family not in ("chronos-2", "unknown"):
             raise ValueError(
-                f"finetune_chronos2 requires Chronos-2, got {self.repo_id} "
+                f"_finetune_chronos2 requires Chronos-2, got {self.repo_id} "
                 f"(family: {self.model_family})"
             )
 
@@ -367,11 +412,12 @@ class ChronosFinetuner:
             **extra_trainer_kwargs,
         )
 
-    def finetune_chronos_t5(
+    def _finetune_chronos_t5(
         self,
         data_path: Union[str, Path],
         context_length: int = 512,
         prediction_length: int = 64,
+        freq: str = "D",
         learning_rate: float = 1e-3,
         max_steps: int = 10_000,
         per_device_batch_size: int = 32,
@@ -390,7 +436,7 @@ class ChronosFinetuner:
     ) -> Path:
         if self.model_family not in ("chronos-t5", "unknown"):
             raise ValueError(
-                f"finetune_chronos_t5 requires Chronos-T5, got {self.repo_id} "
+                f"_finetune_chronos_t5 requires Chronos-T5, got {self.repo_id} "
                 f"(family: {self.model_family})"
             )
 
@@ -433,7 +479,7 @@ class ChronosFinetuner:
         )
         model = model.to(self.device)
 
-        gts_dataset = FileDataset(path=data_path, freq="D")
+        gts_dataset = FileDataset(path=data_path, freq=freq)
 
         instance_splitter = InstanceSplitter(
             target_field="target",
@@ -524,19 +570,36 @@ class ChronosFinetuner:
             return sorted(checkpoints, key=lambda p: int(p.name.split("-")[-1]))[-1]
         return output_dir
 
-    def finetune_chronos_bolt(self, *args, **kwargs):
+    def _finetune_chronos_bolt(self, *args, **kwargs):
         raise NotImplementedError("Chronos-Bolt fine-tuning not implemented here.")
 
-    def load_finetuned(self) -> Union[ChronosPipeline, Chronos2Pipeline]:
+    def load_finetuned(
+        self, repo_id: Optional[str] = None
+    ) -> Union[ChronosPipeline, Chronos2Pipeline]:
+        """Load a fine-tuned Chronos pipeline.
+
+        Args:
+            repo_id (str, optional): Path or Hugging Face Hub ID of the
+                fine-tuned checkpoint. If not provided, ``self.repo_id`` is used.
+
+        Returns:
+            A ``Chronos2Pipeline`` or ``ChronosPipeline`` loaded from the
+            checkpoint.
+
+        Raises:
+            NotImplementedError: For Chronos-Bolt (not yet supported).
+            ValueError: For unknown model families.
+        """
+        effective_repo_id = repo_id if repo_id is not None else self.repo_id
         if self.model_family == "chronos-2":
             return Chronos2Pipeline.from_pretrained(
-                self.repo_id,
+                effective_repo_id,
                 device_map=self.device,
                 torch_dtype=self.dtype,
             )
         if self.model_family == "chronos-t5":
             return ChronosPipeline.from_pretrained(
-                self.repo_id,
+                effective_repo_id,
                 device_map=self.device,
                 torch_dtype=self.dtype,
             )
