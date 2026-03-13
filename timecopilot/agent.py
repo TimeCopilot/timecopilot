@@ -330,11 +330,8 @@ def _transform_eval_to_text(eval_df, models):
         # Filter for cross-validation involving only one fold
         std = eval_df.get(f"{model}_std")
 
-        if std is None or std.iloc[0] == 0:
-            stability = "N/A"
-        else:
-            stability = f"{std.iloc[0]:.3f}"
-
+        stability = "N/A" if std is None or std.iloc[0] == 0 \
+            else f"{std.iloc[0]:.3f}"
         parts.append(
             f"{model}: mean MASE={mean:.3f}, stability={stability}"
         )
@@ -1014,12 +1011,15 @@ class TimeCopilot:
                 forecast_df=fcst_cv,
                 models=[model.alias for model in callable_models],
             )
-            eval_mean = eval_df.groupby(["metric"], as_index=False).mean(numeric_only=True)
-            eval_std = eval_df.groupby(["metric"], as_index=False).std(numeric_only=True)
+            eval_mean = eval_df.groupby(["metric"], as_index=False)\
+                .mean(numeric_only=True)
+            eval_std = eval_df.groupby(["metric"], as_index=False)\
+                .std(numeric_only=True)
             eval_df = eval_mean.copy()
 
             if n_folds > 1:
-                eval_std = eval_df.groupby(["metric"], as_index=False).std(numeric_only=True)
+                eval_std = eval_df.groupby(["metric"], as_index=False)\
+                    .std(numeric_only=True)
                 for col in eval_mean.columns:
                     if col != "metric":
                         eval_df[f"{col}_std"] = eval_std[col]
