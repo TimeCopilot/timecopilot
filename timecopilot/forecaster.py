@@ -191,6 +191,7 @@ class TimeCopilotForecaster(Forecaster):
         level: list[int | float] | None = None,
         quantiles: list[float] | None = None,
         cv_mode: str | None = None,
+        verbose: bool = True,
     ) -> pd.DataFrame:
         """
         Cross-validation with optional preset modes.
@@ -224,7 +225,7 @@ class TimeCopilotForecaster(Forecaster):
         """
 
         # Backward compatibility: explicit n_windows always wins
-        if n_windows == 1 and cv_mode is not None:
+        if cv_mode is not None:
             if cv_mode == "quick":
                 n_windows = 1
             elif cv_mode == "std":
@@ -233,6 +234,9 @@ class TimeCopilotForecaster(Forecaster):
                 n_windows = 5
             else:
                 raise ValueError("cv_mode must be one of: quick, std, robust")
+
+        if verbose:
+            print(f"[TimeCopilot] Starting cross-validation with {n_windows} window(s)")
 
         return self._call_models(
             "cross_validation",
@@ -245,6 +249,9 @@ class TimeCopilotForecaster(Forecaster):
             level=level,
             quantiles=quantiles,
         )
+
+        if verbose:
+            print(f"[TimeCopilot] Starting cross-validation with {n_windows} window(s)")
 
     def detect_anomalies(
         self,

@@ -146,7 +146,6 @@ class ForecastAgentOutput(BaseModel):
         """Pretty print the forecast results using rich formatting."""
         console = console or Console()
 
-        # Create header with title and overview
         header = Panel(
             f"[bold cyan]{self.selected_model}[/bold cyan] forecast analysis\n"
             f"[{'green' if self.is_better_than_seasonal_naive else 'red'}]"
@@ -157,7 +156,6 @@ class ForecastAgentOutput(BaseModel):
             style="blue",
         )
 
-        # Time Series Analysis Section - check if features_df is available
         ts_features = Table(
             title="Time Series Features",
             show_header=True,
@@ -167,13 +165,11 @@ class ForecastAgentOutput(BaseModel):
         ts_features.add_column("Feature", style="cyan")
         ts_features.add_column("Value", style="magenta")
 
-        # Use features_df if available (attached after forecast run)
         if features_df is not None:
             for feature_name, feature_value in features_df.iloc[0].items():
                 if pd.notna(feature_value):
                     ts_features.add_row(feature_name, f"{float(feature_value):.3f}")
         else:
-            # Fallback: show a note that detailed features are not available
             ts_features.add_row("Features", "Available in analysis text below")
 
         ts_analysis = Panel(
@@ -182,7 +178,6 @@ class ForecastAgentOutput(BaseModel):
             style="blue",
         )
 
-        # Model Selection Section
         model_details = Panel(
             f"[bold]Technical Details[/bold]\n{self.model_details}\n\n"
             f"[bold]Selection Rationale[/bold]\n{self.reason_for_selection}",
@@ -190,27 +185,39 @@ class ForecastAgentOutput(BaseModel):
             style="green",
         )
 
-        # Model Comparison Table - check if eval_df is available
         model_scores = Table(
             title="Model Performance", show_header=True, title_style="bold yellow"
         )
         model_scores.add_column("Model", style="yellow")
         model_scores.add_column("MASE", style="cyan", justify="right")
 
-        # Use eval_df if available (attached after forecast run)
+        has_std = False
         if eval_df is not None:
-            # Get the MASE scores from eval_df
+            has_std = any(col.endswith("_std") for col in eval_df.columns)
+
+        if has_std:
+            model_scores.add_column("STD", style="magenta", justify="right")
+
+        if eval_df is not None:
             model_scores_data = []
             for col in eval_df.columns:
-                if col != "metric" and pd.notna(eval_df[col].iloc[0]):
-                    model_scores_data.append((col, float(eval_df[col].iloc[0])))
+                if col.endswith("_std") or col == "metric":
+                    continue
 
-            # Sort by score (lower MASE is better)
+                mean = float(eval_df[col].iloc[0])
+                std = float(eval_df.get(f"{col}_std", pd.Series([0])).iloc[0])
+
+                if pd.notna(mean):
+                    model_scores_data.append((col, mean, std))
+
             model_scores_data.sort(key=lambda x: x[1])
-            for model, score in model_scores_data:
-                model_scores.add_row(model, f"{score:.3f}")
+
+            for model, mean, std in model_scores_data:
+                if has_std:
+                    model_scores.add_row(model, f"{mean:.3f}", f"{std:.3f}")
+                else:
+                    model_scores.add_row(model, f"{mean:.3f}")
         else:
-            # Fallback: show a note that detailed scores are not available
             model_scores.add_row("Scores", "Available in analysis text below")
 
         model_analysis = Panel(
@@ -219,16 +226,13 @@ class ForecastAgentOutput(BaseModel):
             style="yellow",
         )
 
-        # Forecast Results Section - check if fcst_df is available
         forecast_table = Table(
             title="Forecast Values", show_header=True, title_style="bold magenta"
         )
         forecast_table.add_column("Period", style="magenta")
         forecast_table.add_column("Value", style="cyan", justify="right")
 
-        # Use fcst_df if available (attached after forecast run)
         if fcst_df is not None:
-            # Show forecast values from fcst_df
             fcst_data = fcst_df.copy()
             if "ds" in fcst_data.columns and self.selected_model in fcst_data.columns:
                 for _, row in fcst_data.iterrows():
@@ -240,7 +244,6 @@ class ForecastAgentOutput(BaseModel):
                     value = row[self.selected_model]
                     forecast_table.add_row(period, f"{value:.2f}")
 
-                # Add note about number of periods if many
                 if len(fcst_data) > 12:
                     forecast_table.caption = (
                         f"[dim]Showing all {len(fcst_data)} forecasted periods. "
@@ -249,7 +252,6 @@ class ForecastAgentOutput(BaseModel):
             else:
                 forecast_table.add_row("Forecast", "Available in analysis text below")
         else:
-            # Fallback: show a note that detailed forecast is not available
             forecast_table.add_row("Forecast", "Available in analysis text below")
 
         forecast_analysis = Panel(
@@ -258,14 +260,12 @@ class ForecastAgentOutput(BaseModel):
             style="magenta",
         )
 
-        # Anomaly Detection Section
         anomaly_analysis = Panel(
             self.anomaly_analysis,
             title="[bold red]Anomaly Detection[/bold red]",
             style="red",
         )
 
-        # Optional user response section
         user_response = None
         if self.user_query_response:
             user_response = Panel(
@@ -274,7 +274,6 @@ class ForecastAgentOutput(BaseModel):
                 style="cyan",
             )
 
-        # Print all sections with clear separation
         console.print("\n")
         console.print(header)
 
@@ -300,7 +299,6 @@ class ForecastAgentOutput(BaseModel):
 
         console.print("\n")
 
-
 def _transform_time_series_to_text(df: pd.DataFrame) -> str:
     df_agg = df.groupby("unique_id").agg(list)
     output = (
@@ -314,214 +312,93 @@ def _transform_time_series_to_text(df: pd.DataFrame) -> str:
     return output
 
 
-def _summarize_time_series_for_llm(df: pd.DataFrame, max_series: int = 50) -> str:
-    summaries = []
-
-    grouped = df.groupby("unique_id")
-
-    for i, (uid, g) in enumerate(grouped):
-        if i >= max_series:
-            break
-
-        y = g["y"]
-
-        summaries.append(
-            {
-                "series": uid[:12],  # shorten UUID
-                "n_points": int(len(g)),
-                "mean": round(float(y.mean()), 3),
-                "std": round(float(y.std()), 3),
-                "q25": round(float(y.quantile(0.25)), 3),
-                "median": round(float(y.median()), 3),
-                "q75": round(float(y.quantile(0.75)), 3),
-                "min": round(float(y.min()), 3),
-                "max": round(float(y.max()), 3),
-            }
-        )
-
-    dataset_summary = {
-        "n_series_total": int(df["unique_id"].nunique()),
-        "n_series_sampled": len(summaries),
-        "series_sample": summaries,
-    }
-
-    return (
-        "Summary statistics for a sample of the dataset time series. "
-        "The dataset contains many series; only a subset is shown for context. "
-        f"{dataset_summary}"
-    )
-
-
-# def _transform_features_to_text(features_df: pd.DataFrame) -> str:
-#     output = (
-#         "these are the time series features in json format where the key is "
-#         "the identifier of the time series and the values is also a json of "
-#         "feature names and their values."
-#         f"{features_df.to_json(orient='index')}"
-#     )
-#     return output
-
-
 def _transform_features_to_text(features_df: pd.DataFrame) -> str:
-    # Base on similarly named function, edited to involve the summary
+    output = (
+        "these are the time series features in json format where the key is "
+        "the identifier of the time series and the values is also a json of "
+        "feature names and their values."
+        f"{features_df.to_json(orient='index')}"
+    )
+    return output
 
-    summaries = []
+def _transform_eval_to_text(eval_df, models):
+    parts = []
 
-    for uid, row in features_df.iterrows():
-        summaries.append(
-            {
-                "series": uid,
-                "trend_strength": float(row.get("trend_strength", 0)),
-                "seasonal_strength": float(row.get("seasonal_strength", 0)),
-                "spikiness": float(row.get("spikiness", 0)),
-                "lumpiness": float(row.get("lumpiness", 0)),
-                "entropy": float(row.get("entropy", 0)),
-                "acf1": float(row.get("acf1", 0)),
-            }
+    for model in models:
+        mean = eval_df[model].iloc[0]
+
+        # Filter for cross-validation involving only one fold
+        std = eval_df.get(f"{model}_std")
+
+        if std is None or std.iloc[0] == 0:
+            stability = "N/A"
+        else:
+            stability = f"{std.iloc[0]:.3f}"
+
+        parts.append(
+            f"{model}: mean MASE={mean:.3f}, stability={stability}"
         )
 
-    return (
-        "Key time series diagnostic features extracted from the dataset. "
-        "These features describe structural properties of each series. "
-        f"{summaries}"
+    return ", ".join(parts)
+
+def _transform_fcst_to_text(fcst_df: pd.DataFrame) -> str:
+    df_agg = fcst_df.groupby("unique_id").agg(list)
+    output = (
+        "these are the forecasted values in json format where the key is the "
+        "identifier of the time series and the values is also a json of two "
+        "elements: the first element is the date column and the second "
+        "element is the value column."
+        f"{df_agg.to_json(orient='index')}"
     )
-
-
-def _transform_eval_to_text(eval_df: pd.DataFrame, models: list[str]) -> str:
-    output = ", ".join([f"{model}: {eval_df[model].iloc[0]}" for model in models])
     return output
 
 
-# def _transform_fcst_to_text(fcst_df: pd.DataFrame) -> str:
-#     df_agg = fcst_df.groupby("unique_id").agg(list)
-#     output = (
-#         "these are the forecasted values in json format where the key is the "
-#         "identifier of the time series and the values is also a json of two "
-#         "elements: the first element is the date column and the second "
-#         "element is the value column."
-#         f"{df_agg.to_json(orient='index')}"
-#     )
-#     return output
-
-
-def _transform_fcst_to_text(fcst_df: pd.DataFrame) -> str:
-    summaries = []
-    # Identically named function commented out for tokenization ease purposes.
-
-    for uid, g in fcst_df.groupby("unique_id"):
-        value_cols = [c for c in g.columns if c not in ["unique_id", "ds"]]
-
-        for col in value_cols:
-            y = g[col]
-
-            summaries.append(
-                {
-                    "series": uid,
-                    "model": col,
-                    "horizon": int(len(g)),
-                    "start_forecast": str(g["ds"].min()),
-                    "end_forecast": str(g["ds"].max()),
-                    "mean_forecast": float(y.mean()),
-                    "std_forecast": float(y.std()),
-                    "min_forecast": float(y.min()),
-                    "q25_forecast": float(y.quantile(0.25)),
-                    "median_forecast": float(y.median()),
-                    "q75_forecast": float(y.quantile(0.75)),
-                    "max_forecast": float(y.max()),
-                }
-            )
-
-    return (
-        "These are summary statistics of the generated forecasts. "
-        "Each entry corresponds to one forecast series and model. "
-        "The values describe the forecast distribution across the "
-        " horizon, not the raw predictions. "
-        f"{summaries}"
-    )
-
-
-# def _transform_anomalies_to_text(anomalies_df: pd.DataFrame) -> str:
-#     """Transform anomaly detection results to text for the agent."""
-#     # Get anomaly columns
-#     anomaly_cols = [col for col in anomalies_df.columns if col.endswith("-anomaly")]
-
-#     if not anomaly_cols:
-#         return "No anomaly detection results available."
-
-#     # Count anomalies per series
-#     anomaly_summary = {}
-#     for unique_id in anomalies_df["unique_id"].unique():
-#         series_data = anomalies_df[anomalies_df["unique_id"] == unique_id]
-#         series_summary = {}
-
-#         for anomaly_col in anomaly_cols:
-#             if anomaly_col in series_data.columns:
-#                 anomaly_count = series_data[anomaly_col].sum()
-#                 total_points = len(series_data)
-#                 anomaly_rate = (
-#                     (anomaly_count / total_points) * 100 if total_points > 0 else 0
-#                 )
-
-#                 # Get timestamps of anomalies
-#                 anomalies = series_data[series_data[anomaly_col]]
-#                 anomaly_dates = (
-#                     anomalies["ds"].dt.strftime("%Y-%m-%d").tolist()
-#                     if len(anomalies) > 0
-#                     else []
-#                 )
-
-#                 series_summary[anomaly_col] = {
-#                     "count": int(anomaly_count),
-#                     "rate_percent": round(anomaly_rate, 2),
-#                     "dates": anomaly_dates[:10],  # Limit to first 10
-#                     "total_points": int(total_points),
-#                 }
-
-#         anomaly_summary[unique_id] = series_summary
-
-#     output = (
-#         "these are the anomaly detection results in json format where the key is the "
-#         "identifier of the time series and the values contain anomaly statistics "
-#         "including count, rate, and timestamps of detected anomalies. "
-#         f"{anomaly_summary}"
-#     )
-#     return output
-
-
 def _transform_anomalies_to_text(anomalies_df: pd.DataFrame) -> str:
-    # Creating equally named function that will summarise information regarding
-    # anomalies to reduce tokenization traffic towards LLM
+    """Transform anomaly detection results to text for the agent."""
+    # Get anomaly columns
     anomaly_cols = [col for col in anomalies_df.columns if col.endswith("-anomaly")]
 
     if not anomaly_cols:
         return "No anomaly detection results available."
 
-    summaries = []
-
-    for uid, g in anomalies_df.groupby("unique_id"):
-        total_points = int(len(g))
+    # Count anomalies per series
+    anomaly_summary = {}
+    for unique_id in anomalies_df["unique_id"].unique():
+        series_data = anomalies_df[anomalies_df["unique_id"] == unique_id]
+        series_summary = {}
 
         for anomaly_col in anomaly_cols:
-            anomaly_count = int(g[anomaly_col].sum())
-            anomaly_rate = (
-                (anomaly_count / total_points) * 100 if total_points > 0 else 0
-            )
+            if anomaly_col in series_data.columns:
+                anomaly_count = series_data[anomaly_col].sum()
+                total_points = len(series_data)
+                anomaly_rate = (
+                    (anomaly_count / total_points) * 100 if total_points > 0 else 0
+                )
 
-            summaries.append(
-                {
-                    "series": uid,
-                    "model": anomaly_col.replace("-anomaly", ""),
-                    "total_points": total_points,
-                    "anomaly_count": anomaly_count,
-                    "anomaly_rate_pct": round(anomaly_rate, 3),
+                # Get timestamps of anomalies
+                anomalies = series_data[series_data[anomaly_col]]
+                anomaly_dates = (
+                    anomalies["ds"].dt.strftime("%Y-%m-%d").tolist()
+                    if len(anomalies) > 0
+                    else []
+                )
+
+                series_summary[anomaly_col] = {
+                    "count": int(anomaly_count),
+                    "rate_percent": round(anomaly_rate, 2),
+                    "dates": anomaly_dates[:10],  # Limit to first 10
+                    "total_points": int(total_points),
                 }
-            )
 
-    return (
-        "These are summary statistics of anomaly detection results. "
-        "Each entry reports how many anomalies were detected for a series and model. "
-        f"{summaries}"
+        anomaly_summary[unique_id] = series_summary
+
+    output = (
+        "these are the anomaly detection results in json format where the key is the "
+        "identifier of the time series and the values contain anomaly statistics "
+        "including count, rate, and timestamps of detected anomalies. "
+        f"{anomaly_summary}"
     )
+    return output
 
 
 def _is_sktime_forecaster(obj: object) -> bool:
@@ -591,12 +468,11 @@ class TimeCopilot:
         if "SeasonalNaive" not in self.forecasters:
             self.forecasters["SeasonalNaive"] = SeasonalNaive()
         self.system_prompt = f"""
-        You're a forecasting expert. You will be given summary statistics
-        describing one or more time series, and your task is to determine
-        the best forecasting model for them.
+        You're a forecasting expert. You will be given a time series 
+        as a list of numbers and your task is to determine the best model for it. 
         You have access to the following tools:
 
-        1. tsfeatures_tool: Calculates time series features to help
+        1. tsfeatures_tool: Calculates time series features to help 
         with model selection.
         Available features are: {", ".join(TSFEATURES.keys())}
 
@@ -1066,9 +942,7 @@ class TimeCopilot:
         async def add_time_series(
             ctx: RunContext[ExperimentDataset],
         ) -> str:
-            # return _transform_time_series_to_text(ctx.deps.df)
-            # keeping things traceable regarding previously used function
-            return _summarize_time_series_for_llm(ctx.deps.df)
+            return _transform_time_series_to_text(ctx.deps.df)
 
         @self.forecasting_agent.tool
         async def tsfeatures_tool(
@@ -1110,7 +984,6 @@ class TimeCopilot:
         async def cross_validation_tool(
             ctx: RunContext[ExperimentDataset],
             models: list[str],
-            cv_mode: str | None = None,
         ) -> str:
             """Perform cross-validation to evaluate and compare multiple forecasting
             models.
@@ -1134,16 +1007,23 @@ class TimeCopilot:
                 df=ctx.deps.df,
                 h=ctx.deps.h,
                 freq=ctx.deps.freq,
-                cv_mode=cv_mode,
+                cv_mode=ctx.deps.cv_mode,
             )
+            n_folds = fcst_cv["cutoff"].nunique()
             eval_df = ctx.deps.evaluate_forecast_df(
                 forecast_df=fcst_cv,
                 models=[model.alias for model in callable_models],
             )
-            eval_df = eval_df.groupby(
-                ["metric"],
-                as_index=False,
-            ).mean(numeric_only=True)
+            eval_mean = eval_df.groupby(["metric"], as_index=False).mean(numeric_only=True)
+            eval_std = eval_df.groupby(["metric"], as_index=False).std(numeric_only=True)
+            eval_df = eval_mean.copy()
+
+            if n_folds > 1:
+                eval_std = eval_df.groupby(["metric"], as_index=False).std(numeric_only=True)
+                for col in eval_mean.columns:
+                    if col != "metric":
+                        eval_df[f"{col}_std"] = eval_std[col]
+
             self.eval_df = eval_df
             self.eval_forecasters = models
             return _transform_eval_to_text(eval_df, models)
@@ -1356,6 +1236,7 @@ class TimeCopilot:
         freq: str | None = None,
         seasonality: int | None = None,
         query: str | None = None,
+        cv_mode: str | None = None,
     ) -> AgentRunResult[ForecastAgentOutput]:
         """Generate forecast and anomaly analysis.
 
@@ -1397,6 +1278,7 @@ class TimeCopilot:
             seasonality,
             query,
         )
+        self.dataset.cv_mode = cv_mode
         query = query if query else "complete system prompt"
         result = self.forecasting_agent.run_sync(
             user_prompt=query,
@@ -1419,7 +1301,7 @@ class TimeCopilot:
         """Generate forecast and analysis.
 
         .. deprecated:: 0.1.0
-            Use :meth:`` instead. This method is kept for backwards
+            Use :meth:`analyze` instead. This method is kept for backwards
             compatibility.
 
         Args:
@@ -1644,7 +1526,6 @@ class AsyncTimeCopilot(TimeCopilot):
         freq: str | None = None,
         seasonality: int | None = None,
         query: str | None = None,
-        cv_mode: str | None = None,
     ) -> AgentRunResult[ForecastAgentOutput]:
         """
         Asynchronously generate forecast and analysis for the provided
