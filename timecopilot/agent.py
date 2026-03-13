@@ -1110,6 +1110,7 @@ class TimeCopilot:
         async def cross_validation_tool(
             ctx: RunContext[ExperimentDataset],
             models: list[str],
+            cv_mode: str | None = None,
         ) -> str:
             """Perform cross-validation to evaluate and compare multiple forecasting
             models.
@@ -1133,6 +1134,7 @@ class TimeCopilot:
                 df=ctx.deps.df,
                 h=ctx.deps.h,
                 freq=ctx.deps.freq,
+                cv_mode=cv_mode,
             )
             eval_df = ctx.deps.evaluate_forecast_df(
                 forecast_df=fcst_cv,
@@ -1417,7 +1419,7 @@ class TimeCopilot:
         """Generate forecast and analysis.
 
         .. deprecated:: 0.1.0
-            Use :meth:`analyze` instead. This method is kept for backwards
+            Use :meth:`` instead. This method is kept for backwards
             compatibility.
 
         Args:
@@ -1565,6 +1567,7 @@ class AsyncTimeCopilot(TimeCopilot):
         freq: str | None = None,
         seasonality: int | None = None,
         query: str | None = None,
+        cv_mode: str | None = None,
     ) -> AgentRunResult[ForecastAgentOutput]:
         """
         Asynchronously analyze time series data with forecasting, anomaly detection,
@@ -1641,6 +1644,7 @@ class AsyncTimeCopilot(TimeCopilot):
         freq: str | None = None,
         seasonality: int | None = None,
         query: str | None = None,
+        cv_mode: str | None = None,
     ) -> AgentRunResult[ForecastAgentOutput]:
         """
         Asynchronously generate forecast and analysis for the provided
