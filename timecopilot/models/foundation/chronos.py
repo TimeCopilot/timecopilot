@@ -201,11 +201,21 @@ class Chronos(Forecaster):
     @contextmanager
     def _get_model(self) -> BaseChronosPipeline:
         device_map = "cuda:0" if torch.cuda.is_available() else "cpu"
-        model = BaseChronosPipeline.from_pretrained(
-            self.repo_id,
-            device_map=device_map,
-            dtype=self.dtype,
-        )
+        repo_path = Path(self.repo_id)
+        # LoRA checkpoints save adapter_config.json; BaseChronosPipeline.from_pretrained
+        # uses AutoConfig and fails. Chronos2Pipeline.from_pretrained handles LoRA via PEFT.
+        if repo_path.is_dir() and (repo_path / "adapter_config.json").exists():
+            model = Chronos2Pipeline.from_pretrained(
+                self.repo_id,
+                device_map=device_map,
+                torch_dtype=self.dtype,
+            )
+        else:
+            model = BaseChronosPipeline.from_pretrained(
+                self.repo_id,
+                device_map=device_map,
+                dtype=self.dtype,
+            )
         try:
             yield model
         finally:
