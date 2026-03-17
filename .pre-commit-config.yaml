@@ -5,15 +5,22 @@ repos:
     hooks:
       - id: ruff
         args: [--fix]
+        stages: [pre-commit, manual]
       - id: ruff-format
+        stages: [pre-commit, manual]
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.8.0
     hooks:
       - id: mypy
         args: [--ignore-missing-imports, --check-untyped-defs]
         additional_dependencies: [types-PyYAML, types-requests]
+        stages: [pre-commit, manual]
   - repo: https://github.com/pappasam/toml-sort
     rev: v0.24.2
     hooks:
-      - id: toml-sort
+      - id: toml-sort-fix
         args: ["--all", "--trailing-comma-inline-array", "--in-place"]
+        stages: [pre-commit]
+      - id: toml-sort
+        args: ["--all", "--trailing-comma-inline-array", "--in-place", "--check"]
+        stages: [manual]
