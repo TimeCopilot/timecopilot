@@ -4,6 +4,7 @@
     options:
         members:
             - Chronos
+            - ChronosFinetuningConfig
 
 ::: timecopilot.models.foundation.flowstate
     options:
