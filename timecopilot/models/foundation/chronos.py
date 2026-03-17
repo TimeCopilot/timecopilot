@@ -21,15 +21,28 @@ from .utils import TimeSeriesDataset
 class ChronosFinetuningConfig:
     """Configuration for finetuning a Chronos pipeline before forecasting.
 
-    Parameters are passed through to the chronos pipeline's ``fit()`` method,
-    with ``finetune_steps`` mapped to the library's ``num_steps`` argument.
-    The forecast horizon ``h`` passed to ``forecast(df, h, ...)`` is used as
-    ``prediction_length`` for ``fit()``. The class-level ``batch_size`` on
-    ``Chronos`` is for inference only; use this config's ``batch_size`` to
-    control the training batch size when finetuning (optional).
+    Pass an instance to the ``Chronos`` constructor; when you call
+    ``forecast()``, the model is finetuned on the context data before
+    predicting. The forecast horizon ``h`` from ``forecast(df, h, ...)`` is
+    used as ``prediction_length`` for the internal ``fit()``. Parameters are
+    passed through to the chronos pipeline's ``fit()``, with ``finetune_steps``
+    mapped to the library's ``num_steps``.
 
-    For parameter details and examples, see the chronos-forecasting Chronos-2
-    quickstart: https://github.com/amazon-science/chronos-forecasting/blob/main/notebooks/chronos-2-quickstart.ipynb
+    Attributes:
+        finetune_steps: Number of training steps. Passed to the pipeline as
+            ``num_steps``. Defaults to 1000.
+        learning_rate: Optimizer learning rate. Defaults to None (chronos
+            uses 1e-6; for LoRA, 1e-5 is recommended).
+        batch_size: Training batch size for finetuning. Defaults to None
+            (chronos uses 256). The ``batch_size`` on ``Chronos`` is for
+            inference only.
+        finetune_mode: ``"full"`` (full parameter update) or ``"lora"``
+            (low-rank adaptation). Defaults to None (chronos uses ``"full"``).
+        lora_config: LoRA configuration when ``finetune_mode="lora"``. Defaults
+            to None. See the Chronos-2 quickstart for details.
+    
+    Notes:
+        - Based on the [Chronos-2 quickstart](https://github.com/amazon-science/chronos-forecasting/blob/main/notebooks/chronos-2-quickstart.ipynb).
     """
 
     finetune_steps: int = 1000
