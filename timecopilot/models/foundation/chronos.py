@@ -200,17 +200,14 @@ class Chronos(Forecaster):
         # LoRA checkpoints save adapter_config.json; BaseChronosPipeline.from_pretrained
         # uses AutoConfig and fails. Chronos2Pipeline.from_pretrained handles LoRA via PEFT.
         if repo_path.is_dir() and (repo_path / "adapter_config.json").exists():
-            model = Chronos2Pipeline.from_pretrained(
-                self.repo_id,
-                device_map=device_map,
-                torch_dtype=self.dtype,
-            )
+            cls = Chronos2Pipeline
         else:
-            model = BaseChronosPipeline.from_pretrained(
-                self.repo_id,
-                device_map=device_map,
-                dtype=self.dtype,
-            )
+            cls = BaseChronosPipeline
+        model = cls.from_pretrained(
+            self.repo_id,
+            device_map=device_map,
+            torch_dtype=self.dtype,
+        )
         try:
             yield model
         finally:
