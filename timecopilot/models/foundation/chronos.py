@@ -1,4 +1,6 @@
 from contextlib import contextmanager
+from dataclasses import dataclass
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -15,6 +17,28 @@ from ..utils.forecaster import Forecaster, QuantileConverter
 from .utils import TimeSeriesDataset
 
 
+@dataclass
+class ChronosFinetuningConfig:
+    """Configuration for finetuning a Chronos pipeline before forecasting.
+
+    Parameters are passed through to the chronos pipeline's ``fit()`` method,
+    with ``finetune_steps`` mapped to the library's ``num_steps`` argument.
+    The forecast horizon ``h`` passed to ``forecast(df, h, ...)`` is used as
+    ``prediction_length`` for ``fit()``. The class-level ``batch_size`` on
+    ``Chronos`` is for inference only; use this config's ``batch_size`` to
+    control the training batch size when finetuning (optional).
+
+    For parameter details and examples, see the chronos-forecasting Chronos-2
+    quickstart: https://github.com/amazon-science/chronos-forecasting/blob/main/notebooks/chronos-2-quickstart.ipynb
+    """
+
+    finetune_steps: int = 1000
+    learning_rate: float | None = None
+    batch_size: int | None = None
+    finetune_mode: Literal["full", "lora"] | None = None
+    lora_config: Any = None
+
+
 class Chronos(Forecaster):
     """
     Chronos models are large pre-trained models for time series forecasting,
@@ -29,6 +53,7 @@ class Chronos(Forecaster):
         batch_size: int = 16,
         alias: str = "Chronos",
         dtype: torch.dtype = torch.float32,
+        finetuning_config: ChronosFinetuningConfig | None = None,
     ):
         # ruff: noqa: E501
         """
@@ -40,16 +65,23 @@ class Chronos(Forecaster):
                 the full list of available models at
                 [Hugging Face](https://huggingface.co/collections/
                 amazon/chronos-models-65f1791d630a8d57cb718444)
-            batch_size (int, optional): Batch size to use for inference.
+            batch_size (int, optional): Batch size to use for inference only.
                 Larger models may require smaller batch sizes due to GPU
                 memory constraints. Defaults to 16. For Chronos-Bolt models,
-                higher batch sizes (e.g., 256) are possible.
+                higher batch sizes (e.g., 256) are possible. When finetuning,
+                use ``finetuning_config.batch_size`` to set the training
+                batch size (optional; library default when not set).
             alias (str, optional): Name to use for the model in output
                 DataFrames and logs. Defaults to "Chronos".
             dtype (torch.dtype, optional): Data type for model weights and
                 input tensors. Defaults to torch.float32 for numerical
                 precision. Use torch.bfloat16 for reduced memory usage on
                 supported hardware.
+            finetuning_config (ChronosFinetuningConfig | None, optional): If
+                provided, the model is finetuned on the forecast context
+                data before predicting. See ChronosFinetuningConfig and the
+                [Chronos-2 quickstart](https://github.com/amazon-science/chronos-forecasting/blob/main/notebooks/chronos-2-quickstart.ipynb)
+                for parameter details.
 
         Notes:
             **Available models:**
@@ -57,6 +89,8 @@ class Chronos(Forecaster):
             | Model ID                                                               | Parameters |
             | ---------------------------------------------------------------------- | ---------- |
             | [`amazon/chronos-2`](https://huggingface.co/amazon/chronos-2)   | 120M         |
+            | [`autogluon/chronos-2-synth`](https://huggingface.co/autogluon/chronos-2-synth)   | 120M         |
+            | [`autogluon/chronos-2-small`](https://huggingface.co/autogluon/chronos-2-small)   | 28M         |
             | [`amazon/chronos-bolt-tiny`](https://huggingface.co/amazon/chronos-bolt-tiny)   | 9M         |
             | [`amazon/chronos-bolt-mini`](https://huggingface.co/amazon/chronos-bolt-mini)   | 21M        |
             | [`amazon/chronos-bolt-small`](https://huggingface.co/amazon/chronos-bolt-small) | 48M        |
@@ -90,6 +124,50 @@ class Chronos(Forecaster):
         self.batch_size = batch_size
         self.alias = alias
         self.dtype = dtype
+        self.finetuning_config = finetuning_config
+
+    @staticmethod
+    def _build_fit_inputs_from_df(df: pd.DataFrame) -> list[dict[str, Any]]:
+        """Build list of fit inputs from a DataFrame (unique_id, ds, y)."""
+        df_sorted = df.sort_values(by=["unique_id", "ds"])
+        return [
+            {"target": group["y"].values}
+            for _, group in df_sorted.groupby("unique_id")
+        ]
+
+    def _maybe_finetune(
+        self,
+        model: BaseChronosPipeline,
+        df: pd.DataFrame,
+        h: int,
+    ) -> BaseChronosPipeline:
+        """If finetuning_config is set, finetune the model on df and return it."""
+        if self.finetuning_config is None:
+            return model
+        if not hasattr(model, "fit"):
+            raise ValueError(
+                f"Finetuning is not supported for model {self.repo_id}; "
+                "the loaded pipeline has no fit method."
+            )
+        train_inputs = self._build_fit_inputs_from_df(df)
+        fit_kwargs: dict[str, Any] = {
+            "inputs": train_inputs,
+            "prediction_length": h,
+            "num_steps": self.finetuning_config.finetune_steps,
+        }
+        if self.finetuning_config.learning_rate is not None:
+            fit_kwargs["learning_rate"] = (
+                self.finetuning_config.learning_rate
+            )
+        if self.finetuning_config.batch_size is not None:
+            fit_kwargs["batch_size"] = self.finetuning_config.batch_size
+        if self.finetuning_config.finetune_mode is not None:
+            fit_kwargs["finetune_mode"] = (
+                self.finetuning_config.finetune_mode
+            )
+        if self.finetuning_config.lora_config is not None:
+            fit_kwargs["lora_config"] = self.finetuning_config.lora_config
+        return model.fit(**fit_kwargs)
 
     @contextmanager
     def _get_model(self) -> BaseChronosPipeline:
@@ -97,7 +175,7 @@ class Chronos(Forecaster):
         model = BaseChronosPipeline.from_pretrained(
             self.repo_id,
             device_map=device_map,
-            torch_dtype=self.dtype,
+            dtype=self.dtype,
         )
         try:
             yield model
@@ -221,6 +299,9 @@ class Chronos(Forecaster):
 
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
+
+            When ``finetuning_config`` was set at construction, the model is
+            finetuned on ``df`` before predicting.
         """
         freq = self._maybe_infer_freq(df, freq)
         qc = QuantileConverter(level=level, quantiles=quantiles)
@@ -229,6 +310,7 @@ class Chronos(Forecaster):
         )
         fcst_df = dataset.make_future_dataframe(h=h, freq=freq)
         with self._get_model() as model:
+            model = self._maybe_finetune(model, df, h)
             fcsts_mean_np, fcsts_quantiles_np = self._predict(
                 model,
                 dataset,
