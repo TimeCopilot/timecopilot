@@ -28,6 +28,7 @@ nav:
           - examples/ts-foundation-models-comparison-quickstart.ipynb
           - examples/gift-eval.ipynb
           - examples/chronos-family.ipynb
+          - examples/finetuning.ipynb
           - examples/cryptocurrency-quickstart.ipynb
           - examples/sktime.ipynb
           - examples/patchtst-fm.ipynb
