@@ -156,8 +156,7 @@ class Chronos(Forecaster):
         """Build list of fit inputs from a DataFrame (unique_id, ds, y)."""
         df_sorted = df.sort_values(by=["unique_id", "ds"])
         return [
-            {"target": group["y"].values}
-            for _, group in df_sorted.groupby("unique_id")
+            {"target": group["y"].values} for _, group in df_sorted.groupby("unique_id")
         ]
 
     def _maybe_finetune(
@@ -181,15 +180,11 @@ class Chronos(Forecaster):
             "num_steps": self.finetuning_config.finetune_steps,
         }
         if self.finetuning_config.learning_rate is not None:
-            fit_kwargs["learning_rate"] = (
-                self.finetuning_config.learning_rate
-            )
+            fit_kwargs["learning_rate"] = self.finetuning_config.learning_rate
         if self.finetuning_config.batch_size is not None:
             fit_kwargs["batch_size"] = self.finetuning_config.batch_size
         if self.finetuning_config.finetune_mode is not None:
-            fit_kwargs["finetune_mode"] = (
-                self.finetuning_config.finetune_mode
-            )
+            fit_kwargs["finetune_mode"] = self.finetuning_config.finetune_mode
         if self.finetuning_config.lora_config is not None:
             fit_kwargs["lora_config"] = self.finetuning_config.lora_config
         if self.finetuning_config.save_path is not None:

@@ -2,7 +2,6 @@ import sys
 
 import pytest
 
-from peft import LoraConfig
 from timecopilot.models.ensembles.median import MedianEnsemble
 from timecopilot.models.foundation.chronos import Chronos, ChronosFinetuningConfig
 from timecopilot.models.foundation.flowstate import FlowState
@@ -67,17 +66,17 @@ models = [
     Chronos(repo_id="amazon/chronos-2", alias="Chronos-2"),
     Chronos(repo_id="amazon/chronos-2", alias="Chronos-2", batch_size=2),
     Chronos(
-        repo_id="autogluon/chronos-2-small", 
-        alias="chronos2-finetuned", 
+        repo_id="autogluon/chronos-2-small",
+        alias="chronos2-finetuned",
         finetuning_config=ChronosFinetuningConfig(finetune_steps=1),
         batch_size=2,
     ),
     Chronos(
-        repo_id="amazon/chronos-2", 
-        alias="chronos2-finetuned-lora", 
+        repo_id="amazon/chronos-2",
+        alias="chronos2-finetuned-lora",
         finetuning_config=ChronosFinetuningConfig(
-            finetune_steps=3, 
-            finetune_mode="lora", 
+            finetune_steps=3,
+            finetune_mode="lora",
             learning_rate=1e-5,
         ),
         batch_size=2,
@@ -125,7 +124,6 @@ if sys.version_info >= (3, 11):
 if sys.version_info < (3, 13):
     from tabpfn_time_series import TabPFNMode
 
-    from timecopilot.models.foundation.sundial import Sundial
     from timecopilot.models.foundation.tabpfn import TabPFN
 
     models.append(TabPFN(mode=TabPFNMode.MOCK))

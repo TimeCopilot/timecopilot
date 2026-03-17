@@ -76,10 +76,10 @@ def test_chronos_forecast_uses_configured_dtype(mocker):
 
 
 def test_chronos_finetuning_save_and_reuse(tmp_path):
-    """Finetune with save_path, run cross-validation, then forecast using the saved path."""
-    from timecopilot.models.foundation.chronos import Chronos, ChronosFinetuningConfig
-
+    """Finetune with save_path, run cross-validation,"""
+    """then forecast using the saved path."""
     from ..test_models import generate_series
+    from timecopilot.models.foundation.chronos import Chronos, ChronosFinetuningConfig
 
     save_path = tmp_path / "chronos2-finetuned"
     config = ChronosFinetuningConfig(
@@ -99,7 +99,7 @@ def test_chronos_finetuning_save_and_reuse(tmp_path):
     assert "Chronos" in cv_df.columns
 
     assert save_path.is_dir(), f"Finetuned model should be saved to {save_path}"
-    assert (save_path / "config.json").exists(), "Expected config.json in saved checkpoint"
+    assert (save_path / "config.json").exists(), "Expected config.json "
 
     model_reuse = Chronos(
         repo_id=str(save_path),
