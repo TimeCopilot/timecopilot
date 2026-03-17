@@ -76,8 +76,8 @@ def test_chronos_forecast_uses_configured_dtype(mocker):
 
 
 def test_chronos_finetuning_save_and_reuse(tmp_path):
-    """Finetune with save_path, run cross-validation,"""
-    """then forecast using the saved path."""
+    """Finetune with save_path, run cross-validation,
+    then forecast using the saved path."""
     from ..test_models import generate_series
     from timecopilot.models.foundation.chronos import Chronos, ChronosFinetuningConfig
 
