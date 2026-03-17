@@ -2,8 +2,9 @@ import sys
 
 import pytest
 
+from peft import LoraConfig
 from timecopilot.models.ensembles.median import MedianEnsemble
-from timecopilot.models.foundation.chronos import Chronos
+from timecopilot.models.foundation.chronos import Chronos, ChronosFinetuningConfig
 from timecopilot.models.foundation.flowstate import FlowState
 from timecopilot.models.foundation.moirai import Moirai
 from timecopilot.models.foundation.patchtst_fm import PatchTSTFM
@@ -65,6 +66,22 @@ models = [
     Chronos(repo_id="amazon/chronos-bolt-tiny", alias="Chronos-Bolt"),
     Chronos(repo_id="amazon/chronos-2", alias="Chronos-2"),
     Chronos(repo_id="amazon/chronos-2", alias="Chronos-2", batch_size=2),
+    Chronos(
+        repo_id="autogluon/chronos-2-small", 
+        alias="chronos2-finetuned", 
+        finetuning_config=ChronosFinetuningConfig(finetune_steps=1),
+        batch_size=2,
+    ),
+    Chronos(
+        repo_id="amazon/chronos-2", 
+        alias="chronos2-finetuned-lora", 
+        finetuning_config=ChronosFinetuningConfig(
+            finetune_steps=3, 
+            finetune_mode="lora", 
+            learning_rate=1e-5,
+        ),
+        batch_size=2,
+    ),
     FlowState(repo_id="ibm-research/flowstate"),
     FlowState(
         repo_id="ibm-granite/granite-timeseries-flowstate-r1",
