@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Literal
 
 import numpy as np
@@ -40,7 +41,11 @@ class ChronosFinetuningConfig:
             (low-rank adaptation). Defaults to None (chronos uses ``"full"``).
         lora_config: LoRA configuration when ``finetune_mode="lora"``. Defaults
             to None. See the Chronos-2 quickstart for details.
-    
+        save_path: If set, the finetuned model is saved to this directory (path
+            or str). Use this same path as ``repo_id`` when creating
+            ``Chronos(repo_id=save_path, finetuning_config=None)`` for
+            subsequent forecasting without finetuning.
+
     Notes:
         - Based on the [Chronos-2 quickstart](https://github.com/amazon-science/chronos-forecasting/blob/main/notebooks/chronos-2-quickstart.ipynb).
     """
@@ -50,6 +55,7 @@ class ChronosFinetuningConfig:
     batch_size: int | None = None
     finetune_mode: Literal["full", "lora"] | None = None
     lora_config: Any = None
+    save_path: str | Path | None = None
 
 
 class Chronos(Forecaster):
@@ -74,8 +80,11 @@ class Chronos(Forecaster):
             repo_id (str, optional): The Hugging Face Hub model ID or local
                 path to load the Chronos model from. Examples include
                 "amazon/chronos-t5-tiny", "amazon/chronos-t5-large", or a
-                local directory. Defaults to "amazon/chronos-t5-large". See
-                the full list of available models at
+                local directory. You can also pass a path where a finetuned
+                model was saved (see ``finetuning_config.save_path``); use
+                that path as ``repo_id`` with ``finetuning_config=None`` to
+                reuse the saved model. Defaults to "amazon/chronos-t5-large".
+                See the full list of available models at
                 [Hugging Face](https://huggingface.co/collections/
                 amazon/chronos-models-65f1791d630a8d57cb718444)
             batch_size (int, optional): Batch size to use for inference only.
@@ -92,7 +101,10 @@ class Chronos(Forecaster):
                 supported hardware.
             finetuning_config (ChronosFinetuningConfig | None, optional): If
                 provided, the model is finetuned on the forecast context
-                data before predicting. See ChronosFinetuningConfig and the
+                data before predicting. Set ``save_path`` on the config to
+                save the finetuned model; then use that path as ``repo_id``
+                with ``finetuning_config=None`` for later forecasts. See
+                ChronosFinetuningConfig and the
                 [Chronos-2 quickstart](https://github.com/amazon-science/chronos-forecasting/blob/main/notebooks/chronos-2-quickstart.ipynb)
                 for parameter details.
 
@@ -180,6 +192,10 @@ class Chronos(Forecaster):
             )
         if self.finetuning_config.lora_config is not None:
             fit_kwargs["lora_config"] = self.finetuning_config.lora_config
+        if self.finetuning_config.save_path is not None:
+            sp = Path(self.finetuning_config.save_path)
+            fit_kwargs["output_dir"] = str(sp.parent)
+            fit_kwargs["finetuned_ckpt_name"] = sp.name
         return model.fit(**fit_kwargs)
 
     @contextmanager
