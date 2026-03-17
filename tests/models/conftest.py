@@ -3,7 +3,7 @@ import sys
 import pytest
 
 from timecopilot.models.ensembles.median import MedianEnsemble
-from timecopilot.models.foundation.chronos import Chronos, ChronosFinetuningConfig
+from timecopilot.models.foundation.chronos import Chronos
 from timecopilot.models.foundation.flowstate import FlowState
 from timecopilot.models.foundation.moirai import Moirai
 from timecopilot.models.foundation.patchtst_fm import PatchTSTFM

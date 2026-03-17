@@ -113,7 +113,7 @@ def test_chronos_finetuning_save_and_reuse(tmp_path):
 
 
 def test_chronos_lora_finetuning_save_and_reuse(tmp_path):
-    """Finetune Chronos-2 with LoRA and save_path, then load from path and forecast (no patching)."""
+    """Finetune Chronos-2 with LoRA and save_path, then load from path and forecast."""
     from ..test_models import generate_series
     from timecopilot.models.foundation.chronos import Chronos, ChronosFinetuningConfig
 
@@ -137,7 +137,7 @@ def test_chronos_lora_finetuning_save_and_reuse(tmp_path):
     assert "Chronos" in fcst.columns
 
     assert save_path.is_dir(), f"LoRA checkpoint should be saved to {save_path}"
-    assert (save_path / "adapter_config.json").exists(), "Expected adapter_config.json for LoRA"
+    assert (save_path / "adapter_config.json").exists(), "Expected adapter_config.json "
 
     model_reuse = Chronos(
         repo_id=str(save_path),
