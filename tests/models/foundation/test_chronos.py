@@ -73,3 +73,40 @@ def test_chronos_forecast_uses_configured_dtype(mocker):
 
     with pytest.raises(RuntimeError, match="stop after dtype check"):
         model.forecast(df=df, h=2)
+
+
+def test_chronos_finetuning_save_and_reuse(tmp_path):
+    """Finetune with save_path, run cross-validation, then forecast using the saved path."""
+    from timecopilot.models.foundation.chronos import Chronos, ChronosFinetuningConfig
+
+    from ..test_models import generate_series
+
+    save_path = tmp_path / "chronos2-finetuned"
+    config = ChronosFinetuningConfig(
+        finetune_steps=2,
+        save_path=save_path,
+    )
+    model = Chronos(
+        repo_id="autogluon/chronos-2-small",
+        finetuning_config=config,
+        batch_size=2,
+    )
+    n_series = 2
+    df = generate_series(n_series, freq="MS")
+
+    cv_df = model.cross_validation(df, h=2, n_windows=1, freq="MS")
+    assert not cv_df.empty
+    assert "Chronos" in cv_df.columns
+
+    assert save_path.is_dir(), f"Finetuned model should be saved to {save_path}"
+    assert (save_path / "config.json").exists(), "Expected config.json in saved checkpoint"
+
+    model_reuse = Chronos(
+        repo_id=str(save_path),
+        finetuning_config=None,
+        batch_size=2,
+    )
+    fcst = model_reuse.forecast(df, h=2, freq="MS")
+    assert not fcst.empty
+    assert "Chronos" in fcst.columns
+    assert len(fcst) == n_series * 2  # h=2 per series
