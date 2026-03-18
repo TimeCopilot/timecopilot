@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
+from multiprocessing import current_process
 from typing import TYPE_CHECKING, Any
 
 import pandas as pd
@@ -196,6 +198,36 @@ def _distributed_setup(
     return schema, partition_config
 
 
+@contextmanager
+def _patch_torch_dataloader_for_daemon():
+    """Force PyTorch DataLoader to use num_workers=0 when running in a daemon process.
+
+    Chronos (and other libs) create DataLoaders with num_workers>0, which spawns
+    child processes. Daemon processes cannot have children, so we patch
+    DataLoader to use num_workers=0 for the duration of the context.
+    """
+    if not current_process().daemon:
+        yield
+        return
+    try:
+        import torch.utils.data
+    except ImportError:
+        yield
+        return
+    _DataLoader = torch.utils.data.DataLoader
+    _orig_init = _DataLoader.__init__
+
+    def _patched_init(self, *args, **kwargs):
+        kwargs["num_workers"] = 0
+        _orig_init(self, *args, **kwargs)
+
+    torch.utils.data.DataLoader.__init__ = _patched_init
+    try:
+        yield
+    finally:
+        torch.utils.data.DataLoader.__init__ = _orig_init
+
+
 def _forecast_wrapper(
     df: pd.DataFrame,
     forecaster: Any,  # TimeCopilotForecaster - using Any to avoid import issues
@@ -221,13 +253,14 @@ def _forecast_wrapper(
     Returns:
         Pandas DataFrame with forecast results.
     """
-    return forecaster._forecast_pandas(
-        df=df,
-        h=h,
-        freq=freq,
-        level=level,
-        quantiles=quantiles,
-    )
+    with _patch_torch_dataloader_for_daemon():
+        return forecaster._forecast_pandas(
+            df=df,
+            h=h,
+            freq=freq,
+            level=level,
+            quantiles=quantiles,
+        )
 
 
 def _cross_validation_wrapper(
@@ -259,15 +292,16 @@ def _cross_validation_wrapper(
     Returns:
         Pandas DataFrame with cross-validation results.
     """
-    return forecaster._cross_validation_pandas(
-        df=df,
-        h=h,
-        freq=freq,
-        n_windows=n_windows,
-        step_size=step_size,
-        level=level,
-        quantiles=quantiles,
-    )
+    with _patch_torch_dataloader_for_daemon():
+        return forecaster._cross_validation_pandas(
+            df=df,
+            h=h,
+            freq=freq,
+            n_windows=n_windows,
+            step_size=step_size,
+            level=level,
+            quantiles=quantiles,
+        )
 
 
 def _detect_anomalies_wrapper(
@@ -295,10 +329,11 @@ def _detect_anomalies_wrapper(
     Returns:
         Pandas DataFrame with anomaly detection results.
     """
-    return forecaster._detect_anomalies_pandas(
-        df=df,
-        h=h,
-        freq=freq,
-        n_windows=n_windows,
-        level=level,
-    )
+    with _patch_torch_dataloader_for_daemon():
+        return forecaster._detect_anomalies_pandas(
+            df=df,
+            h=h,
+            freq=freq,
+            n_windows=n_windows,
+            level=level,
+        )
