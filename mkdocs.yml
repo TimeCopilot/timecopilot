@@ -22,12 +22,12 @@ nav:
           - examples/agent-quickstart.ipynb
           - examples/llm-providers.ipynb
           - examples/aws-bedrock.ipynb
-          - examples/google-llms.ipynb
           - examples/forecaster-quickstart.ipynb
           - examples/anomaly-detection-forecaster-quickstart.ipynb
           - examples/ts-foundation-models-comparison-quickstart.ipynb
           - examples/gift-eval.ipynb
           - examples/chronos-family.ipynb
+          - examples/crytpocurrency-quickstart.ipynb
           - examples/finetuning.ipynb
           - examples/cryptocurrency-quickstart.ipynb
           - examples/sktime.ipynb
@@ -47,7 +47,6 @@ nav:
       - api/models/ml.md
       - api/models/neural.md
       - api/models/ensembles.md
-      - api/models/adapters/adapters.md
       - api/models/utils/forecaster.md
       - api/gift-eval/gift-eval.md
   - Changelogs:
@@ -76,7 +75,6 @@ nav:
 
 theme:
   name: "material"
-  custom_dir: docs/overrides
   logo: https://timecopilot.s3.amazonaws.com/public/logos/logo-white.svg
   favicon: https://timecopilot.s3.amazonaws.com/public/logos/favicon-white.svg
   palette:
