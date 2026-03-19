@@ -77,6 +77,14 @@ All documentation files should use **kebab-case** (e.g., `model-hub.md`, `foreca
 
 For further reference, see the [Google Developer Documentation Style Guide on file names](https://developers.google.com/style/filenames).
 
+### Adding Models & Adapters
+
+In order for new models and adapters to show up in TimeCopilot's documentation properly there are a couple steps to take:
+
+- Add the model/adapter in its own file or the appropriate file in `docs/api/models` or the appropriate subdirectory. For adapters, it may also be good to create an example notebook in `docs/examples` and add it to the `Examples` section of [mkdocs.yml](https://github.com/TimeCopilot/timecopilot/blob/main/mkdocs.yml).
+    - when creating a new file in `docs/api/models` for this step, add that file in the API Reference section of [mkdocs.yml](https://github.com/TimeCopilot/timecopilot/blob/main/mkdocs.yml)
+- A docstring should be present for the new model/adapter with an example in the `forecast()` method in a similar style to the [TimeCopilot agent query method](https://timecopilot.dev/api/agent/#timecopilot.agent.TimeCopilot.query). Note: when adding an adapter with its own dependencies you may need to add those dependencies as dev dependencies with `uv add new_dep --group dev`.
+
 ## Adding New Datasets
 
 The datasets utilized in our documentation are hosted on AWS at `https://timecopilot.s3.amazonaws.com/public/data/`. If you wish to contribute additional datasets for your changes, please contact [@AzulGarza](http://github.com/AzulGarza) for guidance.
@@ -88,31 +96,31 @@ TimeCopilot uses some forked Python packages, maintained under custom names on P
 
 - **chronos-forecasting**
     - Forked from: [amazon-science/chronos-forecasting](https://github.com/amazon-science/chronos-forecasting)
-    - TimeCopilot fork: [AzulGarza/chronos-forecasting](https://github.com/AzulGarza/chronos-forecasting/tree/feat/timecopilot-chronos-forecasting)
+    - TimeCopilot fork: [TimeCopilot/chronos-forecasting](https://github.com/TimeCopilot/chronos-forecasting/tree/feat/timecopilot-chronos-forecasting)
     - Published on PyPI as: [`timecopilot-chronos-forecasting`](https://pypi.org/project/timecopilot-chronos-forecasting/)
 
 
 - **granite-tsfm**
     - Forked from: [ibm-granite/granite-tsfm](https://github.com/ibm-granite/granite-tsfm)
-    - TimeCopilot fork: [AzulGarza/granite-tsfm](https://github.com/AzulGarza/granite-tsfm)
+    - TimeCopilot fork: [TimeCopilot/granite-tsfm](https://github.com/TimeCopilot/granite-tsfm)
     - Published on PyPI as: [`timecopilot-granite-tsfm`](https://pypi.org/project/timecopilot-granite-tsfm/)
 
 - **timesfm**
     - Forked from: [google-research/timesfm](https://github.com/google-research/timesfm)
-    - TimeCopilot fork: [AzulGarza/timesfm](https://github.com/AzulGarza/timesfm)
+    - TimeCopilot fork: [TimeCopilot/timesfm](https://github.com/TimeCopilot/timesfm)
     - Published on PyPI as: [`timecopilot-timesfm`](https://pypi.org/project/timecopilot-timesfm/)
 
 - **tirex**
     - Forked from: [NX-AI/tirex](https://github.com/NX-AI/tirex)
-    - TimeCopilot fork: [AzulGarza/tirex](https://github.com/AzulGarza/tirex)
+    - TimeCopilot fork: [TimeCopilot/tirex](https://github.com/TimeCopilot/tirex)
     - Published on PyPI as: [`timecopilot-tirex`](https://pypi.org/project/timecopilot-tirex/)
 
 - **toto**
     - Forked from: [DataDog/toto](https://github.com/DataDog/toto)
-    - TimeCopilot fork: [AzulGarza/toto](https://github.com/AzulGarza/toto)
+    - TimeCopilot fork: [TimeCopilot/toto](https://github.com/TimeCopilot/toto)
     - Published on PyPI as: [`timecopilot-toto`](https://pypi.org/project/timecopilot-toto/)
 
 - **uni2ts**:
     - Forked from: [SalesforceAIResearch/uni2ts](https://github.com/SalesforceAIResearch/uni2ts)
-    - TimeCopilot fork: [AzulGarza/uni2ts](https://github.com/AzulGarza/uni2ts)
+    - TimeCopilot fork: [TimeCopilot/uni2ts](https://github.com/TimeCopilot/uni2ts)
     - Published on PyPI as: [`timecopilot-uni2ts`](https://pypi.org/project/timecopilot-uni2ts/)

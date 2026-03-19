@@ -96,9 +96,11 @@ class TimeCopilotForecaster(Forecaster):
                     res_df_model = fn(**known_kwargs, **kwargs)
                     res_df_model = res_df_model.rename(
                         columns={
-                            col: col.replace(self.fallback_model.alias, model.alias)
-                            if col.startswith(self.fallback_model.alias)
-                            else col
+                            col: (
+                                col.replace(self.fallback_model.alias, model.alias)
+                                if col.startswith(self.fallback_model.alias)
+                                else col
+                            )
                             for col in res_df_model.columns
                         }
                     )

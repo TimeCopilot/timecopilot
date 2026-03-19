@@ -6,6 +6,7 @@ from timecopilot.models.ensembles.median import MedianEnsemble
 from timecopilot.models.foundation.chronos import Chronos
 from timecopilot.models.foundation.flowstate import FlowState
 from timecopilot.models.foundation.moirai import Moirai
+from timecopilot.models.foundation.patchtst_fm import PatchTSTFM
 from timecopilot.models.foundation.timesfm import TimesFM
 from timecopilot.models.foundation.toto import Toto
 from timecopilot.models.ml import AutoLGBM
@@ -69,6 +70,9 @@ models = [
         repo_id="ibm-granite/granite-timeseries-flowstate-r1",
         alias="FlowState-Granite",
     ),
+    PatchTSTFM(
+        context_length=2_048,
+    ),
     Toto(context_length=256, batch_size=2),
     Moirai(
         context_length=256,
@@ -104,8 +108,6 @@ if sys.version_info >= (3, 11):
 if sys.version_info < (3, 13):
     from tabpfn_time_series import TabPFNMode
 
-    from timecopilot.models.foundation.sundial import Sundial
     from timecopilot.models.foundation.tabpfn import TabPFN
 
     models.append(TabPFN(mode=TabPFNMode.MOCK))
-    models.append(Sundial(context_length=256, num_samples=10))

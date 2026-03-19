@@ -143,7 +143,7 @@ class _TimesFMV2_p5(Forecaster):
         prediction_length: int,
     ) -> TimesFM_2p5_200M_torch:
         # automatically detect the best device
-        # https://github.com/AzulGarza/timesfm/blob/b810bbdf9f8a1e66396e7bd5cdb3b005e9116d86/src/timesfm/timesfm_2p5/timesfm_2p5_torch.py#L71
+        # https://github.com/TimeCopilot/timesfm/blob/b810bbdf9f8a1e66396e7bd5cdb3b005e9116d86/src/timesfm/timesfm_2p5/timesfm_2p5_torch.py#L71
         if os.path.exists(self.repo_id):
             path = os.path.join(self.repo_id, "model.safetensors")
             tfm = TimesFM_2p5_200M_torch().model.load_checkpoint(path)
