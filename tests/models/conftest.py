@@ -108,8 +108,6 @@ if sys.version_info >= (3, 11):
 if sys.version_info < (3, 13):
     from tabpfn_time_series import TabPFNMode
 
-    from timecopilot.models.foundation.sundial import Sundial
     from timecopilot.models.foundation.tabpfn import TabPFN
 
     models.append(TabPFN(mode=TabPFNMode.MOCK))
-    models.append(Sundial(context_length=256, num_samples=10))

@@ -96,31 +96,31 @@ TimeCopilot uses some forked Python packages, maintained under custom names on P
 
 - **chronos-forecasting**
     - Forked from: [amazon-science/chronos-forecasting](https://github.com/amazon-science/chronos-forecasting)
-    - TimeCopilot fork: [AzulGarza/chronos-forecasting](https://github.com/AzulGarza/chronos-forecasting/tree/feat/timecopilot-chronos-forecasting)
+    - TimeCopilot fork: [TimeCopilot/chronos-forecasting](https://github.com/TimeCopilot/chronos-forecasting/tree/feat/timecopilot-chronos-forecasting)
     - Published on PyPI as: [`timecopilot-chronos-forecasting`](https://pypi.org/project/timecopilot-chronos-forecasting/)
 
 
 - **granite-tsfm**
     - Forked from: [ibm-granite/granite-tsfm](https://github.com/ibm-granite/granite-tsfm)
-    - TimeCopilot fork: [AzulGarza/granite-tsfm](https://github.com/AzulGarza/granite-tsfm)
+    - TimeCopilot fork: [TimeCopilot/granite-tsfm](https://github.com/TimeCopilot/granite-tsfm)
     - Published on PyPI as: [`timecopilot-granite-tsfm`](https://pypi.org/project/timecopilot-granite-tsfm/)
 
 - **timesfm**
     - Forked from: [google-research/timesfm](https://github.com/google-research/timesfm)
-    - TimeCopilot fork: [AzulGarza/timesfm](https://github.com/AzulGarza/timesfm)
+    - TimeCopilot fork: [TimeCopilot/timesfm](https://github.com/TimeCopilot/timesfm)
     - Published on PyPI as: [`timecopilot-timesfm`](https://pypi.org/project/timecopilot-timesfm/)
 
 - **tirex**
     - Forked from: [NX-AI/tirex](https://github.com/NX-AI/tirex)
-    - TimeCopilot fork: [AzulGarza/tirex](https://github.com/AzulGarza/tirex)
+    - TimeCopilot fork: [TimeCopilot/tirex](https://github.com/TimeCopilot/tirex)
     - Published on PyPI as: [`timecopilot-tirex`](https://pypi.org/project/timecopilot-tirex/)
 
 - **toto**
     - Forked from: [DataDog/toto](https://github.com/DataDog/toto)
-    - TimeCopilot fork: [AzulGarza/toto](https://github.com/AzulGarza/toto)
+    - TimeCopilot fork: [TimeCopilot/toto](https://github.com/TimeCopilot/toto)
     - Published on PyPI as: [`timecopilot-toto`](https://pypi.org/project/timecopilot-toto/)
 
 - **uni2ts**:
     - Forked from: [SalesforceAIResearch/uni2ts](https://github.com/SalesforceAIResearch/uni2ts)
-    - TimeCopilot fork: [AzulGarza/uni2ts](https://github.com/AzulGarza/uni2ts)
+    - TimeCopilot fork: [TimeCopilot/uni2ts](https://github.com/TimeCopilot/uni2ts)
     - Published on PyPI as: [`timecopilot-uni2ts`](https://pypi.org/project/timecopilot-uni2ts/)
