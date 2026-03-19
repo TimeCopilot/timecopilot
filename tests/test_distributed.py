@@ -6,6 +6,7 @@ from utilsforecast.data import generate_series
 
 from timecopilot.forecaster import TimeCopilotForecaster
 from timecopilot.models import SeasonalNaive, ZeroModel
+from timecopilot.models.foundation.chronos import Chronos
 from timecopilot.models.utils.forecaster import Forecaster
 
 
@@ -29,9 +30,7 @@ class SimpleTestModel(Forecaster):
         for uid in unique_ids:
             uid_df = df[df["unique_id"] == uid]
             last_ds = uid_df["ds"].max()
-            future_ds = pd.date_range(
-                start=last_ds, periods=h + 1, freq=freq
-            )[1:]
+            future_ds = pd.date_range(start=last_ds, periods=h + 1, freq=freq)[1:]
             results.append(
                 pd.DataFrame(
                     {
@@ -51,8 +50,16 @@ def models():
 
 @pytest.fixture
 def simple_models():
-    """Models that don't use parallel processing internally - safe for distributed tests."""
+    """
+    Models that don't use parallel processing internally - safe for
+    distributed tests.
+    """
     return [SimpleTestModel()]
+
+
+@pytest.fixture
+def foundation_model():
+    return [Chronos(repo_id="autogluon/chronos-2-small")]
 
 
 @pytest.fixture
@@ -186,6 +193,36 @@ def test_forecast_dask(simple_models, dask_df):
     result_pd = result.compute()
     assert len(result_pd) == 2 * 3
     for model in simple_models:
+        assert model.alias in result_pd.columns
+
+
+@pytest.mark.distributed
+@pytest.mark.parametrize(
+    "n_series,n_partitions",
+    [
+        (1, 1),
+        (3, 1),
+        (1, 2),
+        (3, 2),
+    ],
+)
+def test_forecast_dask_series(n_series, n_partitions, foundation_model):
+    pytest.importorskip("dask")
+    import dask.dataframe as dd
+
+    # models = foundation_model()
+    models = foundation_model
+    h = 2
+
+    df = generate_series(n_series=n_series, freq="D", min_length=30)
+    df["unique_id"] = df["unique_id"].astype(str)
+
+    dask_df = dd.from_pandas(df, npartitions=n_partitions)
+    forecaster = TimeCopilotForecaster(models=models)
+    result = forecaster.forecast(df=dask_df, h=h, freq="D")
+    result_pd = result.compute()
+    assert len(result_pd) == h * n_series
+    for model in models:
         assert model.alias in result_pd.columns
 
 
