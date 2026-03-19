@@ -4,8 +4,10 @@ requires = ["hatchling"]
 
 [dependency-groups]
 dev = [
+  "fugue[dask,ray,spark]>=0.9.0",
   "mktestdocs>=0.2.5",
   "pre-commit",
+  "pyspark<4.1",
   "pytest",
   "pytest-asyncio>=1.1.0",
   "pytest-cov",
@@ -85,6 +87,7 @@ version = "0.0.23"
 distributed = [
   "dask<=2024.12.1",
   "fugue[dask,ray,spark]>=0.9.0",
+  "pyspark<4.1",
   "ray<=2.44.0",
 ]
 
