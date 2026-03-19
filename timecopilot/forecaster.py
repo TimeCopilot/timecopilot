@@ -90,7 +90,8 @@ class TimeCopilotForecaster(Forecaster):
 
     @staticmethod
     def _is_distributed_df(df: AnyDataFrame) -> bool:
-        """Check if a DataFrame is a distributed DataFrame type.
+        """
+        Check if a DataFrame is a distributed DataFrame type.
 
         Args:
             df: DataFrame to check.
@@ -164,7 +165,8 @@ class TimeCopilotForecaster(Forecaster):
         level: list[int | float] | None = None,
         quantiles: list[float] | None = None,
     ) -> pd.DataFrame:
-        """Internal pandas-only forecast implementation.
+        """
+        Internal pandas-only forecast implementation.
 
         This method is called directly for pandas DataFrames or by the
         distributed wrapper for each partition.
@@ -179,7 +181,7 @@ class TimeCopilotForecaster(Forecaster):
             quantiles=quantiles,
         )
 
-    def _distributed_forecast(
+    def _forecast_distributed(
         self,
         df: DistributedDataFrame,
         h: int,
@@ -188,7 +190,8 @@ class TimeCopilotForecaster(Forecaster):
         quantiles: list[float] | None = None,
         num_partitions: int | None = None,
     ) -> DistributedDataFrame:
-        """Distributed forecast implementation using Fugue.
+        """
+        Distributed forecast implementation using Fugue.
 
         This method handles Spark, Dask, and Ray DataFrames by partitioning
         the data by unique_id and running the pandas forecast on each partition.
@@ -206,7 +209,13 @@ class TimeCopilotForecaster(Forecaster):
         """
         import fugue.api as fa
 
-        from .utils.distributed import _distributed_setup, _forecast_wrapper
+        from .utils.distributed import (
+            _distributed_setup,
+            _forecast_wrapper,
+            _maybe_repartition_df,
+        )
+
+        df = _maybe_repartition_df(df)
 
         schema, partition_config = _distributed_setup(
             df=df,
@@ -305,7 +314,7 @@ class TimeCopilotForecaster(Forecaster):
         """
         # Route to distributed implementation for non-pandas DataFrames
         if self._is_distributed_df(df):
-            return self._distributed_forecast(
+            return self._forecast_distributed(
                 df=df,
                 h=h,
                 freq=freq,
@@ -333,7 +342,8 @@ class TimeCopilotForecaster(Forecaster):
         level: list[int | float] | None = None,
         quantiles: list[float] | None = None,
     ) -> pd.DataFrame:
-        """Internal pandas-only cross-validation implementation.
+        """
+        Internal pandas-only cross-validation implementation.
 
         This method is called directly for pandas DataFrames or by the
         distributed wrapper for each partition.
@@ -350,7 +360,7 @@ class TimeCopilotForecaster(Forecaster):
             quantiles=quantiles,
         )
 
-    def _distributed_cross_validation(
+    def _cross_validation_distributed(
         self,
         df: DistributedDataFrame,
         h: int,
@@ -361,7 +371,8 @@ class TimeCopilotForecaster(Forecaster):
         quantiles: list[float] | None = None,
         num_partitions: int | None = None,
     ) -> DistributedDataFrame:
-        """Distributed cross-validation implementation using Fugue.
+        """
+        Distributed cross-validation implementation using Fugue.
 
         This method handles Spark, Dask, and Ray DataFrames by partitioning
         the data by unique_id and running the pandas cross-validation
@@ -385,7 +396,10 @@ class TimeCopilotForecaster(Forecaster):
         from .utils.distributed import (
             _cross_validation_wrapper,
             _distributed_setup,
+            _maybe_repartition_df,
         )
+
+        df = _maybe_repartition_df(df)
 
         schema, partition_config = _distributed_setup(
             df=df,
@@ -494,7 +508,7 @@ class TimeCopilotForecaster(Forecaster):
         """
         # Route to distributed implementation for non-pandas DataFrames
         if self._is_distributed_df(df):
-            return self._distributed_cross_validation(
+            return self._cross_validation_distributed(
                 df=df,
                 h=h,
                 freq=freq,
@@ -540,7 +554,7 @@ class TimeCopilotForecaster(Forecaster):
             quantiles=None,
         )
 
-    def _distributed_detect_anomalies(
+    def _detect_anomalies_distributed(
         self,
         df: DistributedDataFrame,
         h: int | None = None,
@@ -549,7 +563,8 @@ class TimeCopilotForecaster(Forecaster):
         level: int | float = 99,
         num_partitions: int | None = None,
     ) -> DistributedDataFrame:
-        """Distributed anomaly detection implementation using Fugue.
+        """
+        Distributed anomaly detection implementation using Fugue.
 
         This method handles Spark, Dask, and Ray DataFrames by partitioning
         the data by unique_id and running the pandas anomaly detection
@@ -571,7 +586,10 @@ class TimeCopilotForecaster(Forecaster):
         from .utils.distributed import (
             _detect_anomalies_wrapper,
             _distributed_setup,
+            _maybe_repartition_df,
         )
+
+        df = _maybe_repartition_df(df)
 
         schema, partition_config = _distributed_setup(
             df=df,
@@ -672,7 +690,7 @@ class TimeCopilotForecaster(Forecaster):
         """
         # Route to distributed implementation for non-pandas DataFrames
         if self._is_distributed_df(df):
-            return self._distributed_detect_anomalies(
+            return self._detect_anomalies_distributed(
                 df=df,
                 h=h,
                 freq=freq,

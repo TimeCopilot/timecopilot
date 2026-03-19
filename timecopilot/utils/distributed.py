@@ -2,36 +2,33 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from multiprocessing import current_process
 from typing import TYPE_CHECKING, Any
 
 import pandas as pd
+
+from timecopilot.forecaster import AnyDataFrame
 
 if TYPE_CHECKING:
     from ..models.utils.forecaster import Forecaster
 
 
 def _register_fugue_backends() -> None:
-    """Register Fugue backends for distributed DataFrames.
+    """
+    Register Fugue backends for distributed DataFrames.
 
     This ensures that Fugue can recognize and handle Dask, Spark,
     and Ray DataFrames properly.
     """
-    try:
+    with suppress(ImportError):
         import fugue_dask  # noqa: F401
-    except ImportError:
-        pass
 
-    try:
+    with suppress(ImportError):
         import fugue_spark  # noqa: F401
-    except ImportError:
-        pass
 
-    try:
+    with suppress(ImportError):
         import fugue_ray  # noqa: F401
-    except ImportError:
-        pass
 
 
 def _get_schema(
@@ -40,11 +37,12 @@ def _get_schema(
     id_col: str,
     time_col: str,
     target_col: str,
-    level: list[int | float] | None,
+    level: int | float | list[int | float] | None,
     quantiles: list[float] | None,
     models: list[Forecaster],
-) -> "triad.Schema":
-    """Build the output schema for distributed operations.
+):
+    """
+    Build the output schema for distributed operations.
 
     Args:
         df: Input DataFrame (any distributed type).
@@ -58,7 +56,7 @@ def _get_schema(
 
     Returns:
         Schema object for the output DataFrame.
-    """
+    """  # noqa: E501
     _register_fugue_backends()
     import fugue.api as fa
 
@@ -80,8 +78,10 @@ def _get_schema(
         schema.append(("cutoff", schema[time_col].type))
         # Add anomaly detection columns for each model
         for model in models:
-            schema.append(f"{model.alias}-lo-{int(level)}:double")
-            schema.append(f"{model.alias}-hi-{int(level)}:double")
+            # ignore type errors, should be a compatible type
+            # for detect_anomalies
+            schema.append(f"{model.alias}-lo-{int(level)}:double")  # type: ignore
+            schema.append(f"{model.alias}-hi-{int(level)}:double")  # type: ignore
             schema.append(f"{model.alias}-anomaly:bool")
     elif method == "cross_validation":
         # Add cutoff column with same type as time_col
@@ -141,13 +141,22 @@ def _is_supported_distributed_df(df: Any) -> bool:
         return False
 
 
+def _maybe_repartition_df(df: AnyDataFrame) -> AnyDataFrame:
+    df_module = type(df).__module__
+    if (
+        "dask.dataframe" in df_module or "dask_expr" in df_module
+    ) and df.npartitions == 1:
+        return df.repartition(npartitions=2)
+    return df
+
+
 def _distributed_setup(
     df: Any,
     method: str,
     id_col: str,
     time_col: str,
     target_col: str,
-    level: list[int | float] | None,
+    level: int | float | list[int | float] | None,
     quantiles: list[float] | None,
     num_partitions: int | None,
     models: list[Forecaster],
