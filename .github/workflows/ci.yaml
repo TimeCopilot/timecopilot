@@ -117,6 +117,26 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }} 
           OLLAMA_BASE_URL: "URL_PLACEHOLDER"
 
+  test-distributed:
+    name: test distributed
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Run tests
+        run: uv run pytest -m distributed
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
   build-docs:
     name: build docs
     runs-on: ubuntu-latest
