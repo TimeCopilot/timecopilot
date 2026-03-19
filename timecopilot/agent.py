@@ -146,7 +146,6 @@ class ForecastAgentOutput(BaseModel):
         """Pretty print the forecast results using rich formatting."""
         console = console or Console()
 
-        # Create header with title and overview
         header = Panel(
             f"[bold cyan]{self.selected_model}[/bold cyan] forecast analysis\n"
             f"[{'green' if self.is_better_than_seasonal_naive else 'red'}]"
@@ -157,7 +156,6 @@ class ForecastAgentOutput(BaseModel):
             style="blue",
         )
 
-        # Time Series Analysis Section - check if features_df is available
         ts_features = Table(
             title="Time Series Features",
             show_header=True,
@@ -167,13 +165,11 @@ class ForecastAgentOutput(BaseModel):
         ts_features.add_column("Feature", style="cyan")
         ts_features.add_column("Value", style="magenta")
 
-        # Use features_df if available (attached after forecast run)
         if features_df is not None:
             for feature_name, feature_value in features_df.iloc[0].items():
                 if pd.notna(feature_value):
                     ts_features.add_row(feature_name, f"{float(feature_value):.3f}")
         else:
-            # Fallback: show a note that detailed features are not available
             ts_features.add_row("Features", "Available in analysis text below")
 
         ts_analysis = Panel(
@@ -182,7 +178,6 @@ class ForecastAgentOutput(BaseModel):
             style="blue",
         )
 
-        # Model Selection Section
         model_details = Panel(
             f"[bold]Technical Details[/bold]\n{self.model_details}\n\n"
             f"[bold]Selection Rationale[/bold]\n{self.reason_for_selection}",
@@ -190,27 +185,39 @@ class ForecastAgentOutput(BaseModel):
             style="green",
         )
 
-        # Model Comparison Table - check if eval_df is available
         model_scores = Table(
             title="Model Performance", show_header=True, title_style="bold yellow"
         )
         model_scores.add_column("Model", style="yellow")
         model_scores.add_column("MASE", style="cyan", justify="right")
 
-        # Use eval_df if available (attached after forecast run)
+        has_std = False
         if eval_df is not None:
-            # Get the MASE scores from eval_df
+            has_std = any(col.endswith("_std") for col in eval_df.columns)
+
+        if has_std:
+            model_scores.add_column("STD", style="magenta", justify="right")
+
+        if eval_df is not None:
             model_scores_data = []
             for col in eval_df.columns:
-                if col != "metric" and pd.notna(eval_df[col].iloc[0]):
-                    model_scores_data.append((col, float(eval_df[col].iloc[0])))
+                if col.endswith("_std") or col == "metric":
+                    continue
 
-            # Sort by score (lower MASE is better)
+                mean = float(eval_df[col].iloc[0])
+                std = float(eval_df.get(f"{col}_std", pd.Series([0])).iloc[0])
+
+                if pd.notna(mean):
+                    model_scores_data.append((col, mean, std))
+
             model_scores_data.sort(key=lambda x: x[1])
-            for model, score in model_scores_data:
-                model_scores.add_row(model, f"{score:.3f}")
+
+            for model, mean, std in model_scores_data:
+                if has_std:
+                    model_scores.add_row(model, f"{mean:.3f}", f"{std:.3f}")
+                else:
+                    model_scores.add_row(model, f"{mean:.3f}")
         else:
-            # Fallback: show a note that detailed scores are not available
             model_scores.add_row("Scores", "Available in analysis text below")
 
         model_analysis = Panel(
@@ -219,16 +226,13 @@ class ForecastAgentOutput(BaseModel):
             style="yellow",
         )
 
-        # Forecast Results Section - check if fcst_df is available
         forecast_table = Table(
             title="Forecast Values", show_header=True, title_style="bold magenta"
         )
         forecast_table.add_column("Period", style="magenta")
         forecast_table.add_column("Value", style="cyan", justify="right")
 
-        # Use fcst_df if available (attached after forecast run)
         if fcst_df is not None:
-            # Show forecast values from fcst_df
             fcst_data = fcst_df.copy()
             if "ds" in fcst_data.columns and self.selected_model in fcst_data.columns:
                 for _, row in fcst_data.iterrows():
@@ -240,7 +244,6 @@ class ForecastAgentOutput(BaseModel):
                     value = row[self.selected_model]
                     forecast_table.add_row(period, f"{value:.2f}")
 
-                # Add note about number of periods if many
                 if len(fcst_data) > 12:
                     forecast_table.caption = (
                         f"[dim]Showing all {len(fcst_data)} forecasted periods. "
@@ -249,7 +252,6 @@ class ForecastAgentOutput(BaseModel):
             else:
                 forecast_table.add_row("Forecast", "Available in analysis text below")
         else:
-            # Fallback: show a note that detailed forecast is not available
             forecast_table.add_row("Forecast", "Available in analysis text below")
 
         forecast_analysis = Panel(
@@ -258,14 +260,12 @@ class ForecastAgentOutput(BaseModel):
             style="magenta",
         )
 
-        # Anomaly Detection Section
         anomaly_analysis = Panel(
             self.anomaly_analysis,
             title="[bold red]Anomaly Detection[/bold red]",
             style="red",
         )
 
-        # Optional user response section
         user_response = None
         if self.user_query_response:
             user_response = Panel(
@@ -274,7 +274,6 @@ class ForecastAgentOutput(BaseModel):
                 style="cyan",
             )
 
-        # Print all sections with clear separation
         console.print("\n")
         console.print(header)
 
@@ -300,7 +299,6 @@ class ForecastAgentOutput(BaseModel):
 
         console.print("\n")
 
-
 def _transform_time_series_to_text(df: pd.DataFrame) -> str:
     df_agg = df.groupby("unique_id").agg(list)
     output = (
@@ -323,11 +321,22 @@ def _transform_features_to_text(features_df: pd.DataFrame) -> str:
     )
     return output
 
+def _transform_eval_to_text(eval_df, models):
+    parts = []
 
-def _transform_eval_to_text(eval_df: pd.DataFrame, models: list[str]) -> str:
-    output = ", ".join([f"{model}: {eval_df[model].iloc[0]}" for model in models])
-    return output
+    for model in models:
+        mean = eval_df[model].iloc[0]
 
+        # Filter for cross-validation involving only one fold
+        std = eval_df.get(f"{model}_std")
+
+        stability = "N/A" if std is None or std.iloc[0] == 0 \
+            else f"{std.iloc[0]:.3f}"
+        parts.append(
+            f"{model}: mean MASE={mean:.3f}, stability={stability}"
+        )
+
+    return ", ".join(parts)
 
 def _transform_fcst_to_text(fcst_df: pd.DataFrame) -> str:
     df_agg = fcst_df.groupby("unique_id").agg(list)
@@ -995,15 +1004,26 @@ class TimeCopilot:
                 df=ctx.deps.df,
                 h=ctx.deps.h,
                 freq=ctx.deps.freq,
+                cv_mode=ctx.deps.cv_mode,
             )
+            n_folds = fcst_cv["cutoff"].nunique()
             eval_df = ctx.deps.evaluate_forecast_df(
                 forecast_df=fcst_cv,
                 models=[model.alias for model in callable_models],
             )
-            eval_df = eval_df.groupby(
-                ["metric"],
-                as_index=False,
-            ).mean(numeric_only=True)
+            eval_mean = eval_df.groupby(["metric"], as_index=False)\
+                .mean(numeric_only=True)
+            eval_std = eval_df.groupby(["metric"], as_index=False)\
+                .std(numeric_only=True)
+            eval_df = eval_mean.copy()
+
+            if n_folds > 1:
+                eval_std = eval_df.groupby(["metric"], as_index=False)\
+                    .std(numeric_only=True)
+                for col in eval_mean.columns:
+                    if col != "metric":
+                        eval_df[f"{col}_std"] = eval_std[col]
+
             self.eval_df = eval_df
             self.eval_forecasters = models
             return _transform_eval_to_text(eval_df, models)
@@ -1216,6 +1236,7 @@ class TimeCopilot:
         freq: str | None = None,
         seasonality: int | None = None,
         query: str | None = None,
+        cv_mode: str | None = None,
     ) -> AgentRunResult[ForecastAgentOutput]:
         """Generate forecast and anomaly analysis.
 
@@ -1257,6 +1278,7 @@ class TimeCopilot:
             seasonality,
             query,
         )
+        self.dataset.cv_mode = cv_mode
         query = query if query else "complete system prompt"
         result = self.forecasting_agent.run_sync(
             user_prompt=query,
@@ -1427,6 +1449,7 @@ class AsyncTimeCopilot(TimeCopilot):
         freq: str | None = None,
         seasonality: int | None = None,
         query: str | None = None,
+        cv_mode: str | None = None,
     ) -> AgentRunResult[ForecastAgentOutput]:
         """
         Asynchronously analyze time series data with forecasting, anomaly detection,
