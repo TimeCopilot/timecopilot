@@ -133,7 +133,7 @@ jobs:
           enable-cache: true
 
       - name: Run tests
-        run: uv run pytest -m distributed
+        run: uv run pytest -m distributed -n 1
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
