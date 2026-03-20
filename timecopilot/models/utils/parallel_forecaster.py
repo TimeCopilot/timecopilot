@@ -28,9 +28,7 @@ class ParallelForecaster(Forecaster):
     ) -> pd.DataFrame:
         if current_process().daemon:
             # Running inside a Dask/Fugue worker: do not spawn children
-            results = [
-                self._process_group(df, func, **kwargs) for _, df in df_grouped
-            ]
+            results = [self._process_group(df, func, **kwargs) for _, df in df_grouped]
             return pd.concat(results)
         with Pool(max(1, (os.cpu_count() or 1) - 1)) as executor:
             futures = [
