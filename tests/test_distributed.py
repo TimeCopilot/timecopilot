@@ -59,7 +59,7 @@ def simple_models():
 
 @pytest.fixture
 def foundation_model():
-    return [Chronos(repo_id="autogluon/chronos-2-small")]
+    return [Chronos(repo_id="autogluon/chronos-bolt-tiny")]
 
 
 @pytest.fixture
