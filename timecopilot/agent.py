@@ -937,6 +937,15 @@ class TimeCopilot:
             ctx: RunContext[ExperimentDataset],
             features: list[str],
         ) -> str:
+            """Calculate time series features to help understand the characteristics
+            of the time series data
+
+            Args:
+                features: List of feature names to calculate from available TSFEATURES
+
+            Returns:
+                Text representation of calculated features.
+            """
             callable_features = []
             for feature in features:
                 if feature not in TSFEATURES:
@@ -964,6 +973,15 @@ class TimeCopilot:
             ctx: RunContext[ExperimentDataset],
             models: list[str],
         ) -> str:
+            """Perform cross-validation to evaluate and compare multiple forecasting
+            models.
+
+            Args:
+                models: List of model names to evaluate using cross-validation.
+
+            Returns:
+                Text representation of evaluation metrics for the models.
+            """
             callable_models = []
             for str_model in models:
                 if str_model not in self.forecasters:
@@ -995,6 +1013,14 @@ class TimeCopilot:
             ctx: RunContext[ExperimentDataset],
             model: str,
         ) -> str:
+            """Generate forecast using specified forecasting model.
+
+            Args:
+                model: Name of the forecasting model to use.
+
+            Returns:
+                Text representation of the generated forecast.
+            """
             callable_model = self.forecasters[model]
             forecaster = TimeCopilotForecaster(models=[callable_model])
             fcst_df = forecaster.forecast(

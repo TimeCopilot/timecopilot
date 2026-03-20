@@ -161,4 +161,4 @@ jobs:
         uses: astral-sh/setup-uv@v6
 
       - name: Run pre-commit
-        run: uvx pre-commit run --all-files
+        run: uvx pre-commit run --hook-stage manual --all-files
