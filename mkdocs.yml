@@ -28,6 +28,7 @@ nav:
           - examples/ts-foundation-models-comparison-quickstart.ipynb
           - examples/gift-eval.ipynb
           - examples/chronos-family.ipynb
+          - examples/finetuning.ipynb
           - examples/cryptocurrency-quickstart.ipynb
           - examples/sktime.ipynb
           - examples/skforecast.ipynb
@@ -52,6 +53,7 @@ nav:
       - api/gift-eval/gift-eval.md
   - Changelogs:
       - changelogs/index.md
+      - changelogs/v0.0.24.md
       - changelogs/v0.0.23.md
       - changelogs/v0.0.22.md
       - changelogs/v0.0.21.md

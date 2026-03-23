@@ -79,6 +79,7 @@ dependencies = [
   "opentelemetry-sdk==1.37.0",
   "optuna>=4.5.0",
   "pandas>=2.2.0 ; python_full_version >= '3.13'",
+  "peft>=0.13.0,<1",
   "plotly>=6.3.1",
   "prophet>=1.1.7",
   "pydantic-ai>=0.7.0",
@@ -88,14 +89,14 @@ dependencies = [
   "statsforecast>=2.0.2",
   "tabpfn-time-series==1.0.3 ; python_full_version < '3.13'",
   "tensorboard>=2.20.0",
-  "timecopilot-chronos-forecasting>=0.2.0",
+  "timecopilot-chronos-forecasting>=0.2.1",
   "timecopilot-granite-tsfm>=0.1.2",
   "timecopilot-timesfm>=0.2.1",
   "timecopilot-tirex>=0.1.0 ; python_full_version >= '3.11'",
   "timecopilot-toto>=0.1.5",
   "timecopilot-uni2ts>=0.1.2 ; python_full_version < '3.14'",
   "torchmetrics>=1.8.2",
-  "transformers==4.40.1 ; python_full_version < '3.13'",
+  "transformers>=4.41,<5 ; python_full_version < '3.13'",
   "transformers>=4.48,<5 ; python_full_version >= '3.13'",
   "tsfeatures>=0.4.5",
   "utilsforecast[plotting]>=0.2.15",
@@ -106,7 +107,7 @@ license = "MIT"
 name = "timecopilot"
 readme = "README.md"
 requires-python = ">=3.10"
-version = "0.0.23"
+version = "0.0.24"
 
 [project.scripts]
 timecopilot = "timecopilot._cli:main"
