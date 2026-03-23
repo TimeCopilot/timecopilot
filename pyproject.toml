@@ -13,6 +13,7 @@ dev = [
   "pytest-xdist>=3.8.0",
   "pytest>=8.4.2",
   "s3fs>=2025.3.0",
+  "skforecast>=0.20.0",
   "sktime>=0.40.1",
 ]
 docs = [

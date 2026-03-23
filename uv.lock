@@ -6396,6 +6396,29 @@ dependencies = [
   {marker = "python_full_version >= '3.13'", name = "pandas", source = {registry = "https://pypi.org/simple"}, version = "2.3.3"},
   {marker = "python_full_version >= '3.13'", name = "scikit-learn", source = {registry = "https://pypi.org/simple"}, version = "1.7.2"},
   {name = "joblib"},
+  {name = "numba"},
+  {name = "optuna"},
+  {name = "rich"},
+  {name = "scipy"},
+  {name = "tqdm"},
+]
+name = "skforecast"
+sdist = {hash = "sha256:5df5afb5e5d65f8f09115ac1370bd0c7a4252dba5303e0d931d999c7fd537d05", size = 393897, upload-time = "2026-03-13T09:25:29.867Z", url = "https://files.pythonhosted.org/packages/d3/5f/56ca8b3c28d6cd88b8d27d097b01b4a36dfc20ec4ee2b21b9d95b070545d/skforecast-0.21.0.tar.gz"}
+source = {registry = "https://pypi.org/simple"}
+version = "0.21.0"
+wheels = [
+  {hash = "sha256:a0a685ce544916c52202a3710e844ce8cc911f7eda7a66acd0050ba5221a8058", size = 415716, upload-time = "2026-03-13T09:25:28.238Z", url = "https://files.pythonhosted.org/packages/1b/59/481d13ad6efb0bc6100ec5a50473ade8ddeb0952b63bc00aeff77e11904f/skforecast-0.21.0-py3-none-any.whl"},
+]
+
+[[package]]
+dependencies = [
+  {marker = "python_full_version < '3.13'", name = "numpy", source = {registry = "https://pypi.org/simple"}, version = "1.26.4"},
+  {marker = "python_full_version < '3.13'", name = "pandas", source = {registry = "https://pypi.org/simple"}, version = "2.1.4"},
+  {marker = "python_full_version < '3.13'", name = "scikit-learn", source = {registry = "https://pypi.org/simple"}, version = "1.6.1"},
+  {marker = "python_full_version >= '3.13'", name = "numpy", source = {registry = "https://pypi.org/simple"}, version = "2.1.3"},
+  {marker = "python_full_version >= '3.13'", name = "pandas", source = {registry = "https://pypi.org/simple"}, version = "2.3.3"},
+  {marker = "python_full_version >= '3.13'", name = "scikit-learn", source = {registry = "https://pypi.org/simple"}, version = "1.7.2"},
+  {name = "joblib"},
   {name = "packaging"},
   {name = "scikit-base"},
   {name = "scipy"},
@@ -6902,6 +6925,7 @@ dev = [
   {name = "pytest-rerunfailures"},
   {name = "pytest-xdist"},
   {name = "s3fs"},
+  {name = "skforecast"},
   {name = "sktime"},
 ]
 docs = [
@@ -6975,6 +6999,7 @@ dev = [
   {name = "pytest-rerunfailures", specifier = ">=15.1"},
   {name = "pytest-xdist", specifier = ">=3.8.0"},
   {name = "s3fs", specifier = ">=2025.3.0"},
+  {name = "skforecast", specifier = ">=0.20.0"},
   {name = "sktime", specifier = ">=0.40.1"},
 ]
 docs = [
