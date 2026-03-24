@@ -1,5 +1,6 @@
 """Tests for distributed DataFrame support in TimeCopilotForecaster."""
 
+
 import pandas as pd
 import pytest
 from utilsforecast.data import generate_series
@@ -59,7 +60,8 @@ def simple_models():
 
 @pytest.fixture
 def foundation_model():
-    return [Chronos(repo_id="autogluon/chronos-bolt-tiny")]
+    # return [Chronos(repo_id="autogluon/chronos-bolt-tiny")]
+    return [Chronos(repo_id="autogluon/chronos-t5-tiny")]
 
 
 @pytest.fixture
@@ -67,6 +69,14 @@ def sample_df():
     df = generate_series(n_series=3, freq="D", min_length=30)
     df["unique_id"] = df["unique_id"].astype(str)
     return df
+
+
+@pytest.fixture
+def event_df():
+    return pd.read_csv(
+        "https://timecopilot.s3.amazonaws.com/public/data/events_pageviews.csv",
+        parse_dates=["ds"],
+    )
 
 
 # --- Type detection tests ---
@@ -166,6 +176,63 @@ def test_cross_validation_spark(simple_models, spark_df):
         assert model.alias in result_pd.columns
 
 
+@pytest.mark.distributed
+def test_using_level_spark(foundation_model, spark_session):
+    # level = [0, 20, 40, 60, 80]  # corresponds to qs [0.1, 0.2, ..., 0.9]
+    level: list[int | float] = [20, 80]
+    df = generate_series(
+        n_series=2, freq="D", max_length=100, static_as_categorical=False
+    )
+    spark_df = spark_session.createDataFrame(df)
+    tcf = TimeCopilotForecaster(models=foundation_model)
+    excluded_models = [
+        "AutoLGBM",
+        "AutoNHITS",
+        "AutoTFT",
+        "PatchTST-FM",
+    ]
+    if any(m.alias in excluded_models for m in foundation_model):
+        # These models do not support levels yet
+        with pytest.raises(ValueError) as excinfo:
+            tcf.forecast(
+                df=spark_df,
+                h=2,
+                freq="D",
+                level=level,
+            )
+        assert "not supported" in str(excinfo.value)
+        return
+    fcst_df = tcf.forecast(
+        df=spark_df,
+        h=2,
+        freq="D",
+        level=level,
+    )
+    fcst_df_pd = fcst_df.toPandas()
+    exp_lv_cols = []
+    for lv in level:
+        for model in foundation_model:
+            exp_lv_cols.extend([f"{model.alias}-lo-{lv}", f"{model.alias}-hi-{lv}"])
+    assert len(exp_lv_cols) == len(fcst_df_pd.columns) - 3  # 3 is unique_id, ds, point
+    assert all(col in fcst_df_pd.columns for col in exp_lv_cols)
+    assert not any(("-q-" in col) for col in fcst_df_pd.columns)
+    # test monotonicity of levels
+    exp_lv_cols = exp_lv_cols[2:]  # remove level 0
+    for c1, c2 in zip(exp_lv_cols[:-1:2], exp_lv_cols[1::2], strict=False):
+        for model in foundation_model:
+            if model.alias == "ZeroModel":
+                # ZeroModel is a constant model, so all levels should be the same
+                assert fcst_df_pd[c1].eq(fcst_df_pd[c2]).all()
+            elif "chronos" in model.alias.lower() or "median" in model.alias.lower():
+                # sometimes it gives this condition
+                assert fcst_df_pd[c1].le(fcst_df_pd[c2]).all()
+            elif "tabpfn" in model.alias.lower():
+                # we are testing the mock mode, so we don't care about monotonicity
+                continue
+            else:
+                assert fcst_df_pd[c1].lt(fcst_df_pd[c2]).all()
+
+
 # --- Dask tests ---
 
 
@@ -241,6 +308,66 @@ def test_cross_validation_dask(simple_models, dask_df):
         assert model.alias in result_pd.columns
 
 
+@pytest.mark.distributed
+def test_using_level_dask(foundation_model):
+    import dask.dataframe as dd
+
+    # level = [0, 20, 40, 60, 80]  # corresponds to qs [0.1, 0.2, ..., 0.9]
+    level: list[int | float] = [20, 80]
+    n_partitions = 2
+    df = generate_series(
+        n_series=2, freq="D", max_length=100, static_as_categorical=False
+    )
+    dask_df = dd.from_pandas(df, npartitions=n_partitions)
+    tcf = TimeCopilotForecaster(models=foundation_model)
+    excluded_models = [
+        "AutoLGBM",
+        "AutoNHITS",
+        "AutoTFT",
+        "PatchTST-FM",
+    ]
+    if any(m.alias in excluded_models for m in foundation_model):
+        # These models do not support levels yet
+        with pytest.raises(ValueError) as excinfo:
+            tcf.forecast(
+                df=dask_df,
+                h=2,
+                freq="D",
+                level=level,
+            )
+        assert "not supported" in str(excinfo.value)
+        return
+    fcst_df = tcf.forecast(
+        df=dask_df,
+        h=2,
+        freq="D",
+        level=level,
+    )
+    fcst_df_pd = fcst_df.compute()
+    exp_lv_cols = []
+    for lv in level:
+        for model in foundation_model:
+            exp_lv_cols.extend([f"{model.alias}-lo-{lv}", f"{model.alias}-hi-{lv}"])
+    assert len(exp_lv_cols) == len(fcst_df_pd.columns) - 3  # 3 is unique_id, ds, point
+    assert all(col in fcst_df_pd.columns for col in exp_lv_cols)
+    assert not any(("-q-" in col) for col in fcst_df_pd.columns)
+    # test monotonicity of levels
+    exp_lv_cols = exp_lv_cols[2:]  # remove level 0
+    for c1, c2 in zip(exp_lv_cols[:-1:2], exp_lv_cols[1::2], strict=False):
+        for model in foundation_model:
+            if model.alias == "ZeroModel":
+                # ZeroModel is a constant model, so all levels should be the same
+                assert fcst_df_pd[c1].eq(fcst_df_pd[c2]).all()
+            elif "chronos" in model.alias.lower() or "median" in model.alias.lower():
+                # sometimes it gives this condition
+                assert fcst_df_pd[c1].le(fcst_df_pd[c2]).all()
+            elif "tabpfn" in model.alias.lower():
+                # we are testing the mock mode, so we don't care about monotonicity
+                continue
+            else:
+                assert fcst_df_pd[c1].lt(fcst_df_pd[c2]).all()
+
+
 # --- Ray tests ---
 
 
@@ -292,6 +419,74 @@ def test_cross_validation_ray(simple_models, ray_dataset):
     assert "cutoff" in result_pd.columns
     for model in simple_models:
         assert model.alias in result_pd.columns
+
+
+@pytest.mark.distributed
+def test_using_level_ray(foundation_model):
+    import ray
+
+    # level = [0, 20, 40, 60, 80]  # corresponds to qs [0.1, 0.2, ..., 0.9]
+    level: list[int | float] = [20, 80]
+    df = generate_series(
+        n_series=2, freq="D", max_length=100, static_as_categorical=False
+    )
+    if not ray.is_initialized():
+        # Use local mode to avoid working directory upload issues
+        ray.init(
+            ignore_reinit_error=True,
+            num_cpus=2,
+            include_dashboard=False,
+            runtime_env={"working_dir": None},
+            object_store_memory=78_643_200,
+        )
+    ray_df = ray.data.from_pandas(df)
+    tcf = TimeCopilotForecaster(models=foundation_model)
+    excluded_models = [
+        "AutoLGBM",
+        "AutoNHITS",
+        "AutoTFT",
+        "PatchTST-FM",
+    ]
+    if any(m.alias in excluded_models for m in foundation_model):
+        # These models do not support levels yet
+        with pytest.raises(ValueError) as excinfo:
+            tcf.forecast(
+                df=ray_df,
+                h=2,
+                freq="D",
+                level=level,
+            )
+        assert "not supported" in str(excinfo.value)
+        return
+    fcst_df = tcf.forecast(
+        df=ray_df,
+        h=2,
+        freq="D",
+        level=level,
+    )
+    fcst_df_pd = fcst_df.to_pandas()
+    exp_lv_cols = []
+    for lv in level:
+        for model in foundation_model:
+            exp_lv_cols.extend([f"{model.alias}-lo-{lv}", f"{model.alias}-hi-{lv}"])
+    assert len(exp_lv_cols) == len(fcst_df_pd.columns) - 3  # 3 is unique_id, ds, point
+    assert all(col in fcst_df_pd.columns for col in exp_lv_cols)
+    assert not any(("-q-" in col) for col in fcst_df_pd.columns)
+    # test monotonicity of levels
+    exp_lv_cols = exp_lv_cols[2:]  # remove level 0
+    for c1, c2 in zip(exp_lv_cols[:-1:2], exp_lv_cols[1::2], strict=False):
+        for model in foundation_model:
+            if model.alias == "ZeroModel":
+                # ZeroModel is a constant model, so all levels should be the same
+                assert fcst_df_pd[c1].eq(fcst_df_pd[c2]).all()
+            elif "chronos" in model.alias.lower() or "median" in model.alias.lower():
+                # sometimes it gives this condition
+                assert fcst_df_pd[c1].le(fcst_df_pd[c2]).all()
+            elif "tabpfn" in model.alias.lower():
+                # we are testing the mock mode, so we don't care about monotonicity
+                continue
+            else:
+                assert fcst_df_pd[c1].lt(fcst_df_pd[c2]).all()
 
 
 # --- num_partitions parameter tests ---
