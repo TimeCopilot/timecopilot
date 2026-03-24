@@ -1,6 +1,32 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, TypeVar
+
 import pandas as pd
 
 from .models.utils.forecaster import Forecaster
+
+if TYPE_CHECKING:
+    from dask.dataframe import DataFrame as DaskDataFrame
+    from pyspark.sql import DataFrame as SparkDataFrame
+    from ray.data import Dataset as RayDataset
+
+# Type variable for any supported DataFrame type
+AnyDataFrame = TypeVar(
+    "AnyDataFrame",
+    pd.DataFrame,
+    "DaskDataFrame",
+    "SparkDataFrame",
+    "RayDataset",
+)
+
+# Type variable for distributed DataFrame types only
+DistributedDataFrame = TypeVar(
+    "DistributedDataFrame",
+    "DaskDataFrame",
+    "SparkDataFrame",
+    "RayDataset",
+)
 
 
 class TimeCopilotForecaster(Forecaster):
@@ -62,6 +88,19 @@ class TimeCopilotForecaster(Forecaster):
                 f"same class."
             )
 
+    @staticmethod
+    def _is_distributed_df(df: AnyDataFrame) -> bool:
+        """
+        Check if a DataFrame is a distributed DataFrame type.
+
+        Args:
+            df: DataFrame to check.
+
+        Returns:
+            True if the DataFrame is Spark, Dask, or Ray; False if pandas.
+        """
+        return not isinstance(df, pd.DataFrame)
+
     def _call_models(
         self,
         attr: str,
@@ -118,7 +157,7 @@ class TimeCopilotForecaster(Forecaster):
                 res_df = res_df.merge(res_df_model, on=merge_on, how="left")
         return res_df
 
-    def forecast(
+    def _forecast_pandas(
         self,
         df: pd.DataFrame,
         h: int,
@@ -127,16 +166,111 @@ class TimeCopilotForecaster(Forecaster):
         quantiles: list[float] | None = None,
     ) -> pd.DataFrame:
         """
+        Internal pandas-only forecast implementation.
+
+        This method is called directly for pandas DataFrames or by the
+        distributed wrapper for each partition.
+        """
+        return self._call_models(
+            "forecast",
+            merge_on=["unique_id", "ds"],
+            df=df,
+            h=h,
+            freq=freq,
+            level=level,
+            quantiles=quantiles,
+        )
+
+    def _forecast_distributed(
+        self,
+        df: DistributedDataFrame,
+        h: int,
+        freq: str | None = None,
+        level: list[int | float] | None = None,
+        quantiles: list[float] | None = None,
+        num_partitions: int | None = None,
+    ) -> DistributedDataFrame:
+        """
+        Distributed forecast implementation using Fugue.
+
+        This method handles Spark, Dask, and Ray DataFrames by partitioning
+        the data by unique_id and running the pandas forecast on each partition.
+
+        Args:
+            df: Distributed DataFrame (Spark, Dask, or Ray).
+            h: Forecast horizon.
+            freq: Frequency of the time series.
+            level: Confidence levels for prediction intervals.
+            quantiles: Quantiles to forecast.
+            num_partitions: Number of partitions to use.
+
+        Returns:
+            Distributed DataFrame with forecast results (same type as input).
+        """
+        import fugue.api as fa
+
+        from .utils.distributed import (
+            _distributed_setup,
+            _forecast_wrapper,
+            _maybe_repartition_df,
+        )
+
+        df = _maybe_repartition_df(df)
+
+        schema, partition_config = _distributed_setup(
+            df=df,
+            method="forecast",
+            id_col="unique_id",
+            time_col="ds",
+            target_col="y",
+            level=level,
+            quantiles=quantiles,
+            num_partitions=num_partitions,
+            models=self.models,
+        )
+
+        result_df = fa.transform(
+            df,
+            using=_forecast_wrapper,
+            schema=schema,
+            params={
+                "forecaster": self,
+                "h": h,
+                "freq": freq,
+                "level": level,
+                "quantiles": quantiles,
+            },
+            partition=partition_config,
+            as_fugue=True,
+        )
+
+        return fa.get_native_as_df(result_df)
+
+    def forecast(
+        self,
+        df: AnyDataFrame,
+        h: int,
+        freq: str | None = None,
+        level: list[int | float] | None = None,
+        quantiles: list[float] | None = None,
+        num_partitions: int | None = None,
+    ) -> AnyDataFrame:
+        """
         Generate forecasts for one or more time series using all models.
 
         This method produces point forecasts and, optionally, prediction
         intervals or quantile forecasts. The input DataFrame can contain one
         or multiple time series in stacked (long) format.
 
+        Supports pandas, Spark, Dask, and Ray DataFrames. For distributed
+        DataFrames, the data is partitioned by unique_id and processed in
+        parallel using Fugue.
+
         Args:
-            df (pd.DataFrame):
-                DataFrame containing the time series to forecast. It must
-                include as columns:
+            df (AnyDataFrame):
+                DataFrame containing the time series to forecast. Supports
+                pandas DataFrame, Spark DataFrame, Dask DataFrame, or Ray Dataset.
+                It must include as columns:
 
                     - "unique_id": an ID column to distinguish multiple series.
                     - "ds": a time column indicating timestamps or periods.
@@ -161,10 +295,15 @@ class TimeCopilotForecaster(Forecaster):
                 provided, the output DataFrame will contain additional columns
                 named in the format "model-q-{percentile}", where {percentile}
                 = 100 × quantile value.
+            num_partitions (int, optional):
+                Number of partitions to use for distributed DataFrames. Only
+                used when df is a Spark, Dask, or Ray DataFrame. If not provided,
+                the default partitioning is used.
 
         Returns:
-            pd.DataFrame:
-                DataFrame containing forecast results. Includes:
+            AnyDataFrame:
+                DataFrame containing forecast results (same type as input).
+                Includes:
 
                     - point forecasts for each timestamp, series and model.
                     - prediction intervals if `level` is specified.
@@ -173,9 +312,19 @@ class TimeCopilotForecaster(Forecaster):
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
-        return self._call_models(
-            "forecast",
-            merge_on=["unique_id", "ds"],
+        # Route to distributed implementation for non-pandas DataFrames
+        if self._is_distributed_df(df):
+            return self._forecast_distributed(
+                df=df,
+                h=h,
+                freq=freq,
+                level=level,
+                quantiles=quantiles,
+                num_partitions=num_partitions,
+            )
+
+        # Pandas DataFrame path
+        return self._forecast_pandas(
             df=df,
             h=h,
             freq=freq,
@@ -183,7 +332,7 @@ class TimeCopilotForecaster(Forecaster):
             quantiles=quantiles,
         )
 
-    def cross_validation(
+    def _cross_validation_pandas(
         self,
         df: pd.DataFrame,
         h: int,
@@ -194,15 +343,121 @@ class TimeCopilotForecaster(Forecaster):
         quantiles: list[float] | None = None,
     ) -> pd.DataFrame:
         """
+        Internal pandas-only cross-validation implementation.
+
+        This method is called directly for pandas DataFrames or by the
+        distributed wrapper for each partition.
+        """
+        return self._call_models(
+            "cross_validation",
+            merge_on=["unique_id", "ds", "cutoff"],
+            df=df,
+            h=h,
+            freq=freq,
+            n_windows=n_windows,
+            step_size=step_size,
+            level=level,
+            quantiles=quantiles,
+        )
+
+    def _cross_validation_distributed(
+        self,
+        df: DistributedDataFrame,
+        h: int,
+        freq: str | None = None,
+        n_windows: int = 1,
+        step_size: int | None = None,
+        level: list[int | float] | None = None,
+        quantiles: list[float] | None = None,
+        num_partitions: int | None = None,
+    ) -> DistributedDataFrame:
+        """
+        Distributed cross-validation implementation using Fugue.
+
+        This method handles Spark, Dask, and Ray DataFrames by partitioning
+        the data by unique_id and running the pandas cross-validation
+        on each partition.
+
+        Args:
+            df: Distributed DataFrame (Spark, Dask, or Ray).
+            h: Forecast horizon.
+            freq: Frequency of the time series.
+            n_windows: Number of cross-validation windows.
+            step_size: Step size between windows.
+            level: Confidence levels for prediction intervals.
+            quantiles: Quantiles to forecast.
+            num_partitions: Number of partitions to use.
+
+        Returns:
+            Distributed DataFrame with cross-validation results (same type as input).
+        """
+        import fugue.api as fa
+
+        from .utils.distributed import (
+            _cross_validation_wrapper,
+            _distributed_setup,
+            _maybe_repartition_df,
+        )
+
+        df = _maybe_repartition_df(df)
+
+        schema, partition_config = _distributed_setup(
+            df=df,
+            method="cross_validation",
+            id_col="unique_id",
+            time_col="ds",
+            target_col="y",
+            level=level,
+            quantiles=quantiles,
+            num_partitions=num_partitions,
+            models=self.models,
+        )
+
+        result_df = fa.transform(
+            df,
+            using=_cross_validation_wrapper,
+            schema=schema,
+            params={
+                "forecaster": self,
+                "h": h,
+                "freq": freq,
+                "n_windows": n_windows,
+                "step_size": step_size,
+                "level": level,
+                "quantiles": quantiles,
+            },
+            partition=partition_config,
+            as_fugue=True,
+        )
+
+        return fa.get_native_as_df(result_df)
+
+    def cross_validation(
+        self,
+        df: AnyDataFrame,
+        h: int,
+        freq: str | None = None,
+        n_windows: int = 1,
+        step_size: int | None = None,
+        level: list[int | float] | None = None,
+        quantiles: list[float] | None = None,
+        num_partitions: int | None = None,
+    ) -> AnyDataFrame:
+        """
         This method splits the time series into multiple training and testing
         windows and generates forecasts for each window. It enables evaluating
         forecast accuracy over different historical periods. Supports point
         forecasts and, optionally, prediction intervals or quantile forecasts.
 
+        Supports pandas, Spark, Dask, and Ray DataFrames. For distributed
+        DataFrames, the data is partitioned by unique_id and processed in
+        parallel using Fugue.
+
         Args:
-            df (pd.DataFrame):
-                DataFrame containing the time series to forecast. It must
-                include as columns:
+            df (AnyDataFrame):
+                DataFrame containing the time series to forecast. Supports
+                pandas DataFrame, Spark DataFrame, Dask DataFrame, or Ray Dataset.
+                It must include as columns:
 
                     - "unique_id": an ID column to distinguish multiple series.
                     - "ds": a time column indicating timestamps or periods.
@@ -232,11 +487,15 @@ class TimeCopilotForecaster(Forecaster):
                 Should not be used simultaneously with `level`. If provided,
                 additional columns named "model-q-{percentile}" will appear in
                 the output, where {percentile} is 100 × quantile value.
+            num_partitions (int, optional):
+                Number of partitions to use for distributed DataFrames. Only
+                used when df is a Spark, Dask, or Ray DataFrame. If not provided,
+                the default partitioning is used.
 
         Returns:
-            pd.DataFrame:
+            AnyDataFrame:
                 DataFrame containing the forecasts for each cross-validation
-                window. The output includes:
+                window (same type as input). The output includes:
 
                     - "unique_id" column to indicate the series.
                     - "ds" column to indicate the timestamp.
@@ -247,9 +506,21 @@ class TimeCopilotForecaster(Forecaster):
                     - prediction intervals if `level` is specified.
                     - quantile forecasts if `quantiles` is specified.
         """
-        return self._call_models(
-            "cross_validation",
-            merge_on=["unique_id", "ds", "cutoff"],
+        # Route to distributed implementation for non-pandas DataFrames
+        if self._is_distributed_df(df):
+            return self._cross_validation_distributed(
+                df=df,
+                h=h,
+                freq=freq,
+                n_windows=n_windows,
+                step_size=step_size,
+                level=level,
+                quantiles=quantiles,
+                num_partitions=num_partitions,
+            )
+
+        # Pandas DataFrame path
+        return self._cross_validation_pandas(
             df=df,
             h=h,
             freq=freq,
@@ -259,7 +530,7 @@ class TimeCopilotForecaster(Forecaster):
             quantiles=quantiles,
         )
 
-    def detect_anomalies(
+    def _detect_anomalies_pandas(
         self,
         df: pd.DataFrame,
         h: int | None = None,
@@ -267,6 +538,97 @@ class TimeCopilotForecaster(Forecaster):
         n_windows: int | None = None,
         level: int | float = 99,
     ) -> pd.DataFrame:
+        """Internal pandas-only anomaly detection implementation.
+
+        This method is called directly for pandas DataFrames or by the
+        distributed wrapper for each partition.
+        """
+        return self._call_models(
+            "detect_anomalies",
+            merge_on=["unique_id", "ds", "cutoff"],
+            df=df,
+            h=h,  # type: ignore
+            freq=freq,
+            n_windows=n_windows,
+            level=level,  # type: ignore
+            quantiles=None,
+        )
+
+    def _detect_anomalies_distributed(
+        self,
+        df: DistributedDataFrame,
+        h: int | None = None,
+        freq: str | None = None,
+        n_windows: int | None = None,
+        level: int | float = 99,
+        num_partitions: int | None = None,
+    ) -> DistributedDataFrame:
+        """
+        Distributed anomaly detection implementation using Fugue.
+
+        This method handles Spark, Dask, and Ray DataFrames by partitioning
+        the data by unique_id and running the pandas anomaly detection
+        on each partition.
+
+        Args:
+            df: Distributed DataFrame (Spark, Dask, or Ray).
+            h: Forecast horizon.
+            freq: Frequency of the time series.
+            n_windows: Number of cross-validation windows.
+            level: Confidence level for anomaly detection.
+            num_partitions: Number of partitions to use.
+
+        Returns:
+            Distributed DataFrame with anomaly detection results (same type as input).
+        """
+        import fugue.api as fa
+
+        from .utils.distributed import (
+            _detect_anomalies_wrapper,
+            _distributed_setup,
+            _maybe_repartition_df,
+        )
+
+        df = _maybe_repartition_df(df)
+
+        schema, partition_config = _distributed_setup(
+            df=df,
+            method="detect_anomalies",
+            id_col="unique_id",
+            time_col="ds",
+            target_col="y",
+            level=level,
+            quantiles=None,
+            num_partitions=num_partitions,
+            models=self.models,
+        )
+
+        result_df = fa.transform(
+            df,
+            using=_detect_anomalies_wrapper,
+            schema=schema,
+            params={
+                "forecaster": self,
+                "h": h,
+                "freq": freq,
+                "n_windows": n_windows,
+                "level": level,
+            },
+            partition=partition_config,
+            as_fugue=True,
+        )
+
+        return fa.get_native_as_df(result_df)
+
+    def detect_anomalies(
+        self,
+        df: AnyDataFrame,
+        h: int | None = None,
+        freq: str | None = None,
+        n_windows: int | None = None,
+        level: int | float = 99,
+        num_partitions: int | None = None,
+    ) -> AnyDataFrame:
         """
         Detect anomalies in time-series using a cross-validated z-score test.
 
@@ -276,9 +638,15 @@ class TimeCopilotForecaster(Forecaster):
         flags values outside a two-sided prediction interval (with confidence `level`),
         and returns a DataFrame with results.
 
+        Supports pandas, Spark, Dask, and Ray DataFrames. For distributed
+        DataFrames, the data is partitioned by unique_id and processed in
+        parallel using Fugue.
+
         Args:
-            df (pd.DataFrame):
+            df (AnyDataFrame):
                 DataFrame containing the time series to detect anomalies.
+                Supports pandas DataFrame, Spark DataFrame, Dask DataFrame,
+                or Ray Dataset.
             h (int, optional):
                 Forecast horizon specifying how many future steps to predict.
                 In each cross validation window. If not provided, the seasonality
@@ -300,11 +668,15 @@ class TimeCopilotForecaster(Forecaster):
             level (int | float):
                 Confidence levels for z-score, expressed as
                 percentages (e.g. 80, 95). Default is 99.
+            num_partitions (int, optional):
+                Number of partitions to use for distributed DataFrames. Only
+                used when df is a Spark, Dask, or Ray DataFrame. If not provided,
+                the default partitioning is used.
 
         Returns:
-            pd.DataFrame:
+            AnyDataFrame:
                 DataFrame containing the forecasts for each cross-validation
-                window. The output includes:
+                window (same type as input). The output includes:
 
                     - "unique_id" column to indicate the series.
                     - "ds" column to indicate the timestamp.
@@ -316,13 +688,22 @@ class TimeCopilotForecaster(Forecaster):
                         an anomaly is defined as a value that is outside of the
                         prediction interval (True or False).
         """
-        return self._call_models(
-            "detect_anomalies",
-            merge_on=["unique_id", "ds", "cutoff"],
+        # Route to distributed implementation for non-pandas DataFrames
+        if self._is_distributed_df(df):
+            return self._detect_anomalies_distributed(
+                df=df,
+                h=h,
+                freq=freq,
+                n_windows=n_windows,
+                level=level,
+                num_partitions=num_partitions,
+            )
+
+        # Pandas DataFrame path
+        return self._detect_anomalies_pandas(
             df=df,
-            h=h,  # type: ignore
+            h=h,
             freq=freq,
             n_windows=n_windows,
-            level=level,  # type: ignore
-            quantiles=None,
+            level=level,
         )
