@@ -549,9 +549,9 @@ class QuantileConverter:
         Given a prediction interval level (e.g. 80) return the lower & upper
         quantiles that delimit the central interval (e.g. 0.10, 0.90).
         """
-        alpha = 1 - level / 100
         # handle trailing 9s, can occur with level == 80
-        q_lo = round(alpha / 2, 2)
+        alpha = round(1 - level / 100, 2)
+        q_lo = alpha / 2
         q_hi = 1 - q_lo
         return q_lo, q_hi
 

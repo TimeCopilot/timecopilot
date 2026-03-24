@@ -173,7 +173,7 @@ def test_maybe_convert_quantiles_to_level(n_models, level):
                     check_names=False,
                 )
             else:
-                alpha = 1 - lv / 100
+                alpha = round(1 - lv / 100, 2)
                 q_lo = int((alpha / 2) * 100)
                 q_hi = int((1 - alpha / 2) * 100)
                 pd.testing.assert_series_equal(
