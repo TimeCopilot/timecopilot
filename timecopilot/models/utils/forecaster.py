@@ -550,7 +550,8 @@ class QuantileConverter:
         quantiles that delimit the central interval (e.g. 0.10, 0.90).
         """
         alpha = 1 - level / 100
-        q_lo = alpha / 2
+        # handle trailing 9s, can occur with level == 80
+        q_lo = round(alpha / 2, 2)
         q_hi = 1 - q_lo
         return q_lo, q_hi
 
