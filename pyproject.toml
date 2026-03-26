@@ -4,8 +4,11 @@ requires = ["hatchling"]
 
 [dependency-groups]
 dev = [
+  "fugue[dask,ray,spark]>=0.9.0",
   "mktestdocs>=0.2.5",
   "pre-commit",
+  "pyspark<4.1",
+  "pytest",
   "pytest-asyncio>=1.1.0",
   "pytest-cov",
   "pytest-mock>=3.15.1",
@@ -83,7 +86,7 @@ dependencies = [
   "prophet>=1.1.7",
   "pydantic-ai>=0.7.0",
   "pytorch-lightning==2.4.0",
-  "ray==2.49.2",
+  "ray==2.48",
   "scipy<=1.15.3",
   "statsforecast>=2.0.2",
   "tabpfn-time-series==1.0.3 ; python_full_version < '3.13'",
@@ -108,6 +111,14 @@ readme = "README.md"
 requires-python = ">=3.10"
 version = "0.0.24"
 
+[project.optional-dependencies]
+distributed = [
+  "dask<=2024.12.1",
+  "fugue[dask,ray,spark]>=0.9.0",
+  "pyspark<4.1",
+  "ray==2.48",
+]
+
 [project.scripts]
 timecopilot = "timecopilot._cli:main"
 
@@ -131,8 +142,9 @@ allow-direct-references = true
 disable_error_code = ["no-redef"] # for fasthtml
 
 [tool.pytest.ini_options]
-addopts = "-m 'not docs and not live and not gift_eval' -n auto"
+addopts = "-m 'not docs and not live and not gift_eval and not distributed' -n auto"
 markers = [
+  "distributed: marks tests that require distributed backends (spark, dask, ray)",
   "docs: marks tests related to documentation",
   "flaky: rerun failures (provided by pytest-rerunfailures)",
   "gift_eval: marks tests related to gift eval results replication",

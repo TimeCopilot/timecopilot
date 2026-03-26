@@ -243,7 +243,6 @@ def test_using_level(model):
         "AutoLGBM",
         "AutoNHITS",
         "AutoTFT",
-        "PatchTST-FM",
     ]:
         # These models do not support levels yet
         with pytest.raises(ValueError) as excinfo:
