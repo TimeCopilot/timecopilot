@@ -30,6 +30,7 @@
     options:
         members:
             - TimeGPT
+            - TimeGPTFinetuningConfig
 
 ::: timecopilot.models.foundation.timesfm
     options:
