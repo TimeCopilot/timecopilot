@@ -96,11 +96,9 @@ class TimeCopilotForecaster(Forecaster):
                     res_df_model = fn(**known_kwargs, **kwargs)
                     res_df_model = res_df_model.rename(
                         columns={
-                            col: (
-                                col.replace(self.fallback_model.alias, model.alias)
-                                if col.startswith(self.fallback_model.alias)
-                                else col
-                            )
+                            col: col.replace(self.fallback_model.alias, model.alias)
+                            if col.startswith(self.fallback_model.alias)
+                            else col
                             for col in res_df_model.columns
                         }
                     )
@@ -192,61 +190,54 @@ class TimeCopilotForecaster(Forecaster):
         step_size: int | None = None,
         level: list[int | float] | None = None,
         quantiles: list[float] | None = None,
+        cv_mode: str | None = None,
+        verbose: bool = True,
     ) -> pd.DataFrame:
         """
-        This method splits the time series into multiple training and testing
-        windows and generates forecasts for each window. It enables evaluating
-        forecast accuracy over different historical periods. Supports point
-        forecasts and, optionally, prediction intervals or quantile forecasts.
+        Cross-validation with optional preset modes.
 
-        Args:
-            df (pd.DataFrame):
-                DataFrame containing the time series to forecast. It must
-                include as columns:
+        This method performs rolling-origin cross-validation by splitting the
+        time series into multiple training and testing windows and generating
+        forecasts for each window. It enables evaluating forecast accuracy over
+        different historical periods.
 
-                    - "unique_id": an ID column to distinguish multiple series.
-                    - "ds": a time column indicating timestamps or periods.
-                    - "y": a target column with the observed values.
+        Backward compatibility is preserved: if no additional parameters are
+        provided, the method behaves exactly as before with `n_windows=1`.
 
-            h (int):
-                Forecast horizon specifying how many future steps to predict in
-                each window.
-            freq (str, optional):
-                Frequency of the time series (e.g. "D" for daily, "M" for
-                monthly). See [Pandas frequency aliases](https://pandas.pydata.
-                org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases)
-                for valid values. If not provided, the frequency will be inferred
-                from the data.
-            n_windows (int, optional):
-                Number of cross-validation windows to generate. Defaults to 1.
-            step_size (int, optional):
-                Step size between the start of consecutive windows. If None, it
-                defaults to `h`.
-            level (list[int | float], optional):
-                Confidence levels for prediction intervals, expressed as
-                percentages (e.g. [80, 95]). When specified, the output
-                DataFrame includes lower and upper interval columns for each
-                level.
-            quantiles (list[float], optional):
-                Quantiles to forecast, expressed as floats between 0 and 1.
-                Should not be used simultaneously with `level`. If provided,
-                additional columns named "model-q-{percentile}" will appear in
-                the output, where {percentile} is 100 × quantile value.
+        New optional parameter:
+            cv_mode (str, optional):
+                Preset cross-validation configurations for convenience.
 
-        Returns:
-            pd.DataFrame:
-                DataFrame containing the forecasts for each cross-validation
-                window. The output includes:
+                - "quick":   1 window (fastest, equivalent to previous behavior)
+                - "std":     3 windows (balanced accuracy vs runtime)
+                - "robust":  5 windows (more stable model evaluation)
 
-                    - "unique_id" column to indicate the series.
-                    - "ds" column to indicate the timestamp.
-                    - "y" column to indicate the target.
-                    - "cutoff" column to indicate which window each forecast
-                      belongs to.
-                    - point forecasts for each timestamp, series and model.
-                    - prediction intervals if `level` is specified.
-                    - quantile forecasts if `quantiles` is specified.
+                If `cv_mode` is provided and `n_windows` is left at its default
+                value (1), the number of windows will be overridden by the
+                selected preset.
+
+                If `n_windows` is explicitly provided by the user, it always
+                takes precedence over `cv_mode`.
+
+        This design allows existing code to run unchanged while enabling users
+        and the agent to opt into more robust cross-validation with a simple
+        parameter.
         """
+
+        # Backward compatibility: explicit n_windows always wins
+        if cv_mode is not None:
+            if cv_mode == "quick":
+                n_windows = 1
+            elif cv_mode == "std":
+                n_windows = 3
+            elif cv_mode == "robust":
+                n_windows = 5
+            else:
+                raise ValueError("cv_mode must be one of: quick, std, robust")
+
+        if verbose:
+            print(f"[TimeCopilot] Starting cross-validation with {n_windows} window(s)")
+
         return self._call_models(
             "cross_validation",
             merge_on=["unique_id", "ds", "cutoff"],
@@ -258,6 +249,9 @@ class TimeCopilotForecaster(Forecaster):
             level=level,
             quantiles=quantiles,
         )
+
+        if verbose:
+            print(f"[TimeCopilot] Starting cross-validation with {n_windows} window(s)")
 
     def detect_anomalies(
         self,

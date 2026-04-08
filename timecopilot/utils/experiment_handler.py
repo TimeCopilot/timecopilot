@@ -177,6 +177,7 @@ class ExperimentDataset:
     freq: str
     h: int
     seasonality: int
+    cv_mode: str | None = None
 
     def evaluate_forecast_df(
         self,
