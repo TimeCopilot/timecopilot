@@ -1,9 +1,39 @@
 import os
+from dataclasses import dataclass
+from typing import Literal
 
 import pandas as pd
 from nixtla import NixtlaClient
 
 from ..utils.forecaster import Forecaster
+
+
+@dataclass
+class TimeGPTFinetuningConfig:
+    """Configuration for finetuning TimeGPT before forecasting.
+
+    Pass an instance to the ``TimeGPT`` constructor; when you call
+    ``forecast()``, the model is finetuned on the context data before
+    predicting. Parameters are passed through to ``NixtlaClient.forecast()``.
+
+    Attributes:
+        finetune_steps: Number of training iterations. The model is trained
+            for this many steps on your data to minimize forecasting error.
+            Defaults to 10.
+        finetune_loss: Loss function used during finetuning. Options are
+            ``"default"``, ``"mae"``, ``"mse"``, ``"rmse"``, ``"mape"``, and
+            ``"smape"``. Defaults to ``"default"``.
+        finetune_depth: Controls how many model layers are finetuned, on a
+            scale from 1 (few parameters) to 5 (entire model). Higher values
+            increase training time and may overfit. Defaults to 1.
+
+    Notes:
+        - Based on the [TimeGPT fine-tuning docs](https://docs.nixtla.io/forecasting/fine-tuning/steps).
+    """
+
+    finetune_steps: int = 10
+    finetune_loss: Literal["default", "mae", "mse", "rmse", "mape", "smape"] = "default"
+    finetune_depth: Literal[1, 2, 3, 4, 5] = 1
 
 
 class TimeGPT(Forecaster):
@@ -23,6 +53,7 @@ class TimeGPT(Forecaster):
         max_retries: int = 1,
         model: str = "timegpt-1",
         alias: str = "TimeGPT",
+        finetuning_config: TimeGPTFinetuningConfig | None = None,
     ):
         """
         Args:
@@ -38,6 +69,11 @@ class TimeGPT(Forecaster):
                 available models.
             alias (str, optional): Name to use for the model in output DataFrames and
                 logs. Defaults to "TimeGPT".
+            finetuning_config (TimeGPTFinetuningConfig | None, optional): If
+                provided, the model is finetuned on the forecast context
+                data before predicting. See ``TimeGPTFinetuningConfig`` and
+                the [TimeGPT fine-tuning docs](https://docs.nixtla.io/forecasting/fine-tuning/steps)
+                for parameter details.
 
         Notes:
             **Academic Reference:**
@@ -63,6 +99,7 @@ class TimeGPT(Forecaster):
         self.max_retries = max_retries
         self.model = model
         self.alias = alias
+        self.finetuning_config = finetuning_config
 
     def _get_client(self) -> NixtlaClient:
         if self.api_key is None:  # noqa: SIM108
@@ -128,9 +165,17 @@ class TimeGPT(Forecaster):
 
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
+
+            When ``finetuning_config`` was set at construction, the model is
+            finetuned on ``df`` before predicting.
         """
         freq = self._maybe_infer_freq(df, freq)
         client = self._get_client()
+        finetune_kwargs: dict = {}
+        if self.finetuning_config is not None:
+            finetune_kwargs["finetune_steps"] = self.finetuning_config.finetune_steps
+            finetune_kwargs["finetune_loss"] = self.finetuning_config.finetune_loss
+            finetune_kwargs["finetune_depth"] = self.finetuning_config.finetune_depth
         fcst_df = client.forecast(
             df=df,
             h=h,
@@ -138,6 +183,7 @@ class TimeGPT(Forecaster):
             model=self.model,
             level=level,
             quantiles=quantiles,
+            **finetune_kwargs,
         )
         fcst_df["ds"] = pd.to_datetime(fcst_df["ds"])
         cols = [col.replace("TimeGPT", self.alias) for col in fcst_df.columns]
