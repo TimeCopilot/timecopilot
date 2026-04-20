@@ -119,14 +119,6 @@ distributed = [
   "ray==2.48",
 ]
 
-[project.optional-dependencies]
-distributed = [
-  "dask<=2024.12.1",
-  "fugue[dask,ray,spark]>=0.9.0",
-  "pyspark<4.1",
-  "ray==2.48",
-]
-
 [project.scripts]
 timecopilot = "timecopilot._cli:main"
 
