@@ -1,6 +1,6 @@
 import os
 from collections.abc import Callable
-from multiprocessing import Pool
+from multiprocessing import Pool, current_process
 
 import pandas as pd
 
@@ -26,6 +26,10 @@ class ParallelForecaster(Forecaster):
         func: Callable,
         **kwargs,
     ) -> pd.DataFrame:
+        if current_process().daemon:
+            # Running inside a Dask/Fugue worker: do not spawn children
+            results = [self._process_group(df, func, **kwargs) for _, df in df_grouped]
+            return pd.concat(results)
         with Pool(max(1, (os.cpu_count() or 1) - 1)) as executor:
             futures = [
                 executor.apply_async(

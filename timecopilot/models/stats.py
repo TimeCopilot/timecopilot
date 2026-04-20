@@ -1,4 +1,5 @@
 import os
+from multiprocessing import current_process
 
 import pandas as pd
 from statsforecast import StatsForecast
@@ -53,10 +54,13 @@ def run_statsforecast_model(
     level: list[int | float] | None,
     quantiles: list[float] | None,
 ) -> pd.DataFrame:
+    # Use n_jobs=1 when running in a daemon process (e.g. Dask/Fugue worker)
+    # to avoid "daemonic processes are not allowed to have children"
+    n_jobs = 1 if current_process().daemon else -1
     sf = StatsForecast(
         models=[model],
         freq=freq,
-        n_jobs=-1,
+        n_jobs=n_jobs,
         fallback_model=_SeasonalNaive(
             season_length=get_seasonality(freq),
         ),

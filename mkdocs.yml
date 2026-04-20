@@ -32,6 +32,10 @@ nav:
           - examples/cryptocurrency-quickstart.ipynb
           - examples/sktime.ipynb
           - examples/patchtst-fm.ipynb
+          - examples/pandas_baseline.ipynb
+          - examples/dask.ipynb
+          - examples/pyspark.ipynb
+          - examples/ray.ipynb
   - Experiments:
       - experiments/gift-eval.md
       - experiments/fev.md
