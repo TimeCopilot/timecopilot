@@ -42,6 +42,7 @@ TimeCopilot provides a unified interface to state-of-the-art foundation models f
 - [Chronos](api/models/foundation/models.md#timecopilot.models.foundation.chronos) ([arXiv:2403.07815](https://arxiv.org/abs/2403.07815))
 - [FlowState](api/models/foundation/models.md#timecopilot.models.foundation.flowstate) ([arXiv:2508.05287](https://arxiv.org/abs/2508.05287)) 
 - [Moirai](api/models/foundation/models.md#timecopilot.models.foundation.moirai) ([arXiv:2402.02592](https://arxiv.org/abs/2402.02592))
+- [PatchTST-FM](api/models/foundation/models.md#timecopilot.models.foundation.patchtst_fm) ([arXiv:2602.06909](https://arxiv.org/abs/2602.06909))
 - [Sundial](api/models/foundation/models.md#timecopilot.models.foundation.sundial) ([arXiv:2502.00816](https://arxiv.org/pdf/2502.00816))
 - [TabPFN](api/models/foundation/models.md#timecopilot.models.foundation.tabpfn) ([arXiv:2501.02945](https://arxiv.org/abs/2501.02945))
 - [TiRex](api/models/foundation/models.md#timecopilot.models.foundation.tirex) ([arXiv:2505.23719](https://arxiv.org/abs/2505.23719))
@@ -79,11 +80,21 @@ TimeCopilot integrates the popular Prophet model for time series forecasting, de
 
 TimeCopilot provides access to automated machine learning models for time series forecasting. These models leverage gradient boosting and other ML techniques to automatically select features and optimize hyperparameters for your specific time series data.
 
+- [AutoCatboost](api/models/ml.md#timecopilot.models.ml.AutoCatboost)
+- [AutoElasticNet](api/models/ml.md#timecopilot.models.ml.AutoElasticNet)
+- [AutoLasso](api/models/ml.md#timecopilot.models.ml.AutoLasso)
 - [AutoLGBM](api/models/ml.md#timecopilot.models.ml.AutoLGBM)
+- [AutoLinearRegression](api/models/ml.md#timecopilot.models.ml.AutoLinearRegression)
+- [AutoRandomForest](api/models/ml.md#timecopilot.models.ml.AutoRandomForest)
+- [AutoRidge](api/models/ml.md#timecopilot.models.ml.AutoRidge)
+- [AutoXGBoost](api/models/ml.md#timecopilot.models.ml.AutoXGBoost)
 
 ## Neural Network Models
 
 TimeCopilot integrates state-of-the-art neural network models for time series forecasting. These models leverage deep learning architectures specifically designed for temporal data, offering powerful capabilities for complex pattern recognition and long-range dependency modeling.
 
+- [AutoDeepAR](api/models/neural.md#timecopilot.models.neural.AutoDeepAR)
+- [AutoNBEATS](api/models/neural.md#timecopilot.models.neural.AutoNBEATS)
 - [AutoNHITS](api/models/neural.md#timecopilot.models.neural.AutoNHITS)
+- [AutoPatchTST](api/models/neural.md#timecopilot.models.neural.AutoPatchTST)
 - [AutoTFT](api/models/neural.md#timecopilot.models.neural.AutoTFT)
