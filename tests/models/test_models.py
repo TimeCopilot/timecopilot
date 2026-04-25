@@ -110,7 +110,7 @@ def test_correct_forecast_dates(model, freq, h):
         "AutoCatboost",
     }
     if model.alias in _ml_auto_aliases | {"AutoNHITS", "AutoTFT"}:
-        # AutoMLForecast models require a certain minimum length
+        # These auto ML and neural models require a longer minimum series length
         sizes_per_freq = {
             freq: 1_000 for freq in ["10S", "10T", "15T", "5T", "H", "Q-DEC"]
         }
