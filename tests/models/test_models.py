@@ -231,8 +231,12 @@ def test_using_quantiles(model):
 def test_using_level(model):
     level = [0, 20, 40, 60, 80]  # corresponds to qs [0.1, 0.2, ..., 0.9]
     df = generate_series(n_series=2, freq="D")
-    if model.alias in ["AutoLGBM", "AutoNHITS", "AutoTFT"]:
-        # these models only support quantiles, not level
+    if model.alias in [
+        "AutoLGBM",
+        "AutoNHITS",
+        "AutoTFT",
+    ]:
+        # These models do not support levels yet
         with pytest.raises(ValueError) as excinfo:
             model.forecast(
                 df=df,
