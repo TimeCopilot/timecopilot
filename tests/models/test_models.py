@@ -270,7 +270,7 @@ def test_using_level(model):
         "AutoPatchTST",
     }
     if model.alias in _level_unsupported:
-        # these models only support quantiles, not level
+        # These models do not support levels yet
         with pytest.raises(ValueError) as excinfo:
             model.forecast(
                 df=df,
