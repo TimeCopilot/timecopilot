@@ -9,7 +9,12 @@ from timecopilot.models.foundation.moirai import Moirai
 from timecopilot.models.foundation.patchtst_fm import PatchTSTFM
 from timecopilot.models.foundation.timesfm import TimesFM
 from timecopilot.models.foundation.toto import Toto
-from timecopilot.models.ml import AutoLGBM
+from timecopilot.models.ml import (
+    AutoElasticNet,
+    AutoLGBM,
+    AutoLinearRegression,
+    AutoXGBoost,
+)
 from timecopilot.models.neural import AutoNHITS, AutoTFT
 from timecopilot.models.prophet import Prophet
 from timecopilot.models.stats import (
@@ -39,6 +44,9 @@ def disable_mps_session(monkeypatch):
 
 models = [
     AutoLGBM(num_samples=2, cv_n_windows=2),
+    AutoLinearRegression(num_samples=2, cv_n_windows=2),
+    AutoXGBoost(num_samples=2, cv_n_windows=2),
+    AutoElasticNet(num_samples=2, cv_n_windows=2),
     AutoNHITS(
         num_samples=2,
         config=dict(

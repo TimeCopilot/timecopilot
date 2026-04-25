@@ -1,3 +1,13 @@
+from .ml import (
+    AutoCatboost,
+    AutoElasticNet,
+    AutoLasso,
+    AutoLGBM,
+    AutoLinearRegression,
+    AutoRandomForest,
+    AutoRidge,
+    AutoXGBoost,
+)
 from .stats import (
     ADIDA,
     IMAPA,
@@ -14,10 +24,18 @@ from .stats import (
 
 __all__ = [
     "ADIDA",
+    "AutoCatboost",
+    "AutoElasticNet",
     "IMAPA",
     "AutoARIMA",
     "AutoCES",
     "AutoETS",
+    "AutoLasso",
+    "AutoLGBM",
+    "AutoLinearRegression",
+    "AutoRandomForest",
+    "AutoRidge",
+    "AutoXGBoost",
     "CrostonClassic",
     "DynamicOptimizedTheta",
     "HistoricAverage",
