@@ -19,7 +19,13 @@ from timecopilot.models.ml import (
     AutoRidge,
     AutoXGBoost,
 )
-from timecopilot.models.neural import AutoNHITS, AutoTFT
+from timecopilot.models.neural import (
+    AutoDeepAR,
+    AutoNBEATS,
+    AutoNHITS,
+    AutoPatchTST,
+    AutoTFT,
+)
 from timecopilot.models.prophet import Prophet
 from timecopilot.models.stats import (
     ADIDA,
@@ -71,6 +77,36 @@ models = [
             val_check_steps=1,
             input_size=12,
             hidden_size=8,
+        ),
+    ),
+    AutoNBEATS(
+        num_samples=2,
+        config=dict(
+            max_steps=1,
+            val_check_steps=1,
+            input_size=12,
+            n_harmonics=1,
+            n_polynomials=1,
+        ),
+    ),
+    AutoDeepAR(
+        num_samples=2,
+        config=dict(
+            max_steps=1,
+            val_check_steps=1,
+            input_size=12,
+            lstm_n_layers=1,
+            lstm_hidden_size=8,
+        ),
+    ),
+    AutoPatchTST(
+        num_samples=2,
+        config=dict(
+            max_steps=1,
+            val_check_steps=1,
+            input_size=12,
+            hidden_size=8,
+            n_heads=2,
         ),
     ),
     AutoARIMA(),
