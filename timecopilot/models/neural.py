@@ -9,9 +9,10 @@ from neuralforecast.auto import (
     AutoTFT as _AutoTFT,
 )
 from neuralforecast.common._base_model import BaseModel as NeuralForecastModel
+from neuralforecast.losses.pytorch import MAE, MQLoss
 from ray import tune
 
-from .utils.forecaster import Forecaster
+from .utils.forecaster import Forecaster, QuantileConverter
 
 os.environ["NIXTLA_ID_AS_COL"] = "true"
 
@@ -20,6 +21,8 @@ def run_neuralforecast_model(
     model: NeuralForecastModel,
     df: pd.DataFrame,
     freq: str,
+    alias: str,
+    qc: QuantileConverter,
 ) -> pd.DataFrame:
     nf = NeuralForecast(
         models=[model],
@@ -27,6 +30,10 @@ def run_neuralforecast_model(
     )
     nf.fit(df=df)
     fcst_df = nf.predict()
+    median_col = f"{alias}-median"
+    if median_col in fcst_df.columns:
+        fcst_df = fcst_df.rename(columns={median_col: alias})
+    fcst_df = qc.maybe_convert_level_to_quantiles(fcst_df, [alias])
     return fcst_df
 
 
@@ -34,8 +41,8 @@ class AutoNHITS(Forecaster):
     """AutoNHITS forecaster using NeuralForecast.
 
     Notes:
-        - Level and quantiles are not supported for AutoNHITS yet. Please open
-            an issue if you need this feature.
+        - Quantile forecasts are supported via `quantiles`. `level` is not
+            supported; use `quantiles` instead.
         - AutoNHITS requires a minimum length for some frequencies.
     """
 
@@ -61,9 +68,9 @@ class AutoNHITS(Forecaster):
     ) -> pd.DataFrame:
         """Generate forecasts for time series data using the model.
 
-        This method produces point forecasts and, optionally, prediction
-        intervals or quantile forecasts. The input DataFrame can contain one
-        or multiple time series in stacked (long) format.
+        This method produces point forecasts and, optionally, quantile
+        forecasts. The input DataFrame can contain one or multiple time series
+        in stacked (long) format.
 
         Args:
             df (pd.DataFrame):
@@ -83,15 +90,14 @@ class AutoNHITS(Forecaster):
                 valid values. If not provided, the frequency will be inferred
                 from the data.
             level (list[int | float], optional):
-                Confidence levels for prediction intervals, expressed as
-                percentages (e.g. [80, 95]). If provided, the returned
-                DataFrame will include lower and upper interval columns for
-                each specified level.
+                Not supported for AutoNHITS. Use `quantiles` instead.
             quantiles (list[float], optional):
                 List of quantiles to forecast, expressed as floats between 0
                 and 1. Should not be used simultaneously with `level`. When
-                provided, the output DataFrame will contain additional columns
-                named in the format "model-q-{percentile}", where {percentile}
+                provided, the model is trained with
+                [`MQLoss`](https://nixtla.github.io/neuralforecast/losses.pytorch.html)
+                and the output DataFrame will contain additional columns named
+                in the format "model-q-{percentile}", where {percentile}
                 = 100 × quantile value.
 
         Returns:
@@ -99,16 +105,23 @@ class AutoNHITS(Forecaster):
                 DataFrame containing forecast results. Includes:
 
                     - point forecasts for each timestamp and series.
-                    - prediction intervals if `level` is specified.
                     - quantile forecasts if `quantiles` is specified.
 
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
-        if level is not None or quantiles is not None:
-            raise ValueError("Level and quantiles are not supported for AutoNHITS yet.")
+        if level is not None and quantiles is not None:
+            raise ValueError(
+                "You must not provide both `level` and `quantiles` simultaneously."
+            )
+        if level is not None:
+            raise ValueError(
+                "Level is not supported for AutoNHITS. Please use `quantiles` instead."
+            )
 
         inferred_freq = self._maybe_infer_freq(df, freq)
+        qc = QuantileConverter(level=None, quantiles=quantiles)
+        loss = MQLoss(level=qc.level) if qc.level is not None else MAE()
         if self.config is None:
             config = _AutoNHITS.get_default_config(h=h, backend="ray")
             config["scaler_type"] = tune.choice(["robust"])
@@ -120,6 +133,7 @@ class AutoNHITS(Forecaster):
         fcst_df = run_neuralforecast_model(
             model=_AutoNHITS(
                 h=h,
+                loss=loss,
                 alias=self.alias,
                 num_samples=self.num_samples,
                 backend=self.backend,
@@ -127,6 +141,8 @@ class AutoNHITS(Forecaster):
             ),
             df=df,
             freq=inferred_freq,
+            alias=self.alias,
+            qc=qc,
         )
         return fcst_df
 
@@ -135,8 +151,8 @@ class AutoTFT(Forecaster):
     """AutoTFT forecaster using NeuralForecast.
 
     Notes:
-        - Level and quantiles are not supported for AutoTFT yet. Please open
-            an issue if you need this feature.
+        - Quantile forecasts are supported via `quantiles`. `level` is not
+            supported; use `quantiles` instead.
         - AutoTFT requires a minimum length for some frequencies.
     """
 
@@ -162,9 +178,9 @@ class AutoTFT(Forecaster):
     ) -> pd.DataFrame:
         """Generate forecasts for time series data using the model.
 
-        This method produces point forecasts and, optionally, prediction
-        intervals or quantile forecasts. The input DataFrame can contain one
-        or multiple time series in stacked (long) format.
+        This method produces point forecasts and, optionally, quantile
+        forecasts. The input DataFrame can contain one or multiple time series
+        in stacked (long) format.
 
         Args:
             df (pd.DataFrame):
@@ -184,15 +200,14 @@ class AutoTFT(Forecaster):
                 valid values. If not provided, the frequency will be inferred
                 from the data.
             level (list[int | float], optional):
-                Confidence levels for prediction intervals, expressed as
-                percentages (e.g. [80, 95]). If provided, the returned
-                DataFrame will include lower and upper interval columns for
-                each specified level.
+                Not supported for AutoTFT. Use `quantiles` instead.
             quantiles (list[float], optional):
                 List of quantiles to forecast, expressed as floats between 0
                 and 1. Should not be used simultaneously with `level`. When
-                provided, the output DataFrame will contain additional columns
-                named in the format "model-q-{percentile}", where {percentile}
+                provided, the model is trained with
+                [`MQLoss`](https://nixtla.github.io/neuralforecast/losses.pytorch.html)
+                and the output DataFrame will contain additional columns named
+                in the format "model-q-{percentile}", where {percentile}
                 = 100 × quantile value.
 
         Returns:
@@ -200,16 +215,23 @@ class AutoTFT(Forecaster):
                 DataFrame containing forecast results. Includes:
 
                     - point forecasts for each timestamp and series.
-                    - prediction intervals if `level` is specified.
                     - quantile forecasts if `quantiles` is specified.
 
                 For multi-series data, the output retains the same unique
                 identifiers as the input DataFrame.
         """
-        if level is not None or quantiles is not None:
-            raise ValueError("Level and quantiles are not supported for AutoTFT yet.")
+        if level is not None and quantiles is not None:
+            raise ValueError(
+                "You must not provide both `level` and `quantiles` simultaneously."
+            )
+        if level is not None:
+            raise ValueError(
+                "Level is not supported for AutoTFT. Please use `quantiles` instead."
+            )
 
         inferred_freq = self._maybe_infer_freq(df, freq)
+        qc = QuantileConverter(level=None, quantiles=quantiles)
+        loss = MQLoss(level=qc.level) if qc.level is not None else MAE()
         if self.config is None:
             config = _AutoTFT.get_default_config(h=h, backend="ray")
             config["scaler_type"] = tune.choice(["robust"])
@@ -220,6 +242,7 @@ class AutoTFT(Forecaster):
         fcst_df = run_neuralforecast_model(
             model=_AutoTFT(
                 h=h,
+                loss=loss,
                 alias=self.alias,
                 num_samples=self.num_samples,
                 backend=self.backend,
@@ -227,5 +250,7 @@ class AutoTFT(Forecaster):
             ),
             df=df,
             freq=inferred_freq,
+            alias=self.alias,
+            qc=qc,
         )
         return fcst_df
