@@ -99,8 +99,18 @@ def test_freq_inferred_correctly(model, freq):
 )
 @pytest.mark.parametrize("h", [1, 12])
 def test_correct_forecast_dates(model, freq, h):
-    if model.alias in ["AutoLGBM", "AutoNHITS", "AutoTFT"]:
-        # AutoLGBM requires a certain minimum length
+    _ml_auto_aliases = {
+        "AutoLGBM",
+        "AutoLinearRegression",
+        "AutoXGBoost",
+        "AutoRidge",
+        "AutoLasso",
+        "AutoElasticNet",
+        "AutoRandomForest",
+        "AutoCatboost",
+    }
+    if model.alias in _ml_auto_aliases | {"AutoNHITS", "AutoTFT"}:
+        # AutoMLForecast models require a certain minimum length
         sizes_per_freq = {
             freq: 1_000 for freq in ["10S", "10T", "15T", "5T", "H", "Q-DEC"]
         }
@@ -231,7 +241,19 @@ def test_using_quantiles(model):
 def test_using_level(model):
     level = [0, 20, 40, 60, 80]  # corresponds to qs [0.1, 0.2, ..., 0.9]
     df = generate_series(n_series=2, freq="D")
-    if model.alias in ["AutoLGBM", "AutoNHITS", "AutoTFT"]:
+    _level_unsupported = {
+        "AutoLGBM",
+        "AutoLinearRegression",
+        "AutoXGBoost",
+        "AutoRidge",
+        "AutoLasso",
+        "AutoElasticNet",
+        "AutoRandomForest",
+        "AutoCatboost",
+        "AutoNHITS",
+        "AutoTFT",
+    }
+    if model.alias in _level_unsupported:
         # these models only support quantiles, not level
         with pytest.raises(ValueError) as excinfo:
             model.forecast(
