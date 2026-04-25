@@ -61,6 +61,7 @@ dependencies = [
   "accelerate>=1.10.1",
   "arch>=7.2.0",
   "black>=25.9.0",
+  "catboost>=1.2.10",
   "datasets>=4.1.1",
   "fire",
   "fsspec>=2025.9.0",
@@ -103,6 +104,7 @@ dependencies = [
   "tsfeatures>=0.4.5",
   "utilsforecast[plotting]>=0.2.15",
   "wandb==0.22.1",
+  "xgboost>=3.2.0",
 ]
 description = "The GenAI Forecasting Agent · LLMs × Time Series Foundation Models"
 license = "MIT"
