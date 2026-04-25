@@ -226,11 +226,6 @@ class PatchTSTFM(Forecaster, _DataProcessor):
                 identifiers as the input DataFrame.
         """
         freq = self._maybe_infer_freq(df, freq)
-        # When support for levels is added remove PatchTST-FM
-        # from the list of models that throw this exception in
-        # tests/models/test_models:test_using_level()
-        if level is not None:
-            raise ValueError("Level is not supported for patchtst-fm yet.")
         qc = QuantileConverter(level=level, quantiles=quantiles)
         dataset = TimeSeriesDataset.from_df(
             df,
