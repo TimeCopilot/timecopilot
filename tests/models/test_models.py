@@ -252,7 +252,8 @@ def test_using_level(model):
         "AutoCatboost",
         "AutoNHITS",
         "AutoTFT",
-    ]:
+    }
+    if level in _level_unsupported:
         # These models do not support levels yet
         with pytest.raises(ValueError) as excinfo:
             model.forecast(
