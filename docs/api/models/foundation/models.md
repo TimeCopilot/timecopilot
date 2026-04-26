@@ -16,6 +16,11 @@
         members:
             - Moirai
 
+::: timecopilot.models.foundation.patchtst_fm
+    options:
+        members:
+            - PatchTSTFM
+
 ::: timecopilot.models.foundation.sundial
     options:
         members:

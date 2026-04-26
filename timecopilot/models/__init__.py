@@ -8,6 +8,7 @@ from .ml import (
     AutoRidge,
     AutoXGBoost,
 )
+from .neural import AutoDeepAR, AutoNBEATS, AutoPatchTST
 from .stats import (
     ADIDA,
     IMAPA,
@@ -25,8 +26,11 @@ from .stats import (
 __all__ = [
     "ADIDA",
     "AutoCatboost",
+    "AutoDeepAR",
     "AutoElasticNet",
     "IMAPA",
+    "AutoNBEATS",
+    "AutoPatchTST",
     "AutoARIMA",
     "AutoCES",
     "AutoETS",

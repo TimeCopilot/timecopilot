@@ -4,5 +4,8 @@
 ::: timecopilot.models.neural
     options:
         members:
+            - AutoDeepAR
+            - AutoNBEATS
             - AutoNHITS
+            - AutoPatchTST
             - AutoTFT

@@ -109,7 +109,14 @@ def test_correct_forecast_dates(model, freq, h):
         "AutoRandomForest",
         "AutoCatboost",
     }
-    if model.alias in _ml_auto_aliases | {"AutoNHITS", "AutoTFT"}:
+    _neural_auto_aliases = {
+        "AutoNHITS",
+        "AutoTFT",
+        "AutoNBEATS",
+        "AutoDeepAR",
+        "AutoPatchTST",
+    }
+    if model.alias in _ml_auto_aliases | _neural_auto_aliases:
         # These auto ML and neural models require a longer minimum series length
         sizes_per_freq = {
             freq: 1_000 for freq in ["10S", "10T", "15T", "5T", "H", "Q-DEC"]
@@ -230,7 +237,13 @@ def test_using_quantiles(model):
         elif "moe" in model.alias.lower():
             # MoE is a bit more lenient with the monotonicity condition
             assert fcst_df[c1].le(fcst_df[c2]).mean() >= 0.5
-        elif model.alias in ["AutoNHITS", "AutoTFT"]:
+        elif model.alias in [
+            "AutoNHITS",
+            "AutoTFT",
+            "AutoNBEATS",
+            "AutoDeepAR",
+            "AutoPatchTST",
+        ]:
             # test config uses max_steps=1, so quantile ordering is not guaranteed
             continue
         else:
@@ -252,6 +265,9 @@ def test_using_level(model):
         "AutoCatboost",
         "AutoNHITS",
         "AutoTFT",
+        "AutoNBEATS",
+        "AutoDeepAR",
+        "AutoPatchTST",
     }
     if model.alias in _level_unsupported:
         # These models do not support levels yet
