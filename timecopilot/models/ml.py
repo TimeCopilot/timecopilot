@@ -44,9 +44,8 @@ def _make_safe_init_config(season_length: int):
     safe config restricts target transforms to None and LocalStandardScaler only,
     while keeping the same frequency-aware lag candidates.
     """
+    from mlforecast.lag_transforms import ExponentiallyWeightedMean, RollingMean
     from mlforecast.target_transforms import LocalStandardScaler
-    from window_ops.ewm import ExponentiallyWeightedMean
-    from window_ops.rolling import RollingMean
 
     candidate_targ_tfms = [None, [LocalStandardScaler()]]
 
