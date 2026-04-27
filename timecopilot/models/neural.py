@@ -354,6 +354,8 @@ class AutoNBEATS(Forecaster):
         if self.config is None:
             config = _AutoNBEATS.get_default_config(h=h, backend="ray")
             config["scaler_type"] = tune.choice(["robust"])
+            if h == 1:
+                config["stack_types"] = ["identity"]
         else:
             config = self.config
         if self.backend == "optuna":
