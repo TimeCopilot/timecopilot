@@ -35,6 +35,59 @@ from .utils.forecaster import Forecaster, QuantileConverter, get_seasonality
 os.environ["NIXTLA_ID_AS_COL"] = "true"
 
 
+def _make_safe_init_config(season_length: int):
+    """Return an AutoMLForecast init_config that avoids transforms that fail on
+    short series (Differences and log transforms).
+
+    The standard search space includes Differences([1]) and log1p transforms
+    which can produce empty feature matrices when the series is short. This
+    safe config restricts target transforms to None and LocalStandardScaler only,
+    while keeping the same frequency-aware lag candidates.
+    """
+    from mlforecast.target_transforms import LocalStandardScaler
+    from window_ops.ewm import ExponentiallyWeightedMean
+    from window_ops.rolling import RollingMean
+
+    candidate_targ_tfms = [None, [LocalStandardScaler()]]
+
+    candidate_lags = [None, [season_length]]
+    seasonality2extra_lags = {
+        7: [[7, 14], [7, 28]],
+        12: [list(range(1, 13))],
+        24: [list(range(1, 25)), list(range(24, 24 * 7 + 1, 24))],
+        52: [list(range(4, 53, 4))],
+    }
+    if season_length in seasonality2extra_lags:
+        candidate_lags.extend(seasonality2extra_lags[season_length])
+
+    candidate_lag_tfms = [None, {1: [ExponentiallyWeightedMean(0.9)]}]
+    if season_length > 1:
+        candidate_lag_tfms.append(
+            {
+                1: [ExponentiallyWeightedMean(0.9)],
+                season_length: [RollingMean(window_size=season_length, min_samples=1)],
+            }
+        )
+
+    def init_config(trial) -> dict:
+        tfm_idx = trial.suggest_categorical(
+            "target_transforms_idx", list(range(len(candidate_targ_tfms)))
+        )
+        lags_idx = trial.suggest_categorical(
+            "lags_idx", list(range(len(candidate_lags)))
+        )
+        lag_tfms_idx = trial.suggest_categorical(
+            "lag_transforms_idx", list(range(len(candidate_lag_tfms)))
+        )
+        return {
+            "lags": candidate_lags[lags_idx],
+            "target_transforms": candidate_targ_tfms[tfm_idx],
+            "lag_transforms": candidate_lag_tfms[lag_tfms_idx],
+        }
+
+    return init_config
+
+
 def run_automlforecast_model(
     model,
     model_name: str,
@@ -46,6 +99,8 @@ def run_automlforecast_model(
     cv_n_windows: int,
     level: list[int | float] | None,
     quantiles: list[float] | None,
+    init_config=None,
+    safe_config: bool = False,
 ) -> pd.DataFrame:
     if level is not None and quantiles is not None:
         raise ValueError(
@@ -56,10 +111,14 @@ def run_automlforecast_model(
             f"Level is not supported for {alias}. " "Please use `quantiles` instead."
         )
     qc = QuantileConverter(level=None, quantiles=quantiles)
+    season_length = get_seasonality(freq)
+    if init_config is None and safe_config:
+        init_config = _make_safe_init_config(season_length)
     mf = AutoMLForecast(
         models=[model],
         freq=freq,
-        season_length=get_seasonality(freq),
+        season_length=season_length if init_config is None else None,
+        init_config=init_config,
         num_threads=-1,
     )
     prediction_intervals = (
@@ -91,10 +150,14 @@ class AutoLGBM(Forecaster):
         alias: str = "AutoLGBM",
         num_samples: int = 10,
         cv_n_windows: int = 5,
+        init_config=None,
+        safe_config: bool = False,
     ):
         self.alias = alias
         self.num_samples = num_samples
         self.cv_n_windows = cv_n_windows
+        self.init_config = init_config
+        self.safe_config = safe_config
 
     def forecast(
         self,
@@ -159,6 +222,8 @@ class AutoLGBM(Forecaster):
             cv_n_windows=self.cv_n_windows,
             level=level,
             quantiles=quantiles,
+            init_config=self.init_config,
+            safe_config=self.safe_config,
         )
 
 
@@ -175,10 +240,14 @@ class AutoLinearRegression(Forecaster):
         alias: str = "AutoLinearRegression",
         num_samples: int = 10,
         cv_n_windows: int = 5,
+        init_config=None,
+        safe_config: bool = False,
     ):
         self.alias = alias
         self.num_samples = num_samples
         self.cv_n_windows = cv_n_windows
+        self.init_config = init_config
+        self.safe_config = safe_config
 
     def forecast(
         self,
@@ -243,6 +312,8 @@ class AutoLinearRegression(Forecaster):
             cv_n_windows=self.cv_n_windows,
             level=level,
             quantiles=quantiles,
+            init_config=self.init_config,
+            safe_config=self.safe_config,
         )
 
 
@@ -260,10 +331,14 @@ class AutoXGBoost(Forecaster):
         alias: str = "AutoXGBoost",
         num_samples: int = 10,
         cv_n_windows: int = 5,
+        init_config=None,
+        safe_config: bool = False,
     ):
         self.alias = alias
         self.num_samples = num_samples
         self.cv_n_windows = cv_n_windows
+        self.init_config = init_config
+        self.safe_config = safe_config
 
     def forecast(
         self,
@@ -328,6 +403,8 @@ class AutoXGBoost(Forecaster):
             cv_n_windows=self.cv_n_windows,
             level=level,
             quantiles=quantiles,
+            init_config=self.init_config,
+            safe_config=self.safe_config,
         )
 
 
@@ -512,10 +589,14 @@ class AutoElasticNet(Forecaster):
         alias: str = "AutoElasticNet",
         num_samples: int = 10,
         cv_n_windows: int = 5,
+        init_config=None,
+        safe_config: bool = False,
     ):
         self.alias = alias
         self.num_samples = num_samples
         self.cv_n_windows = cv_n_windows
+        self.init_config = init_config
+        self.safe_config = safe_config
 
     def forecast(
         self,
@@ -580,6 +661,8 @@ class AutoElasticNet(Forecaster):
             cv_n_windows=self.cv_n_windows,
             level=level,
             quantiles=quantiles,
+            init_config=self.init_config,
+            safe_config=self.safe_config,
         )
 
 
