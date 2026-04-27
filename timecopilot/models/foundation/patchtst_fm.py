@@ -115,6 +115,7 @@ class PatchTSTFM(Forecaster, _DataProcessor):
         if context.shape[1] > self.context_length:
             context = context[..., -self.context_length :]
         context = self._maybe_impute_missing(context)
+        context = context.to(self.device)
         # context is (batch, context_length)
 
         # input data is grouped by id
