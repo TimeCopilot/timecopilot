@@ -7253,7 +7253,7 @@ dependencies = [
 ]
 name = "timecopilot"
 source = {editable = "."}
-version = "0.0.25"
+version = "0.0.26"
 
 [package.dev-dependencies]
 dev = [
