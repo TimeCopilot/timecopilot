@@ -31,11 +31,9 @@ nav:
           - examples/finetuning.ipynb
           - examples/cryptocurrency-quickstart.ipynb
           - examples/sktime.ipynb
-          - examples/patchtst-fm.ipynb
-          - examples/pandas_baseline.ipynb
-          - examples/dask.ipynb
-          - examples/pyspark.ipynb
-          - examples/ray.ipynb
+          - examples/custom-ensembles.ipynb
+          - examples/explaining-foundation-models-and-ensembles.ipynb
+
   - Experiments:
       - experiments/gift-eval.md
       - experiments/fev.md
@@ -172,4 +170,4 @@ plugins:
             - griffe_inherited_docstrings:
                 merge: true
 
-copyright: 2025 - TimeCopilot
+copyright: 2026 - TimeCopilot
