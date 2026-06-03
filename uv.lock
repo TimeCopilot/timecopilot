@@ -7246,6 +7246,7 @@ dependencies = [
     { name = "timecopilot-timesfm" },
     { name = "timecopilot-tirex", marker = "python_full_version >= '3.11'" },
     { name = "timecopilot-toto" },
+    { name = "timecopilot-toto-2" },
     { name = "timecopilot-uni2ts", marker = "python_full_version < '3.14'" },
     { name = "torchmetrics" },
     { name = "transformers" },
@@ -7334,6 +7335,7 @@ requires-dist = [
     { name = "timecopilot-timesfm", specifier = ">=0.2.1" },
     { name = "timecopilot-tirex", marker = "python_full_version >= '3.11'", specifier = ">=0.1.0" },
     { name = "timecopilot-toto", specifier = ">=0.1.6" },
+    { name = "timecopilot-toto-2", specifier = ">=0.1.0" },
     { name = "timecopilot-uni2ts", marker = "python_full_version < '3.14'", specifier = ">=0.1.2" },
     { name = "torchmetrics", specifier = ">=1.8.2" },
     { name = "transformers", marker = "python_full_version < '3.13'", specifier = ">=4.41,<5" },
@@ -7389,6 +7391,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f0/c7/ce5d52d8ac7a6250d0f3e4b135c47f99fc6710b0ca22de260d17c2b82e1c/timecopilot_chronos_forecasting-0.2.1.tar.gz", hash = "sha256:373f52ef24aab2db85c79e4cb33c65e16ffafc542da4b0a67558ea7181f3ee42", size = 886735, upload-time = "2026-03-17T00:56:27.941Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fd/7e/379b4b7b549c2c4018b1fddb5fc7ee17f0de505fed7b6224e66f00135c80/timecopilot_chronos_forecasting-0.2.1-py3-none-any.whl", hash = "sha256:619bc0536ec97880d9c490234e49605c26365ac122322e482ad5288cb298610b", size = 74206, upload-time = "2026-03-17T00:56:29.547Z" },
+]
+
+[[package]]
+name = "timecopilot-dd-unit-scaling"
+version = "0.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "torch" },
+    { name = "unit-scaling" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b3/90/465f1d79e76698549679dab143d98730de947f3a8366cdde55d9e6bbeab0/timecopilot_dd_unit_scaling-0.1.0.tar.gz", hash = "sha256:249a126ca734ead5a7a7a9c48adf494d6d7e2f481c65efb9f7bd9140051fb44b", size = 15148, upload-time = "2026-06-03T17:49:03.119Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fb/57/04e5e2ecf3932dfc50008c59e296c240c0f51b6bc13761ac9bb009273d20/timecopilot_dd_unit_scaling-0.1.0-py3-none-any.whl", hash = "sha256:fd703cec2c07c02bf183e61908b0b8d5386d9bd5c6678bfe49ff162bff9180f5", size = 14990, upload-time = "2026-06-03T17:49:02.018Z" },
 ]
 
 [[package]]
@@ -7498,6 +7513,27 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/3e/c2/ca54af729731bb55a0167e1522f8997b1e4ebffce5377b992aa0bdd0fb45/timecopilot_toto-0.1.6.tar.gz", hash = "sha256:d56491a8d18d941205ec0ef6dfc5bc952228bac281155e7f0342e6d5b44e6f24", size = 130608, upload-time = "2026-06-03T17:29:34.96Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/07/c8/cc13f5a7709563fb47bab51434f0198596dcf9439ec44c9d83281e441b79/timecopilot_toto-0.1.6-py3-none-any.whl", hash = "sha256:885475bc0afc2b1beb321e8617bc44f9056f5f981ab42bf623ac6df8f39e110b", size = 149129, upload-time = "2026-06-03T17:29:33.746Z" },
+]
+
+[[package]]
+name = "timecopilot-toto-2"
+version = "0.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "einops" },
+    { name = "gluonts", extra = ["torch"] },
+    { name = "huggingface-hub" },
+    { name = "jaxtyping" },
+    { name = "matplotlib" },
+    { name = "numpy", version = "1.26.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "safetensors" },
+    { name = "timecopilot-dd-unit-scaling" },
+    { name = "torch" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ce/2a/d8c79086a51bf193d65219f2d90619818557de3cce68a49eb70cf15e5374/timecopilot_toto_2-0.1.0.tar.gz", hash = "sha256:d81dde79de34f2c4bf05e2e0e78f8cd49e5ffab5f986037a83280b07081289c9", size = 21631, upload-time = "2026-06-03T19:24:20.25Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9f/26/ed73cb643e177f0b2c117e32c93dd4b268dd5799bd908d2d82e7a00b5f91/timecopilot_toto_2-0.1.0-py3-none-any.whl", hash = "sha256:1dfbefeb27c269fb7e701cd0944e3e919916bb71cc2f912076134e924d1af5ea", size = 16629, upload-time = "2026-06-03T19:24:19.138Z" },
 ]
 
 [[package]]
@@ -8006,6 +8042,21 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/95/32/1a225d6164441be760d75c2c42e2780dc0873fe382da3e98a2e1e48361e5/tzdata-2025.2.tar.gz", hash = "sha256:b60a638fcc0daffadf82fe0f57e53d06bdec2f36c4df66280ae79bce6bd6f2b9", size = 196380, upload-time = "2025-03-23T13:54:43.652Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5c/23/c7abc0ca0a1526a0774eca151daeb8de62ec457e77262b66b359c3c7679e/tzdata-2025.2-py2.py3-none-any.whl", hash = "sha256:1a403fada01ff9221ca8044d701868fa132215d84beb92242d9acd2147f667a8", size = 347839, upload-time = "2025-03-23T13:54:41.845Z" },
+]
+
+[[package]]
+name = "unit-scaling"
+version = "0.3.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "docstring-parser" },
+    { name = "einops" },
+    { name = "tabulate" },
+    { name = "torch" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7d/3a/6e88c1d682900d05f5b2564cd45520d82a6fb75e2e7f5c41760ed49db6dc/unit_scaling-0.3.5.tar.gz", hash = "sha256:9df186addff1bca39e888f00fb51cda3e7a54440eb478b203cc585442ba15016", size = 4781359, upload-time = "2025-07-11T09:46:18.568Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ce/ba/bc682ddafc853e7d9f4ad89384679b9bc5052a5c44fbc52aa0caad591d25/unit_scaling-0.3.5-py3-none-any.whl", hash = "sha256:53c270afb1e8bf804a39612b544dafedf1065b0cbf79820296d843392bcfac2c", size = 78666, upload-time = "2025-07-11T09:46:16.941Z" },
 ]
 
 [[package]]
