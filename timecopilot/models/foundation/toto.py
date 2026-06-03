@@ -225,7 +225,7 @@ class Toto(Forecaster):
             if series_length > self.context_length:
                 ts = ts[-self.context_length :]
                 series_length = self.context_length
-            padded_tensor[idx, -series_length:] = ts.to(torch.float)
+            padded_tensor[idx, -series_length:] = ts.to(device=self.device, dtype=torch.float)
             padding_mask[idx, -series_length:] = True
         # add the variate dimension (n_var=1)
         target = padded_tensor.unsqueeze(1)
