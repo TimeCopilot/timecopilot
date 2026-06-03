@@ -7332,7 +7332,7 @@ requires-dist = [
   {name = "timecopilot-granite-tsfm", specifier = ">=0.1.2"},
   {name = "timecopilot-timesfm", specifier = ">=0.2.1"},
   {name = "timecopilot-toto", specifier = ">=0.1.6"},
-  {name = "timecopilot-toto-2", specifier = ">=0.1.0"},
+  {name = "timecopilot-toto-2", specifier = ">=0.1.1"},
   {name = "torchmetrics", specifier = ">=1.8.2"},
   {name = "tsfeatures", specifier = ">=0.4.5"},
   {name = "wandb", specifier = "==0.22.1"},
@@ -7518,6 +7518,7 @@ wheels = [
 [[package]]
 dependencies = [
   {extra = ["torch"], name = "gluonts"},
+  {marker = "python_full_version < '3.11'", name = "typing-extensions"},
   {marker = "python_full_version < '3.13'", name = "numpy", source = {registry = "https://pypi.org/simple"}, version = "1.26.4"},
   {marker = "python_full_version >= '3.13'", name = "numpy", source = {registry = "https://pypi.org/simple"}, version = "2.1.3"},
   {name = "einops"},
@@ -7529,11 +7530,11 @@ dependencies = [
   {name = "torch"},
 ]
 name = "timecopilot-toto-2"
-sdist = {hash = "sha256:d81dde79de34f2c4bf05e2e0e78f8cd49e5ffab5f986037a83280b07081289c9", size = 21631, upload-time = "2026-06-03T19:24:20.25Z", url = "https://files.pythonhosted.org/packages/ce/2a/d8c79086a51bf193d65219f2d90619818557de3cce68a49eb70cf15e5374/timecopilot_toto_2-0.1.0.tar.gz"}
+sdist = {hash = "sha256:63e30cc7df2267caf6fe17a59226ed601e1a37f2ecde6d0417b51d6c47d379b7", size = 21760, upload-time = "2026-06-03T21:31:25.699Z", url = "https://files.pythonhosted.org/packages/e1/2f/2d4444d2d66d09b73c237694764221b24c332ce296efa93cac20cefbc7f9/timecopilot_toto_2-0.1.1.tar.gz"}
 source = {registry = "https://pypi.org/simple"}
-version = "0.1.0"
+version = "0.1.1"
 wheels = [
-  {hash = "sha256:1dfbefeb27c269fb7e701cd0944e3e919916bb71cc2f912076134e924d1af5ea", size = 16629, upload-time = "2026-06-03T19:24:19.138Z", url = "https://files.pythonhosted.org/packages/9f/26/ed73cb643e177f0b2c117e32c93dd4b268dd5799bd908d2d82e7a00b5f91/timecopilot_toto_2-0.1.0-py3-none-any.whl"},
+  {hash = "sha256:4812ac0afbcc75915044b7fc0565d3f7e8d25a66167c3479e80e3f4069fd5fbc", size = 16718, upload-time = "2026-06-03T21:31:24.66Z", url = "https://files.pythonhosted.org/packages/76/16/a5df01a4eaff5b62c4c524aba7774d79590e061b2bf4c0defb5216f06e2a/timecopilot_toto_2-0.1.1-py3-none-any.whl"},
 ]
 
 [[package]]
