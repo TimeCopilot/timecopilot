@@ -108,6 +108,12 @@ models = [
         context_length=2_048,
     ),
     Toto(context_length=256, batch_size=2),
+    Toto(
+        repo_id="Datadog/Toto-2.0-4m",
+        alias="Toto-2",
+        context_length=256,
+        batch_size=2,
+    ),
     Moirai(
         context_length=256,
         batch_size=2,
