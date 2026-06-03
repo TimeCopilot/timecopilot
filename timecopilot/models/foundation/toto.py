@@ -183,7 +183,7 @@ class Toto(Forecaster):
             if series_length > self.context_length:
                 ts = ts[-self.context_length :]
                 series_length = self.context_length
-            padded_tensor[idx, -series_length:] = ts
+            padded_tensor[idx, -series_length:] = ts.to(device=self.device, dtype=torch.float)
             padding_mask[idx, -series_length:] = 1.0
         masked_ts = MaskedTimeseries(
             series=padded_tensor,
