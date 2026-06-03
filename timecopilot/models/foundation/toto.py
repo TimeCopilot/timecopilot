@@ -261,7 +261,7 @@ class Toto(Forecaster):
             for batch in tqdm(dataset)
         ]  # list of fcsts objects
 
-        fcsts_mean = [fcst.mean.cpu().numpy() for fcst in fcsts]
+        fcsts_mean = [fcst.median.cpu().numpy() for fcst in fcsts]
         fcsts_mean_np = np.concatenate(fcsts_mean, axis=1)
         if fcsts_mean_np.shape[0] != 1:
             raise ValueError(
