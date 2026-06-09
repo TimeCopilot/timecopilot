@@ -15,6 +15,7 @@ from tqdm import tqdm
 from ..utils.forecaster import Forecaster, QuantileConverter
 from .utils import TimeSeriesDataset
 
+DEFAULT_QUANTILES_TIREX = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
 class TiRex(Forecaster):
     """
@@ -86,31 +87,17 @@ class TiRex(Forecaster):
         quantiles: list[float] | None,
     ) -> tuple[np.ndarray, np.ndarray | None]:
         """handles distinction between quantiles and no quantiles"""
-        if quantiles is not None:
-            fcsts = [
-                model.forecast(
-                    batch,
-                    prediction_length=h,
-                    quantile_levels=quantiles,
-                    output_type="numpy",
-                )
-                for batch in tqdm(dataset)
-            ]  # list of tuples
-            fcsts_quantiles, fcsts_mean = zip(*fcsts, strict=False)
-            fcsts_quantiles_np = np.concatenate(fcsts_quantiles)
-            fcsts_mean_np = np.concatenate(fcsts_mean)
-        else:
-            fcsts = [
-                model.forecast(
-                    batch,
-                    prediction_length=h,
-                    output_type="numpy",
-                )
-                for batch in tqdm(dataset)
-            ]
-            fcsts_quantiles, fcsts_mean = zip(*fcsts, strict=False)
-            fcsts_mean_np = np.concatenate(fcsts_mean)
-            fcsts_quantiles_np = None
+        fcsts = [
+            model.forecast(
+                batch,
+                prediction_length=h,
+                output_type="numpy",
+            )
+            for batch in tqdm(dataset)
+        ]  # list of tuples
+        fcsts_quantiles, fcsts_mean = zip(*fcsts, strict=False)
+        fcsts_mean_np = np.concatenate(fcsts_mean)
+        fcsts_quantiles_np = None if quantiles is None else np.concatenate(fcsts_quantiles)
         return fcsts_mean_np, fcsts_quantiles_np
 
     def forecast(
@@ -169,6 +156,11 @@ class TiRex(Forecaster):
         """
         freq = self._maybe_infer_freq(df, freq)
         qc = QuantileConverter(level=level, quantiles=quantiles)
+        if qc.quantiles is not None and len(qc.quantiles) != len(DEFAULT_QUANTILES_TIREX):
+            raise ValueError(
+                "TiRex only supports the default quantiles, "
+                "please use the default quantiles or default level, "
+            )
         dataset = TimeSeriesDataset.from_df(df, batch_size=self.batch_size)
         fcst_df = dataset.make_future_dataframe(h=h, freq=freq)
         with self._get_model() as model:
