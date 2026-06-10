@@ -151,5 +151,3 @@ if sys.version_info < (3, 13):
     from timecopilot.models.foundation.tabpfn import TabPFN
 
     models.append(TabPFN(mode=TabPFNMode.MOCK))
-
-models = [TiRex(repo_id="NX-AI/TiRex-1.1-gifteval")]
