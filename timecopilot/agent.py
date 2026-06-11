@@ -41,8 +41,8 @@ def _resolve_llm(llm: str | Model) -> str | Model:
     """Resolve LLM string, adding LiteLLM support for 100+ providers.
 
     If the string starts with 'litellm:', creates a pydantic-ai OpenAI model
-    pointed at a running LiteLLM proxy. Set LITELLM_BASE_URL to your proxy
-    address (default: http://localhost:4000/v1).
+    backed by litellm SDK (no proxy needed). LiteLLM reads provider API keys
+    from environment variables (ANTHROPIC_API_KEY, OPENAI_API_KEY, etc.).
 
     Examples:
         --llm litellm:anthropic/claude-sonnet-4-6
@@ -52,15 +52,17 @@ def _resolve_llm(llm: str | Model) -> str | Model:
     if not (isinstance(llm, str) and llm.startswith("litellm:")):
         return llm
 
-    import os
-
-    from openai import AsyncOpenAI
-
     model_name = llm[len("litellm:"):]
-    base_url = os.environ.get("LITELLM_BASE_URL", "http://localhost:4000/v1")
-    api_key = os.environ.get("LITELLM_API_KEY", "sk-unused")
+    try:
+        import litellm
 
-    client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+        litellm.drop_params = True
+        client = litellm.AsyncOpenAI()
+    except ImportError:
+        raise ImportError(
+            "litellm package required for litellm: models. "
+            "Install with: pip install 'timecopilot[litellm]'"
+        )
     return OpenAIModel(model_name, openai_client=client)
 from .models.prophet import Prophet
 from .models.stats import (
