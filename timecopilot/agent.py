@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from pydantic_ai import Agent, ModelRetry, RunContext
 from pydantic_ai.agent import AgentRunResult
 from pydantic_ai.models import Model
+from pydantic_ai.models.openai import OpenAIModel
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -34,6 +35,33 @@ from tsfeatures.tsfeatures import _get_feats
 
 from .forecaster import Forecaster, TimeCopilotForecaster
 from .models.adapters.sktime import SKTimeAdapter
+
+
+def _resolve_llm(llm: str | Model) -> str | Model:
+    """Resolve LLM string, adding LiteLLM support for 100+ providers.
+
+    If the string starts with 'litellm:', creates a pydantic-ai OpenAI model
+    pointed at a running LiteLLM proxy. Set LITELLM_BASE_URL to your proxy
+    address (default: http://localhost:4000/v1).
+
+    Examples:
+        --llm litellm:anthropic/claude-sonnet-4-6
+        --llm litellm:groq/llama-3.3-70b-versatile
+        --llm litellm:deepseek/deepseek-chat
+    """
+    if not (isinstance(llm, str) and llm.startswith("litellm:")):
+        return llm
+
+    import os
+
+    from openai import AsyncOpenAI
+
+    model_name = llm[len("litellm:"):]
+    base_url = os.environ.get("LITELLM_BASE_URL", "http://localhost:4000/v1")
+    api_key = os.environ.get("LITELLM_API_KEY", "sk-unused")
+
+    client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+    return OpenAIModel(model_name, openai_client=client)
 from .models.prophet import Prophet
 from .models.stats import (
     ADIDA,
@@ -541,7 +569,7 @@ class TimeCopilot:
                 "model is not allowed to be passed as a keyword argument"
                 "use `llm` instead"
             )
-        self.llm = llm
+        self.llm = _resolve_llm(llm)
 
         self.forecasting_agent = Agent(
             deps_type=ExperimentDataset,
