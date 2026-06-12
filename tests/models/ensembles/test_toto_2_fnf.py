@@ -69,9 +69,7 @@ def test_weighted_forecast_without_live_artifacts(monkeypatch, tmp_path: Path):
         model,
         "_weights",
         lambda **kwargs: pd.DataFrame(
-            {
-                name: [0.0] for name in PUBLISHED_MODEL_ORDER
-            },
+            {name: [0.0] for name in PUBLISHED_MODEL_ORDER},
             index=["a"],
         ).assign(**{"chronos-2": [0.25], "timesfm-2.5": [0.75]}),
     )
@@ -86,9 +84,7 @@ def test_weighted_forecast_without_live_artifacts(monkeypatch, tmp_path: Path):
 
 
 def test_rejects_unpublished_quantile(monkeypatch, tmp_path: Path):
-    model = Toto2FnF(
-        [DummyQuantileModel("chronos-2", 1.0)], artifacts_dir=tmp_path
-    )
+    model = Toto2FnF([DummyQuantileModel("chronos-2", 1.0)], artifacts_dir=tmp_path)
     ds = pd.date_range("2024-01-01", periods=20, freq="D")
     df = pd.DataFrame({"unique_id": "a", "ds": ds, "y": np.arange(20)})
     with pytest.raises(ValueError, match="published quantiles"):

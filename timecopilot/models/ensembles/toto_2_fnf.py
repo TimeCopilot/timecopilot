@@ -1,5 +1,6 @@
 import base64
 import json
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Literal
 
@@ -106,7 +107,7 @@ class Toto2FnF(Forecaster):
 
     def __init__(
         self,
-        models: list[Forecaster],
+        models: Sequence[Forecaster],
         *,
         alias: str = "Toto-2.0-FnF",
         artifacts_repo: str = "Datadog/Toto-2.0-Family-and-Friends",
@@ -134,7 +135,7 @@ class Toto2FnF(Forecaster):
         self.domain = domain
         self.term = term
         self.threads = threads
-        self.tcf = TimeCopilotForecaster(models=models)
+        self.tcf = TimeCopilotForecaster(models=list(models))
         self._bundle: dict | None = None
 
     def _artifact_root(self) -> Path:
@@ -160,7 +161,10 @@ class Toto2FnF(Forecaster):
         with open(root / "models.json") as f:
             model_order = json.load(f)
         if model_order != PUBLISHED_MODEL_ORDER:
-            raise RuntimeError("FnF artifact model order differs from the published order.")
+            raise RuntimeError(
+                "FnF artifact model order differs \
+                               from the published order."
+            )
         with open(root / "feature_columns.json") as f:
             feature_columns = json.load(f)
         with open(root / "categories.json") as f:
