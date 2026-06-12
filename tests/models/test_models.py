@@ -30,6 +30,16 @@ def test_tirex_import_fails():
 
 
 @pytest.mark.skipif(
+    (3, 11) <= sys.version_info < (3, 14),
+    reason="T0 requires Python >= 3.11 and < 3.14",
+)
+def test_t0_import_fails():
+    with pytest.raises(ImportError) as excinfo:
+        from timecopilot.models.foundation.t0 import T0  # noqa: F401
+    assert "requires Python >= 3.11 and < 3.14" in str(excinfo.value)
+
+
+@pytest.mark.skipif(
     sys.version_info < (3, 13),
     reason="Sundial requires Python < 3.13",
 )

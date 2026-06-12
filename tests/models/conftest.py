@@ -145,6 +145,11 @@ if sys.version_info >= (3, 11):
 
     models.append(TiRex())
 
+if (3, 11) <= sys.version_info < (3, 14):
+    from timecopilot.models.foundation.t0 import T0
+
+    models.append(T0(context_length=256, batch_size=2))
+
 if sys.version_info < (3, 13):
     from tabpfn_time_series import TabPFNMode
 
