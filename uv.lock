@@ -7189,6 +7189,25 @@ wheels = [
 ]
 
 [[package]]
+dependencies = [
+  {marker = "python_full_version == '3.13.*'", name = "numpy", source = {registry = "https://pypi.org/simple"}, version = "2.1.3"},
+  {marker = "python_full_version >= '3.11' and python_full_version < '3.13'", name = "numpy", source = {registry = "https://pypi.org/simple"}, version = "1.26.4"},
+  {marker = "python_full_version >= '3.11' and python_full_version < '3.14'", name = "einops"},
+  {marker = "python_full_version >= '3.11' and python_full_version < '3.14'", name = "huggingface-hub"},
+  {marker = "python_full_version >= '3.11' and python_full_version < '3.14'", name = "jaxtyping"},
+  {marker = "python_full_version >= '3.11' and python_full_version < '3.14'", name = "rotary-embedding-torch"},
+  {marker = "python_full_version >= '3.11' and python_full_version < '3.14'", name = "safetensors"},
+  {marker = "python_full_version >= '3.11' and python_full_version < '3.14'", name = "torch"},
+]
+name = "tfc-t0"
+sdist = {hash = "sha256:7c60d6dd1e32ab5010d335ff9fe827c4ff7bb349f6cd2fc0ebc08260304994ef", size = 33810, upload-time = "2026-06-14T21:39:55.594Z", url = "https://files.pythonhosted.org/packages/25/b1/5a558bab4a04cc19c9b20e93c36459a25acece20d13b2159d7e55a816c88/tfc_t0-0.1.2.tar.gz"}
+source = {registry = "https://pypi.org/simple"}
+version = "0.1.2"
+wheels = [
+  {hash = "sha256:a0ebd97c27f88a3f47d917e46f549ff6e3e1e4d3cb58be701bd0e507da045db9", size = 43888, upload-time = "2026-06-14T21:39:54.242Z", url = "https://files.pythonhosted.org/packages/2a/98/ff61566d636298000488ac47d993b0b7092007768748ac3426f7439e863c/tfc_t0-0.1.2-py3-none-any.whl"},
+]
+
+[[package]]
 name = "threadpoolctl"
 sdist = {hash = "sha256:8ab8b4aa3491d812b623328249fab5302a68d2d71745c8a4c719a2fcaba9f44e", size = 21274, upload-time = "2025-03-13T13:49:23.031Z", url = "https://files.pythonhosted.org/packages/b7/4d/08c89e34946fce2aec4fbb45c9016efd5f4d7f24af8e5d93296e935631d8/threadpoolctl-3.6.0.tar.gz"}
 source = {registry = "https://pypi.org/simple"}
@@ -7203,6 +7222,7 @@ dependencies = [
   {extra = ["torch"], name = "gluonts"},
   {marker = "python_full_version < '3.13'", name = "tabpfn-time-series"},
   {marker = "python_full_version < '3.14'", name = "timecopilot-uni2ts"},
+  {marker = "python_full_version >= '3.11' and python_full_version < '3.14'", name = "tfc-t0"},
   {marker = "python_full_version >= '3.11'", name = "timecopilot-tirex"},
   {marker = "python_full_version >= '3.13'", name = "pandas", source = {registry = "https://pypi.org/simple"}, version = "2.3.3"},
   {name = "accelerate"},
@@ -7289,6 +7309,7 @@ requires-dist = [
   {marker = "python_full_version < '3.13'", name = "tabpfn-time-series", specifier = "==1.0.3"},
   {marker = "python_full_version < '3.13'", name = "transformers", specifier = ">=4.41,<5"},
   {marker = "python_full_version < '3.14'", name = "timecopilot-uni2ts", specifier = ">=0.1.2"},
+  {marker = "python_full_version >= '3.11' and python_full_version < '3.14'", name = "tfc-t0", specifier = ">=0.1.2"},
   {marker = "python_full_version >= '3.11'", name = "timecopilot-tirex", specifier = ">=0.1.0"},
   {marker = "python_full_version >= '3.13'", name = "pandas", specifier = ">=2.2.0"},
   {marker = "python_full_version >= '3.13'", name = "transformers", specifier = ">=4.48,<5"},
