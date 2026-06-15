@@ -96,6 +96,7 @@ dependencies = [
   "timecopilot-granite-tsfm>=0.1.2",
   "timecopilot-timesfm>=0.2.1",
   "timecopilot-tirex>=0.1.0 ; python_full_version >= '3.11'",
+  "timecopilot-tirex>=0.1.1",
   "timecopilot-toto-2>=0.1.1",
   "timecopilot-toto>=0.1.6",
   "timecopilot-uni2ts>=0.1.2 ; python_full_version < '3.14'",
