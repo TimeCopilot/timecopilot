@@ -96,13 +96,25 @@ def _feature_context_cap(seasonality: int) -> int:
 class Toto2FnF(Forecaster):
     """Toto-2.0 Family-and-Friends FFORMA-style meta-ensemble.
 
-    The class accepts ordinary TimeCopilot forecasters, computes live forecasts
-    and tsfeatures from a ``unique_id, ds, y`` dataframe, and applies the
-    published per-(frequency, horizon-term) XGBoost gating head.
-
-    Model aliases must use the published names because XGBoost class indices are
-    tied to that order. A subset of the pool is allowed; weights are then
-    renormalized over the available models.
+    Parameters
+    ----------
+    models
+        Base TimeCopilot forecasters used by the meta-learner. Their aliases
+        must follow the published Toto-2.0 FnF model order.
+    alias
+        Output column name. Defaults to ``"Toto-2.0-FnF"``.
+    repo_id
+        Hugging Face repository containing the published FnF artifacts.
+        Defaults to ``"Datadog/Toto-2.0-Family-and-Friends"``.
+    artifacts_dir
+        Optional local artifact directory. If omitted, artifacts are downloaded
+        from ``repo_id``.
+    domain
+        Optional domain category used by the gating model. Defaults to ``None``.
+    term
+        Horizon bucket used by the gating model. Defaults to ``"auto"``.
+    tsfeatures_threads
+        Number of threads used by ``tsfeatures``. Defaults to ``4``.
     """
 
     def __init__(
@@ -110,31 +122,25 @@ class Toto2FnF(Forecaster):
         models: Sequence[Forecaster],
         *,
         alias: str = "Toto-2.0-FnF",
-        artifacts_repo: str = "Datadog/Toto-2.0-Family-and-Friends",
+        repo_id: str = "Datadog/Toto-2.0-Family-and-Friends",
         artifacts_dir: str | Path | None = None,
         domain: str | None = None,
         term: Literal["auto", "short", "medium", "long"] = "auto",
-        threads: int = 4,
+        tsfeatures_threads: int = 4,
     ):
         aliases = [model.alias for model in models]
-        unknown = sorted(set(aliases) - set(PUBLISHED_MODEL_ORDER))
-        if unknown:
+        if aliases != PUBLISHED_MODEL_ORDER:
             raise ValueError(
-                "FnF model aliases must match the published pool names. "
-                f"Unknown aliases: {unknown}."
+                "FnF base-model aliases must match PUBLISHED_MODEL_ORDER exactly."
             )
-        if len(set(aliases)) != len(aliases):
-            raise ValueError("FnF base-model aliases must be unique.")
-        if not models:
-            raise ValueError("Toto2FnF requires at least one base model.")
 
         self.models = models
         self.alias = alias
-        self.artifacts_repo = artifacts_repo
+        self.repo_id = repo_id
         self.artifacts_dir = Path(artifacts_dir) if artifacts_dir else None
         self.domain = domain
         self.term = term
-        self.threads = threads
+        self.tsfeatures_threads = tsfeatures_threads
         self.tcf = TimeCopilotForecaster(models=list(models))
         self._bundle: dict | None = None
 
@@ -143,7 +149,7 @@ class Toto2FnF(Forecaster):
             return self.artifacts_dir
         return Path(
             snapshot_download(
-                repo_id=self.artifacts_repo,
+                repo_id=self.repo_id,
                 repo_type="model",
                 allow_patterns=[
                     "booster_manifest.json",
@@ -207,7 +213,7 @@ class Toto2FnF(Forecaster):
             .groupby("unique_id", observed=True, sort=False)
             .tail(cap)[["unique_id", "ds", "y"]]
         )
-        feats = tsfeatures(panel, freq=seasonality, threads=self.threads)
+        feats = tsfeatures(panel, freq=seasonality, threads=self.tsfeatures_threads)
         feats = feats.set_index("unique_id").reindex(
             df["unique_id"].drop_duplicates().tolist()
         )
@@ -273,18 +279,14 @@ class Toto2FnF(Forecaster):
         term = _infer_term(freq, h) if self.term == "auto" else self.term
         weights = self._weights(df=df, freq=freq, h=h, term=term)
 
-        available = [model.alias for model in self.models]
-        available_weights = weights[available]
-        available_weights = available_weights.div(
-            available_weights.sum(axis=1).clip(lower=1e-12), axis=0
-        )
-
         out = base[["unique_id", "ds"]].copy()
-        row_weights = available_weights.reindex(base["unique_id"]).to_numpy()
+        row_weights = weights.reindex(base["unique_id"]).to_numpy()
         q_output_cols = []
         for q in PUBLISHED_QUANTILES:
             pct = int(q * 100)
-            values = base[[f"{name}-q-{pct}" for name in available]].to_numpy()
+            values = base[
+                [f"{name}-q-{pct}" for name in PUBLISHED_MODEL_ORDER]
+            ].to_numpy()
             col = f"{self.alias}-q-{pct}"
             out[col] = (values * row_weights).sum(axis=1)
             q_output_cols.append(col)

@@ -53,38 +53,45 @@ def test_infer_term():
     assert _infer_term("D", 450) == "long"
 
 
-def test_rejects_unknown_alias():
-    with pytest.raises(ValueError, match="published pool"):
-        Toto2FnF([DummyQuantileModel("not-published", 1.0)])
+def _dummy_pool() -> list[DummyQuantileModel]:
+    return [
+        DummyQuantileModel(alias, float(i))
+        for i, alias in enumerate(PUBLISHED_MODEL_ORDER)
+    ]
+
+
+def test_rejects_non_published_order():
+    with pytest.raises(ValueError, match="PUBLISHED_MODEL_ORDER"):
+        Toto2FnF([DummyQuantileModel("chronos-2", 1.0)])
 
 
 def test_weighted_forecast_without_live_artifacts(monkeypatch, tmp_path: Path):
-    models = [
-        DummyQuantileModel("chronos-2", 1.0),
-        DummyQuantileModel("timesfm-2.5", 3.0),
-    ]
-    model = Toto2FnF(models=models, artifacts_dir=tmp_path)
+    model = Toto2FnF(models=_dummy_pool(), artifacts_dir=tmp_path)
 
     monkeypatch.setattr(
         model,
         "_weights",
         lambda **kwargs: pd.DataFrame(
-            {name: [0.0] for name in PUBLISHED_MODEL_ORDER},
+            {
+                name: [1.0 / len(PUBLISHED_MODEL_ORDER)]
+                for name in PUBLISHED_MODEL_ORDER
+            },
             index=["a"],
-        ).assign(**{"chronos-2": [0.25], "timesfm-2.5": [0.75]}),
+        ),
     )
 
     ds = pd.date_range("2024-01-01", periods=20, freq="D")
     df = pd.DataFrame({"unique_id": "a", "ds": ds, "y": np.arange(20)})
     result = model.forecast(df, h=2, freq="D", quantiles=[0.1, 0.5, 0.9])
 
-    assert result[model.alias].eq(2.5 + 0.5).all()
-    assert result[f"{model.alias}-q-10"].eq(2.5 + 0.1).all()
-    assert result[f"{model.alias}-q-90"].eq(2.5 + 0.9).all()
+    mean_value = np.mean(np.arange(len(PUBLISHED_MODEL_ORDER)))
+    assert np.allclose(result[model.alias], mean_value + 0.5)
+    assert np.allclose(result[f"{model.alias}-q-10"], mean_value + 0.1)
+    assert np.allclose(result[f"{model.alias}-q-90"], mean_value + 0.9)
 
 
-def test_rejects_unpublished_quantile(monkeypatch, tmp_path: Path):
-    model = Toto2FnF([DummyQuantileModel("chronos-2", 1.0)], artifacts_dir=tmp_path)
+def test_rejects_unpublished_quantile(tmp_path: Path):
+    model = Toto2FnF(_dummy_pool(), artifacts_dir=tmp_path)
     ds = pd.date_range("2024-01-01", periods=20, freq="D")
     df = pd.DataFrame({"unique_id": "a", "ds": ds, "y": np.arange(20)})
     with pytest.raises(ValueError, match="published quantiles"):
