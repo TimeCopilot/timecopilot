@@ -106,7 +106,7 @@ dependencies = [
   "tsfeatures>=0.4.5",
   "utilsforecast[plotting]>=0.2.15",
   "wandb==0.22.1",
-  "xgboost>=3.2.0",
+  "xgboost>=2.1.0",
 ]
 description = "The GenAI Forecasting Agent · LLMs × Time Series Foundation Models"
 license = "MIT"
