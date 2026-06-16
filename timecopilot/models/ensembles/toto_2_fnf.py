@@ -1,6 +1,5 @@
 import base64
 import json
-from collections.abc import Sequence
 from pathlib import Path
 from typing import Literal
 
@@ -10,7 +9,12 @@ import xgboost as xgb
 from huggingface_hub import snapshot_download
 from tsfeatures import tsfeatures
 
-from ... import TimeCopilotForecaster
+from ..foundation.chronos import Chronos
+from ..foundation.flowstate import FlowState
+from ..foundation.patchtst_fm import PatchTSTFM
+from ..foundation.timesfm import TimesFM
+from ..foundation.tirex import TiRex
+from ..foundation.toto import Toto
 from ..utils.forecaster import Forecaster, QuantileConverter, get_seasonality
 
 PUBLISHED_MODEL_ORDER = [
@@ -79,7 +83,8 @@ def _infer_term(freq: str, h: int) -> str:
     canonical = _canonical_freq(freq)
     if canonical not in _BASE_HORIZON:
         raise ValueError(
-            f"Toto2FnF has no published horizon mapping for frequency {freq!r}. "
+            "FamilyAndFriends has no published horizon"
+            " mapping for frequency {freq!r}. "
             "Pass term='short', 'medium', or 'long' explicitly."
         )
     base = _BASE_HORIZON[canonical]
@@ -93,7 +98,7 @@ def _feature_context_cap(seasonality: int) -> int:
     return max(2048, seasonality * 32)
 
 
-class Toto2FnF(Forecaster):
+class FamilyAndFriends(Forecaster):
     """Toto-2.0 Family-and-Friends FFORMA-style meta-ensemble.
 
     Parameters
@@ -119,7 +124,6 @@ class Toto2FnF(Forecaster):
 
     def __init__(
         self,
-        models: Sequence[Forecaster],
         *,
         alias: str = "Toto-2.0-FnF",
         repo_id: str = "Datadog/Toto-2.0-Family-and-Friends",
@@ -128,21 +132,82 @@ class Toto2FnF(Forecaster):
         term: Literal["auto", "short", "medium", "long"] = "auto",
         tsfeatures_threads: int = 4,
     ):
-        aliases = [model.alias for model in models]
+        self.models = self._build_published_pool()
+        aliases = [model.alias for model in self.models]
         if aliases != PUBLISHED_MODEL_ORDER:
-            raise ValueError(
+            raise RuntimeError(
                 "FnF base-model aliases must match PUBLISHED_MODEL_ORDER exactly."
             )
 
-        self.models = models
         self.alias = alias
         self.repo_id = repo_id
         self.artifacts_dir = Path(artifacts_dir) if artifacts_dir else None
         self.domain = domain
         self.term = term
         self.tsfeatures_threads = tsfeatures_threads
-        self.tcf = TimeCopilotForecaster(models=list(models))
         self._bundle: dict | None = None
+
+    def _build_published_pool(self) -> list[Forecaster]:
+        return [
+            Chronos(repo_id="amazon/chronos-2", alias="chronos-2"),
+            TimesFM(repo_id="google/timesfm-2.5-200m-pytorch", alias="timesfm-2.5"),
+            FlowState(repo_id="ibm-research/flowstate", alias="flowstate"),
+            TiRex(repo_id="NX-AI/TiRex", alias="tirex"),
+            PatchTSTFM(repo_id="ibm-research/patchtst-fm-r1", alias="patchtst-fm"),
+            Toto(repo_id="Datadog/Toto-2.0-4m", alias="toto-2.0-4m"),
+            Toto(repo_id="Datadog/Toto-2.0-22m", alias="toto-2.0-22m"),
+            Toto(repo_id="Datadog/Toto-2.0-313m", alias="toto-2.0-313m"),
+            Toto(repo_id="Datadog/Toto-2.0-1B", alias="toto-2.0-1b"),
+            Toto(repo_id="Datadog/Toto-2.0-2.5B", alias="toto-2.0-2.5b"),
+        ]
+
+    def _call_base_models_sequentially(
+        self,
+        df: pd.DataFrame,
+        h: int,
+        freq: str,
+    ) -> pd.DataFrame:
+        """Run base models one at a time to avoid keeping all weights in memory."""
+        import gc
+
+        base: pd.DataFrame | None = None
+        for model in self._build_published_pool():
+            model_forecast = model.forecast(
+                df=df,
+                h=h,
+                freq=freq,
+                level=None,
+                quantiles=PUBLISHED_QUANTILES,
+            )
+            keep_cols = [
+                "unique_id",
+                "ds",
+                *[
+                    col
+                    for col in model_forecast.columns
+                    if col.startswith(f"{model.alias}-q-")
+                ],
+            ]
+            model_forecast = model_forecast[keep_cols]
+            base = (
+                model_forecast
+                if base is None
+                else base.merge(model_forecast, on=["unique_id", "ds"])
+            )
+
+            del model
+            gc.collect()
+            try:
+                import torch
+
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+            except ImportError:
+                pass
+
+        if base is None:
+            raise RuntimeError("No base forecasts were produced.")
+        return base
 
     def _artifact_root(self) -> Path:
         if self.artifacts_dir is not None:
@@ -267,14 +332,10 @@ class Toto2FnF(Forecaster):
 
         # The published learner gates nine fixed quantile forecasts. Always run
         # that grid, then return only the quantiles requested by the caller.
-        base = self.tcf._call_models(
-            "forecast",
-            merge_on=["unique_id", "ds"],
+        base = self._call_base_models_sequentially(
             df=df,
             h=h,
             freq=freq,
-            level=None,
-            quantiles=PUBLISHED_QUANTILES,
         )
         term = _infer_term(freq, h) if self.term == "auto" else self.term
         weights = self._weights(df=df, freq=freq, h=h, term=term)
@@ -300,3 +361,6 @@ class Toto2FnF(Forecaster):
         keep = [f"{self.alias}-q-{int(q * 100)}" for q in requested_quantiles]
         out = out[["unique_id", "ds", self.alias, *keep]]
         return qc.maybe_convert_quantiles_to_level(out, models=[self.alias])
+
+
+Toto2FnF = FamilyAndFriends

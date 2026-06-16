@@ -6,7 +6,7 @@ import pytest
 
 from timecopilot.models.ensembles.toto_2_fnf import (
     PUBLISHED_MODEL_ORDER,
-    Toto2FnF,
+    FamilyAndFriends,
     _canonical_freq,
     _categorical_freq,
     _infer_term,
@@ -60,13 +60,23 @@ def _dummy_pool() -> list[DummyQuantileModel]:
     ]
 
 
-def test_rejects_non_published_order():
-    with pytest.raises(ValueError, match="PUBLISHED_MODEL_ORDER"):
-        Toto2FnF([DummyQuantileModel("chronos-2", 1.0)])
+def test_rejects_non_published_order(monkeypatch):
+    monkeypatch.setattr(
+        FamilyAndFriends,
+        "_build_published_pool",
+        lambda self: [DummyQuantileModel("chronos-2", 1.0)],
+    )
+    with pytest.raises(RuntimeError, match="PUBLISHED_MODEL_ORDER"):
+        FamilyAndFriends()
 
 
 def test_weighted_forecast_without_live_artifacts(monkeypatch, tmp_path: Path):
-    model = Toto2FnF(models=_dummy_pool(), artifacts_dir=tmp_path)
+    monkeypatch.setattr(
+        FamilyAndFriends,
+        "_build_published_pool",
+        lambda self: _dummy_pool(),
+    )
+    model = FamilyAndFriends(artifacts_dir=tmp_path)
 
     monkeypatch.setattr(
         model,
@@ -90,9 +100,53 @@ def test_weighted_forecast_without_live_artifacts(monkeypatch, tmp_path: Path):
     assert np.allclose(result[f"{model.alias}-q-90"], mean_value + 0.9)
 
 
-def test_rejects_unpublished_quantile(tmp_path: Path):
-    model = Toto2FnF(_dummy_pool(), artifacts_dir=tmp_path)
+def test_rejects_unpublished_quantile(monkeypatch, tmp_path: Path):
+    monkeypatch.setattr(
+        FamilyAndFriends,
+        "_build_published_pool",
+        lambda self: _dummy_pool(),
+    )
+    model = FamilyAndFriends(artifacts_dir=tmp_path)
     ds = pd.date_range("2024-01-01", periods=20, freq="D")
     df = pd.DataFrame({"unique_id": "a", "ds": ds, "y": np.arange(20)})
     with pytest.raises(ValueError, match="published quantiles"):
         model.forecast(df, h=2, freq="D", quantiles=[0.05])
+
+
+def test_calls_hardcoded_pool_sequentially(monkeypatch, tmp_path: Path):
+    calls = []
+
+    class RecordingModel(DummyQuantileModel):
+        def forecast(self, *args, **kwargs):
+            calls.append(self.alias)
+            return super().forecast(*args, **kwargs)
+
+    monkeypatch.setattr(
+        FamilyAndFriends,
+        "_build_published_pool",
+        lambda self: [
+            RecordingModel(alias, float(i))
+            for i, alias in enumerate(PUBLISHED_MODEL_ORDER)
+        ],
+    )
+
+    model = FamilyAndFriends(artifacts_dir=tmp_path)
+
+    monkeypatch.setattr(
+        model,
+        "_weights",
+        lambda **kwargs: pd.DataFrame(
+            {
+                name: [1.0 / len(PUBLISHED_MODEL_ORDER)]
+                for name in PUBLISHED_MODEL_ORDER
+            },
+            index=["a"],
+        ),
+    )
+
+    ds = pd.date_range("2024-01-01", periods=20, freq="D")
+    df = pd.DataFrame({"unique_id": "a", "ds": ds, "y": np.arange(20)})
+
+    model.forecast(df=df, h=2, freq="D", quantiles=[0.1, 0.5, 0.9])
+
+    assert calls == PUBLISHED_MODEL_ORDER
