@@ -100,7 +100,7 @@ dependencies = [
   "timecopilot-tirex>=0.1.0 ; python_full_version >= '3.11'",
   "timecopilot-tirex>=0.1.1",
   "timecopilot-toto-2>=0.1.1",
-  "timecopilot-toto>=0.1.6",
+  "timecopilot-toto>=0.1.7",
   "timecopilot-uni2ts>=0.1.2 ; python_full_version < '3.14'",
   "torchmetrics>=1.8.2",
   "transformers>=4.41,<6 ; python_full_version < '3.13'",
