@@ -7270,7 +7270,7 @@ dependencies = [
     { name = "timecopilot-chronos-forecasting" },
     { name = "timecopilot-granite-tsfm", marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
     { name = "timecopilot-timesfm" },
-    { name = "timecopilot-tirex" },
+    { name = "timecopilot-tirex", marker = "python_full_version >= '3.11'" },
     { name = "timecopilot-toto" },
     { name = "timecopilot-toto-2" },
     { name = "timecopilot-uni2ts", marker = "python_full_version < '3.14'" },
@@ -7358,8 +7358,7 @@ requires-dist = [
     { name = "timecopilot-chronos-forecasting", specifier = ">=0.2.2" },
     { name = "timecopilot-granite-tsfm", marker = "python_full_version >= '3.11' and python_full_version < '3.14'", specifier = ">=0.2.1" },
     { name = "timecopilot-timesfm", specifier = ">=0.2.1" },
-    { name = "timecopilot-tirex", specifier = ">=0.1.1" },
-    { name = "timecopilot-tirex", marker = "python_full_version >= '3.11'", specifier = ">=0.1.0" },
+    { name = "timecopilot-tirex", marker = "python_full_version >= '3.11'", specifier = ">=0.1.1" },
     { name = "timecopilot-toto", specifier = ">=0.1.7" },
     { name = "timecopilot-toto-2", specifier = ">=0.1.1" },
     { name = "timecopilot-uni2ts", marker = "python_full_version < '3.14'", specifier = ">=0.1.2" },
@@ -7484,15 +7483,14 @@ name = "timecopilot-tirex"
 version = "0.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "huggingface-hub" },
-    { name = "ninja" },
-    { name = "numpy", version = "1.26.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "huggingface-hub", marker = "python_full_version >= '3.11'" },
+    { name = "ninja", marker = "python_full_version >= '3.11'" },
+    { name = "numpy", version = "1.26.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
     { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
-    { name = "scikit-learn", version = "1.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "scikit-learn", version = "1.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
     { name = "scikit-learn", version = "1.7.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
-    { name = "torch" },
-    { name = "xlstm", version = "2.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "xlstm", version = "2.0.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "torch", marker = "python_full_version >= '3.11'" },
+    { name = "xlstm", marker = "python_full_version >= '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/4a/06/2574fe82fb59ba11a8bf589677243cff349061e95912a762558ca46813aa/timecopilot_tirex-0.1.1.tar.gz", hash = "sha256:c493aff2d29d1fb7a4c3a5a2642df67030691744cc1ae79d5ea9583f4b5d8895", size = 56461, upload-time = "2026-06-09T23:24:46.477Z" }
 wheels = [
@@ -8476,36 +8474,8 @@ wheels = [
 
 [[package]]
 name = "xlstm"
-version = "2.0.0"
-source = { registry = "https://pypi.org/simple" }
-resolution-markers = [
-    "(python_full_version < '3.11' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version < '3.11' and sys_platform != 'darwin' and sys_platform != 'linux')",
-    "python_full_version < '3.11' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
-    "python_full_version < '3.11' and sys_platform == 'linux'",
-]
-sdist = { url = "https://files.pythonhosted.org/packages/21/2a/bee0c59f2e86593ea29cbf3722a312ef1fe27af556dd138e7c771f9b9112/xlstm-2.0.0.tar.gz", hash = "sha256:4e25dd699144d90520113d2812d3243e3a72f1904d53b9e371a1bcf6bd99562e", size = 67094, upload-time = "2024-12-10T23:03:48.622Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/42/7d/0c95c6ff7f40c62614411f4f29dc7f8c52cafbe049713a94d573ae243eb4/xlstm-2.0.0-py3-none-any.whl", hash = "sha256:54ae4fc7433d0b281a15a136f2b8cafe17748e73c29e1c0cc8b1afc41c8e63b4", size = 89850, upload-time = "2024-12-10T23:03:46.177Z" },
-]
-
-[[package]]
-name = "xlstm"
 version = "2.0.5"
 source = { registry = "https://pypi.org/simple" }
-resolution-markers = [
-    "(python_full_version == '3.11.*' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version == '3.11.*' and sys_platform != 'darwin' and sys_platform != 'linux')",
-    "(python_full_version == '3.12.*' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version == '3.12.*' and sys_platform != 'darwin' and sys_platform != 'linux')",
-    "(python_full_version == '3.13.*' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version == '3.13.*' and sys_platform != 'darwin' and sys_platform != 'linux')",
-    "(python_full_version >= '3.14' and platform_machine != 'x86_64' and sys_platform == 'darwin') or (python_full_version >= '3.14' and sys_platform != 'darwin' and sys_platform != 'linux')",
-    "python_full_version == '3.11.*' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
-    "python_full_version == '3.11.*' and sys_platform == 'linux'",
-    "python_full_version == '3.12.*' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
-    "python_full_version == '3.12.*' and sys_platform == 'linux'",
-    "python_full_version == '3.13.*' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
-    "python_full_version == '3.13.*' and sys_platform == 'linux'",
-    "python_full_version >= '3.14' and platform_machine == 'x86_64' and sys_platform == 'darwin'",
-    "python_full_version >= '3.14' and sys_platform == 'linux'",
-]
 dependencies = [
     { name = "dacite", marker = "python_full_version >= '3.11'" },
     { name = "einops", marker = "python_full_version >= '3.11'" },
