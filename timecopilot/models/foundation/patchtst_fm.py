@@ -1,4 +1,8 @@
+import sys
 from contextlib import contextmanager
+
+if sys.version_info < (3, 11) or sys.version_info >= (3, 14):
+    raise ImportError("PatchTSTFM requires Python >= 3.11 and < 3.14")
 
 import numpy as np
 import pandas as pd
@@ -128,7 +132,7 @@ class PatchTSTFM(Forecaster, _DataProcessor):
             quantile_levels=quantile_levels,
             # scale_factor=scale_factor,
             # batch_first=False,
-        ).quantile_predictions
+        ).quantile_outputs
         fcst = fcst.squeeze(-1).transpose(-1, -2)  # now shape is (batch, h, quantiles)
 
         # may not be the ideal solution, but this should be more adaptable
