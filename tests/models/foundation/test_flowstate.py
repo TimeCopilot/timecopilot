@@ -1,5 +1,14 @@
+import sys
+
 import numpy as np
 import pandas as pd
+import pytest
+
+if sys.version_info < (3, 11) or sys.version_info >= (3, 14):
+    pytest.skip(
+        "FlowState requires Python >= 3.11 and < 3.14",
+        allow_module_level=True,
+    )
 
 from timecopilot import TimeCopilotForecaster
 from timecopilot.models.foundation.flowstate import FlowState
