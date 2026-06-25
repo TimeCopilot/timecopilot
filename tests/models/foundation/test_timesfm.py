@@ -47,13 +47,9 @@ def test_load_model_from_local_path(mocker, model_class, mock_paths):
         expected_path = os.path.join(local_path, "torch_model.ckpt")
         mock_loader[0].assert_called_once_with(path=expected_path)
     elif model_class is _TimesFMV2_p5:
-        expected_predictor = mock_loader[
-            0
-        ].return_value.model.load_checkpoint.return_value
-        assert predictor is expected_predictor
-        mock_loader[0].return_value.model.load_checkpoint.assert_called_once_with(
-            os.path.join(local_path, "model.safetensors")
-        )
+        # `from_pretrained` handles both local directories and HF repos.
+        assert predictor is mock_loader[0].from_pretrained.return_value
+        mock_loader[0].from_pretrained.assert_called_once_with(local_path)
 
 
 @pytest.mark.parametrize("model_class, mock_paths", MODEL_PARAMS)
