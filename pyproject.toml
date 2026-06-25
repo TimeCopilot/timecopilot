@@ -96,7 +96,7 @@ dependencies = [
   "tfc-t0>=0.2.0 ; python_full_version >= '3.11' and python_full_version < '3.14'",
   "timecopilot-chronos-forecasting>=0.2.2",
   "timecopilot-granite-tsfm>=0.2.1 ; python_full_version >= '3.11' and python_full_version < '3.14'",
-  "timecopilot-timesfm>=0.2.1",
+  "timecopilot-timesfm>=0.3.0",
   "timecopilot-tirex>=0.1.1 ; python_full_version >= '3.11'",
   "timecopilot-toto-2>=0.1.1",
   "timecopilot-toto>=0.1.7",
