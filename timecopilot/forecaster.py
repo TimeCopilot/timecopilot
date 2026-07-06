@@ -47,6 +47,7 @@ class TimeCopilotForecaster(Forecaster):
         self,
         models: list[Forecaster],
         fallback_model: Forecaster | None = None,
+        clean_cache: bool = False,
     ):
         """
         Initialize the TimeCopilotForecaster with a list of models.
@@ -59,6 +60,9 @@ class TimeCopilotForecaster(Forecaster):
                 compatible signatures.
             fallback_model (Forecaster, optional):
                 Model to use as a fallback when a model fails.
+            clean_cache (bool):
+                If True, run Python garbage collection and clear the CUDA cache
+                after each model call. Useful for memory-heavy foundation models.
 
         Raises:
             ValueError: If duplicate model aliases are found in the models list.
@@ -66,6 +70,7 @@ class TimeCopilotForecaster(Forecaster):
         self._validate_unique_aliases(models)
         self.models = models
         self.fallback_model = fallback_model
+        self.clean_cache = clean_cache
 
     def _validate_unique_aliases(self, models: list[Forecaster]) -> None:
         """
@@ -87,6 +92,20 @@ class TimeCopilotForecaster(Forecaster):
                 f"Please provide different aliases when instantiating models of the "
                 f"same class."
             )
+
+    @staticmethod
+    def _clean_model_cache() -> None:
+        """Release temporary Python and CUDA memory between model calls."""
+        import gc
+
+        gc.collect()
+        try:
+            import torch
+
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except ImportError:
+            pass
 
     @staticmethod
     def _is_distributed_df(df: AnyDataFrame) -> bool:
@@ -155,6 +174,8 @@ class TimeCopilotForecaster(Forecaster):
                     # (the initial model)
                     res_df_model = res_df_model.drop(columns=["y"])
                 res_df = res_df.merge(res_df_model, on=merge_on, how="left")
+            if self.clean_cache:
+                self._clean_model_cache()
         return res_df
 
     def _forecast_pandas(

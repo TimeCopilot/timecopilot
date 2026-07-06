@@ -1,4 +1,8 @@
+import sys
 from contextlib import contextmanager
+
+if sys.version_info < (3, 11) or sys.version_info >= (3, 14):
+    raise ImportError("FlowState requires Python >= 3.11 and < 3.14")
 
 import numpy as np
 import pandas as pd
@@ -121,7 +125,7 @@ class FlowState(Forecaster, _DataProcessor):
             prediction_length=h,
             scale_factor=scale_factor,
             batch_first=False,
-        ).prediction_outputs
+        ).quantile_outputs
         fcst = fcst.squeeze(-1).transpose(-1, -2)  # now shape is (batch, h, quantiles)
         fcst_mean = fcst[..., supported_quantiles.index(0.5)]
         fcst_mean_np = fcst_mean.detach().numpy(force=True)

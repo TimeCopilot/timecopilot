@@ -173,3 +173,20 @@ def test_mixed_models_unique_aliases():
     # This should not raise an error
     forecaster = TimeCopilotForecaster(models=[model1, model2, model3])
     assert len(forecaster.models) == 3
+
+
+def test_clean_cache_runs_after_each_model(monkeypatch, models):
+    calls = []
+
+    monkeypatch.setattr(
+        TimeCopilotForecaster,
+        "_clean_model_cache",
+        staticmethod(lambda: calls.append("cleaned")),
+    )
+
+    df = generate_series(n_series=1, freq="D", min_length=10)
+    forecaster = TimeCopilotForecaster(models=models, clean_cache=True)
+
+    forecaster.forecast(df=df, h=2, freq="D")
+
+    assert calls == ["cleaned"] * len(models)

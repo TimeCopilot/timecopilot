@@ -26,6 +26,11 @@
         members:
             - Sundial
 
+::: timecopilot.models.foundation.t0
+    options:
+        members:
+            - T0
+
 ::: timecopilot.models.foundation.tabpfn
     options:
         members:
