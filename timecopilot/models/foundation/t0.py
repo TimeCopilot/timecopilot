@@ -1,3 +1,4 @@
+import json
 import sys
 from contextlib import contextmanager
 
@@ -7,6 +8,8 @@ if sys.version_info < (3, 11) or sys.version_info >= (3, 14):
 import numpy as np
 import pandas as pd
 import torch
+from huggingface_hub import hf_hub_download
+from huggingface_hub.constants import CONFIG_NAME
 from t0 import T0Forecaster
 from tqdm import tqdm
 
@@ -87,7 +90,14 @@ class T0(Forecaster):
 
     @contextmanager
     def _get_model(self) -> T0Forecaster:
-        model = T0Forecaster.from_pretrained(self.repo_id).to(self.device).eval()
+        # huggingface_hub may not inject config.json into model kwargs when the
+        # checkpoint repo is gated; pass the config explicitly.
+        config_path = hf_hub_download(self.repo_id, CONFIG_NAME)
+        with open(config_path, encoding="utf-8") as f:
+            config = json.load(f)
+        model = (
+            T0Forecaster.from_pretrained(self.repo_id, **config).to(self.device).eval()
+        )
         try:
             yield model
         finally:
