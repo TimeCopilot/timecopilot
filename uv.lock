@@ -7212,11 +7212,11 @@ dependencies = [
   {marker = "python_full_version >= '3.11' and python_full_version < '3.14'", name = "torch"},
 ]
 name = "tfc-t0"
-sdist = {hash = "sha256:e9ada1d84627dcd0ae459f93de08a306b143ec6f1c48556c8051eb98ad187562", size = 324587, upload-time = "2026-06-24T14:30:45.001Z", url = "https://files.pythonhosted.org/packages/c9/13/8f57de1b6ede91854f747694f57d78fda100f99d9eb0cfa5e033fe4f7c28/tfc_t0-0.2.0.tar.gz"}
+sdist = {hash = "sha256:0792f5088ecf898b13e51290da0508d1b96c8abf74843aea4b397d6e807331d4", size = 327018, upload-time = "2026-07-30T15:51:35.942Z", url = "https://files.pythonhosted.org/packages/85/59/de499b9a1ec1a6ca95745525cf01f336a4999a7c4436d8b71dcfd0a975ae/tfc_t0-0.2.3.tar.gz"}
 source = {registry = "https://pypi.org/simple"}
-version = "0.2.0"
+version = "0.2.3"
 wheels = [
-  {hash = "sha256:6dc037f90917d6806e9de029f9bd91a96826d318b38c3ee8b83c7fbb3c51c9f8", size = 44323, upload-time = "2026-06-24T14:30:43.554Z", url = "https://files.pythonhosted.org/packages/0e/31/a5bcd4c2066735e7549942d51eb76b182d3d36b1074897a76a72c3f2261b/tfc_t0-0.2.0-py3-none-any.whl"},
+  {hash = "sha256:cb67a7e1aa9832124c69494455f9e02119cc4480e8dc5a7608b9da9bb5f31cea", size = 44898, upload-time = "2026-07-30T15:51:34.692Z", url = "https://files.pythonhosted.org/packages/d8/47/8e96a5147597e5db6fddd7c54fadcc6be77cab124c008891805918517cf2/tfc_t0-0.2.3-py3-none-any.whl"},
 ]
 
 [[package]]
@@ -7319,7 +7319,7 @@ requires-dist = [
   {marker = "python_full_version < '3.13'", name = "tabpfn-time-series", specifier = "==1.0.3"},
   {marker = "python_full_version < '3.13'", name = "transformers", specifier = ">=4.41,<6"},
   {marker = "python_full_version < '3.14'", name = "timecopilot-uni2ts", specifier = ">=0.1.2"},
-  {marker = "python_full_version >= '3.11' and python_full_version < '3.14'", name = "tfc-t0", specifier = ">=0.2.0"},
+  {marker = "python_full_version >= '3.11' and python_full_version < '3.14'", name = "tfc-t0", specifier = ">=0.2.3"},
   {marker = "python_full_version >= '3.11' and python_full_version < '3.14'", name = "timecopilot-granite-tsfm", specifier = ">=0.2.1"},
   {marker = "python_full_version >= '3.11'", name = "timecopilot-tirex", specifier = ">=0.1.1"},
   {marker = "python_full_version >= '3.13'", name = "pandas", specifier = ">=2.2.0"},
