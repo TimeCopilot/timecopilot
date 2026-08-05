@@ -122,6 +122,9 @@ distributed = [
   "pyspark<4.1",
   "ray==2.48",
 ]
+litellm = [
+  "litellm>=1.80.0,<1.87.0",
+]
 
 [project.scripts]
 timecopilot = "timecopilot._cli:main"

@@ -154,6 +154,32 @@ async def test_async_is_queryable():
 
 
 @pytest.mark.live
+@pytest.mark.flaky(reruns=3, reruns_delay=2)
+def test_litellm_forecast():
+    h = 2
+    df = generate_series(
+        n_series=1,
+        freq="D",
+        min_length=30,
+        static_as_categorical=False,
+        with_trend=True,
+    )
+    tc = TimeCopilot(
+        llm="litellm:openai/gpt-4o-mini",
+        forecasters=[
+            ZeroModel(),
+        ],
+    )
+    result = tc.forecast(
+        df=df,
+        query=f"Please forecast the series with a horizon of {h} and frequency D.",
+    )
+    assert len(result.fcst_df) == h
+    assert result.features_df is not None
+    assert result.eval_df is not None
+
+
+@pytest.mark.live
 @pytest.mark.asyncio
 @pytest.mark.flaky(reruns=3, reruns_delay=2)
 async def test_async_query_stream():
