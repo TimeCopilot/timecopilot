@@ -18,29 +18,32 @@ nav:
       - Introduction: getting-started/introduction.md
       - Quickstart: getting-started/quickstart.md
       - Installation: getting-started/installation.md
-      - Examples:
-          - examples/agent-quickstart.ipynb
-          - examples/llm-providers.ipynb
-          - examples/aws-bedrock.ipynb
-          - examples/google-llms.ipynb
-          - examples/forecaster-quickstart.ipynb
-          - examples/anomaly-detection-forecaster-quickstart.ipynb
-          - examples/ts-foundation-models-comparison-quickstart.ipynb
-          - examples/gift-eval.ipynb
-          - examples/chronos-family.ipynb
-          - examples/toto-family.ipynb
-          - examples/finetuning.ipynb
-          - examples/cryptocurrency-quickstart.ipynb
-          - examples/sktime.ipynb
-          - examples/custom-ensembles.ipynb
-          - examples/explaining-foundation-models-and-ensembles.ipynb
-
-  - Experiments:
-      - experiments/gift-eval.md
-      - experiments/fev.md
-  - Documentation:
       - Time Series Model Hub: model-hub.md
       - Forecasting Parameters: forecasting-parameters.md
+  - Examples:
+      - examples/index.md
+      - Core Workflows:
+          - Forecaster Quickstart: examples/forecaster-quickstart.ipynb
+          - Anomaly Detection: examples/anomaly-detection-forecaster-quickstart.ipynb
+          - Cryptocurrency Walkthrough: examples/cryptocurrency-quickstart.ipynb
+      - Agent and LLMs:
+          - Agent Quickstart: examples/agent-quickstart.ipynb
+          - LLM Providers: examples/llm-providers.ipynb
+          - AWS Bedrock: examples/aws-bedrock.ipynb
+          - Google LLMs: examples/google-llms.ipynb
+          - Explaining Models and Ensembles: examples/explaining-foundation-models-and-ensembles.ipynb
+      - Foundation Models:
+          - Compare Foundation Models: examples/ts-foundation-models-comparison-quickstart.ipynb
+          - Family Guides:
+              - Chronos: examples/chronos-family.ipynb
+              - TiRex: examples/tirex-family.ipynb
+              - Toto: examples/toto-family.ipynb
+          - Finetuning: examples/finetuning.ipynb
+      - Benchmarks and Ensembles:
+          - GIFT-Eval: examples/gift-eval.ipynb
+          - Custom Ensembles: examples/custom-ensembles.ipynb
+      - Integrations:
+          - sktime: examples/sktime.ipynb
   - API Reference:
       - api/agent.md
       - api/forecaster.md
@@ -53,8 +56,12 @@ nav:
       - api/models/adapters/adapters.md
       - api/models/utils/forecaster.md
       - api/gift-eval/gift-eval.md
+  - Experiments:
+      - experiments/gift-eval.md
+      - experiments/fev.md
   - Changelogs:
       - changelogs/index.md
+      - changelogs/v0.0.30.md
       - changelogs/v0.0.29.md
       - changelogs/v0.0.28.md
       - changelogs/v0.0.27.md
