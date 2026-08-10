@@ -46,7 +46,7 @@ TimeCopilot provides a unified interface to state-of-the-art foundation models f
 - [Sundial](api/models/foundation/models.md#timecopilot.models.foundation.sundial) ([arXiv:2502.00816](https://arxiv.org/pdf/2502.00816))
 - [T0](api/models/foundation/models.md#timecopilot.models.foundation.t0) ([model card](https://huggingface.co/theforecastingcompany/t0-alpha))
 - [TabPFN](api/models/foundation/models.md#timecopilot.models.foundation.tabpfn) ([arXiv:2501.02945](https://arxiv.org/abs/2501.02945))
-- [TiRex](api/models/foundation/models.md#timecopilot.models.foundation.tirex) ([arXiv:2505.23719](https://arxiv.org/abs/2505.23719))
+- [TiRex / TiRex-2](api/models/foundation/models.md#timecopilot.models.foundation.tirex) ([arXiv:2505.23719](https://arxiv.org/abs/2505.23719), [arXiv:2607.01204](https://arxiv.org/abs/2607.01204))
 - [TimeGPT](api/models/foundation/models.md#timecopilot.models.foundation.timegpt) ([arXiv:2310.03589](https://arxiv.org/abs/2310.03589))
 - [TimesFM](api/models/foundation/models.md#timecopilot.models.foundation.timesfm) ([arXiv:2310.10688](https://arxiv.org/abs/2310.10688))
 - [Toto](api/models/foundation/models.md#timecopilot.models.foundation.toto) ([arXiv:2505.14766](https://arxiv.org/abs/2505.14766))
