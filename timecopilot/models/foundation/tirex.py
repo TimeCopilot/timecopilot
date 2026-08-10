@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import os
 import sys
 from contextlib import contextmanager
+from typing import TYPE_CHECKING
 
 if sys.version_info < (3, 11):
     raise ImportError("TiRex requires Python >= 3.11")
@@ -15,14 +18,21 @@ from tqdm import tqdm
 from ..utils.forecaster import Forecaster, QuantileConverter
 from .utils import TimeSeriesDataset
 
+if TYPE_CHECKING:
+    from tirex2.api_adapter import ForecastModel
+
 DEFAULT_QUANTILES_TIREX = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+_MEDIAN_QUANTILE_IDX = DEFAULT_QUANTILES_TIREX.index(0.5)
 
 
 class TiRex(Forecaster):
     """
-    TiRex is a zero-shot time series forecasting model based on xLSTM,
-    supporting both point and quantile predictions for long and short horizons.
-    See the [official repo](https://github.com/NX-AI/tirex) for more details.
+    TiRex is a family of zero-shot time series forecasting models based on
+    xLSTM, supporting both point and quantile predictions. This class
+    transparently supports TiRex 1.0 and TiRex 2.0 checkpoints, dispatching
+    to the appropriate backend based on `repo_id`. See the
+    [TiRex repo](https://github.com/NX-AI/tirex) and
+    [TiRex-2 repo](https://github.com/NX-AI/tirex-2) for more details.
     """
 
     def __init__(
@@ -34,8 +44,9 @@ class TiRex(Forecaster):
         """
         Args:
             repo_id (str, optional): The Hugging Face Hub model ID or local path to load
-                the TiRex model from. Examples include "NX-AI/TiRex". Defaults to
-                "NX-AI/TiRex". See the full list of models at
+                the TiRex model from. Use "NX-AI/TiRex" for TiRex 1.0 or
+                "NX-AI/TiRex-2" for TiRex 2.0. Defaults to "NX-AI/TiRex".
+                See the full list of models at
                 [Hugging Face](https://huggingface.co/NX-AI).
             batch_size (int, optional): Batch size to use for inference. Defaults to 16.
                 Adjust based on available memory and model size.
@@ -43,32 +54,54 @@ class TiRex(Forecaster):
                 and logs. Defaults to "TiRex".
 
         Notes:
-            **Academic Reference:**
+            **Academic References:**
 
-            - Paper: [TiRex: Zero-shot Time Series Forecasting with xLSTM](https://arxiv.org/abs/2505.23719)
+            - TiRex 1.0: [TiRex: Zero-shot Time Series Forecasting with xLSTM](https://arxiv.org/abs/2505.23719)
+            - TiRex 2.0: [TiRex-2: Generalizing TiRex to Multivariate Data and Streaming](https://arxiv.org/abs/2607.01204)
 
             **Resources:**
 
-            - GitHub: [NX-AI/tirex](https://github.com/NX-AI/tirex)
+            - GitHub: [NX-AI/tirex](https://github.com/NX-AI/tirex),
+              [NX-AI/tirex-2](https://github.com/NX-AI/tirex-2)
             - HuggingFace: [NX-AI Models](https://huggingface.co/NX-AI)
 
             **Technical Details:**
 
-            - The model is loaded onto the best available device (GPU if available,
-              otherwise CPU).
-            - On CPU, CUDA kernels are disabled automatically. See the
+            - TiRex 2.0 is loaded onto the best available device (CUDA, then MPS,
+              otherwise CPU). TiRex 1.0 uses CUDA when available, otherwise CPU.
+            - TiRex 1.0 on CPU disables CUDA kernels automatically. See the
               [CUDA kernels section](https://github.com/NX-AI/tirex#cuda-kernels)
               for details.
-            - For best performance, a CUDA-capable GPU with compute capability >= 8.0
-              is recommended.
+            - TiRex 2.0 natively supports CPU, CUDA, and MPS devices.
             - The model is only available for Python >= 3.11.
         """
         self.repo_id = repo_id
         self.batch_size = batch_size
         self.alias = alias
 
+    def _is_tirex2(self) -> bool:
+        repo = self.repo_id.rstrip("/")
+        return repo.endswith("TiRex-2") or repo.split("/")[-1] == "TiRex-2"
+
+    @staticmethod
+    def _best_device_v2() -> str:
+        if torch.cuda.is_available():
+            return "cuda"
+        if torch.backends.mps.is_available():
+            return "mps"
+        return "cpu"
+
     @contextmanager
-    def _get_model(self) -> PretrainedModel:
+    def _get_model(self) -> PretrainedModel | ForecastModel:
+        if self._is_tirex2():
+            with self._get_model_v2() as model:
+                yield model
+        else:
+            with self._get_model_v1() as model:
+                yield model
+
+    @contextmanager
+    def _get_model_v1(self) -> PretrainedModel:
         device = "cuda" if torch.cuda.is_available() else "cpu"
         if device == "cpu":
             # see https://github.com/NX-AI/tirex/tree/main?tab=readme-ov-file#cuda-kernels
@@ -80,7 +113,22 @@ class TiRex(Forecaster):
             del model
             torch.cuda.empty_cache()
 
-    def _forecast(
+    @contextmanager
+    def _get_model_v2(self) -> ForecastModel:
+        from tirex2 import load_model as load_model_v2
+
+        device = self._best_device_v2()
+        model = load_model_v2(self.repo_id, device=device)
+        try:
+            yield model
+        finally:
+            del model
+            if device == "cuda":
+                torch.cuda.empty_cache()
+            elif device == "mps":
+                torch.mps.empty_cache()
+
+    def _forecast_v1(
         self,
         model: PretrainedModel,
         dataset: TimeSeriesDataset,
@@ -102,6 +150,37 @@ class TiRex(Forecaster):
             None if quantiles is None else np.concatenate(fcsts_quantiles)
         )
 
+        return fcsts_mean_np, fcsts_quantiles_np
+
+    def _forecast_v2(
+        self,
+        model: ForecastModel,
+        dataset: TimeSeriesDataset,
+        h: int,
+        quantiles: list[float] | None,
+    ) -> tuple[np.ndarray, np.ndarray | None]:
+        from tirex2 import TimeseriesType
+
+        timeseries = [
+            TimeseriesType(
+                target=ts.float().unsqueeze(0),
+                past_covariates=None,
+                future_covariates=None,
+            )
+            for ts in dataset.data
+        ]
+        forecasts = model.forecast(
+            timeseries=timeseries,
+            prediction_length=h,
+            output_type="numpy",
+            batch_size=self.batch_size,
+        )
+        fcsts_mean_np = np.concatenate(
+            [f[0, _MEDIAN_QUANTILE_IDX, :] for f in forecasts],
+        )
+        fcsts_quantiles_np = (
+            None if quantiles is None else np.concatenate([f[0].T for f in forecasts])
+        )
         return fcsts_mean_np, fcsts_quantiles_np
 
     def forecast(
@@ -173,8 +252,9 @@ class TiRex(Forecaster):
         )
 
         fcst_df = dataset.make_future_dataframe(h=h, freq=freq)
+        forecast_fn = self._forecast_v2 if self._is_tirex2() else self._forecast_v1
         with self._get_model() as model:
-            fcsts_mean_np, fcsts_quantiles_np = self._forecast(
+            fcsts_mean_np, fcsts_quantiles_np = forecast_fn(
                 model,
                 dataset,
                 h,
