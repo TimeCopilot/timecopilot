@@ -134,6 +134,13 @@ if sys.version_info >= (3, 11):
     from timecopilot.models.foundation.tirex import TiRex
 
     models.append(TiRex())
+    models.append(
+        TiRex(
+            repo_id="NX-AI/TiRex-2",
+            alias="TiRex-2",
+            batch_size=2,
+        )
+    )
 
 if (3, 11) <= sys.version_info < (3, 14):
     from timecopilot.models.foundation.t0 import T0
