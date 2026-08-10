@@ -81,7 +81,7 @@ For further reference, see the [Google Developer Documentation Style Guide on fi
 
 In order for new models and adapters to show up in TimeCopilot's documentation properly there are a couple steps to take:
 
-- Add the model/adapter in its own file or the appropriate file in `docs/api/models` or the appropriate subdirectory. For adapters, it may also be good to create an example notebook in `docs/examples` and add it to the `Examples` section of [mkdocs.yml](https://github.com/TimeCopilot/timecopilot/blob/main/mkdocs.yml).
+- Add the model/adapter in its own file or the appropriate file in `docs/api/models` or the appropriate subdirectory. For adapters, it may also be good to create an example notebook in `docs/examples` and add it to the appropriate subsection under **Examples** in [mkdocs.yml](https://github.com/TimeCopilot/timecopilot/blob/main/mkdocs.yml) (e.g. Foundation Models → Family Guides, Integrations, Agent and LLMs).
     - when creating a new file in `docs/api/models` for this step, add that file in the API Reference section of [mkdocs.yml](https://github.com/TimeCopilot/timecopilot/blob/main/mkdocs.yml)
 - A docstring should be present for the new model/adapter with an example in the `forecast()` method in a similar style to the [TimeCopilot agent query method](https://timecopilot.dev/api/agent/#timecopilot.agent.TimeCopilot.query). Note: when adding an adapter with its own dependencies you may need to add those dependencies as dev dependencies with `uv add new_dep --group dev`.
 

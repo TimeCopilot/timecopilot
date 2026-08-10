@@ -5,6 +5,9 @@ TimeCopilot provides a unified API for time series forecasting, integrating foun
 
 Here you'll find all the time series forecasting models available in TimeCopilot, organized by family. Click on any model name to jump to its detailed API documentation.
 
+!!! note "Family example notebooks"
+    Walkthrough notebooks for families of foundation models [here](examples/index.md#foundation-models).
+
 !!! tip "Forecast multiple models using a unified API"
 
     With the [TimeCopilotForecaster][timecopilot.forecaster.TimeCopilotForecaster] class, you can generate and cross-validate forecasts using a unified API. Here's an example:
