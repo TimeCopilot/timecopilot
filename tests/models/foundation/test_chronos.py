@@ -12,7 +12,7 @@ def test_chronos_default_dtype_is_float32():
 def test_chronos_model_uses_configured_dtype(mocker):
     """Ensure Chronos loads models with the configured dtype."""
     mock_pipeline = mocker.patch(
-        "timecopilot.models.foundation.chronos.BaseChronosPipeline.from_pretrained"
+        "foundationforecast.models.chronos.BaseChronosPipeline.from_pretrained"
     )
     mocker.patch("torch.cuda.is_available", return_value=False)
 
@@ -43,12 +43,12 @@ def test_chronos_forecast_uses_configured_dtype(mocker):
 
     # Patch dataset creation to capture dtype argument
     mock_from_df = mocker.patch(
-        "timecopilot.models.foundation.chronos.TimeSeriesDataset.from_df"
+        "foundationforecast.models.chronos.TimeSeriesDataset.from_df"
     )
 
     # Avoid real model loading and CUDA branching
     mocker.patch(
-        "timecopilot.models.foundation.chronos.BaseChronosPipeline.from_pretrained"
+        "foundationforecast.models.chronos.BaseChronosPipeline.from_pretrained"
     )
     mocker.patch("torch.cuda.is_available", return_value=False)
 
