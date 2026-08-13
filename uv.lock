@@ -1752,6 +1752,36 @@ wheels = [
 ]
 
 [[package]]
+name = "foundationforecast"
+version = "0.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "gluonts", extra = ["torch"] },
+    { name = "huggingface-hub" },
+    { name = "nixtla" },
+    { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "scipy" },
+    { name = "tabpfn-time-series", marker = "python_full_version < '3.13'" },
+    { name = "tfc-t0", marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
+    { name = "timecopilot-chronos-forecasting" },
+    { name = "timecopilot-granite-tsfm", marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
+    { name = "timecopilot-timesfm" },
+    { name = "timecopilot-tirex", marker = "python_full_version >= '3.11'" },
+    { name = "timecopilot-tirex2", marker = "python_full_version >= '3.11'" },
+    { name = "timecopilot-toto" },
+    { name = "timecopilot-toto-2" },
+    { name = "timecopilot-uni2ts", marker = "python_full_version < '3.14'" },
+    { name = "torch", version = "2.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
+    { name = "torch", version = "2.13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
+    { name = "transformers" },
+    { name = "utilsforecast" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a3/93/c3307da9f4a0293930cad98060132893efb85a12ff8250cb8440c1aefba2/foundationforecast-0.1.1.tar.gz", hash = "sha256:5b619c6bf5bc46c9b81964827973d9d4025faef65b69f85c957556c89cd3f9bc", size = 2340749, upload-time = "2026-08-13T20:10:28.393Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ca/d4/a81f0379a40d7289399cf906d4cb9339c4cb9242df04564bc1e15691ad21/foundationforecast-0.1.1-py3-none-any.whl", hash = "sha256:598fc883089f636aed8a152777295e9db838693852d4ebe9c78cc8f161e15d96", size = 52972, upload-time = "2026-08-13T20:10:26.925Z" },
+]
+
+[[package]]
 name = "frozenlist"
 version = "1.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -7501,8 +7531,8 @@ dependencies = [
     { name = "catboost" },
     { name = "datasets" },
     { name = "fire" },
+    { name = "foundationforecast" },
     { name = "fsspec" },
-    { name = "gluonts", extra = ["torch"] },
     { name = "huggingface-hub" },
     { name = "hydra-core" },
     { name = "lightgbm" },
@@ -7527,17 +7557,7 @@ dependencies = [
     { name = "pytorch-lightning" },
     { name = "scipy" },
     { name = "statsforecast" },
-    { name = "tabpfn-time-series", marker = "python_full_version < '3.13'" },
     { name = "tensorboard" },
-    { name = "tfc-t0", marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
-    { name = "timecopilot-chronos-forecasting" },
-    { name = "timecopilot-granite-tsfm", marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
-    { name = "timecopilot-timesfm" },
-    { name = "timecopilot-tirex", marker = "python_full_version >= '3.11'" },
-    { name = "timecopilot-tirex2", marker = "python_full_version >= '3.11'" },
-    { name = "timecopilot-toto" },
-    { name = "timecopilot-toto-2" },
-    { name = "timecopilot-uni2ts", marker = "python_full_version < '3.14'" },
     { name = "torchmetrics" },
     { name = "transformers" },
     { name = "tsfeatures" },
@@ -7588,9 +7608,9 @@ requires-dist = [
     { name = "dask", marker = "extra == 'distributed'", specifier = "<=2024.12.1" },
     { name = "datasets", specifier = ">=4.1.1" },
     { name = "fire" },
+    { name = "foundationforecast", specifier = ">=0.1.1" },
     { name = "fsspec", specifier = ">=2025.9.0" },
     { name = "fugue", extras = ["dask", "ray", "spark"], marker = "extra == 'distributed'", specifier = ">=0.9.0" },
-    { name = "gluonts", extras = ["torch"] },
     { name = "huggingface-hub", specifier = ">=0.36.2,<2.0" },
     { name = "hydra-core", specifier = ">=1.3.2" },
     { name = "lightgbm", specifier = ">=4.6.0" },
@@ -7617,17 +7637,7 @@ requires-dist = [
     { name = "ray", marker = "extra == 'distributed'", specifier = "==2.48" },
     { name = "scipy", specifier = "<=1.15.3" },
     { name = "statsforecast", specifier = ">=2.0.2" },
-    { name = "tabpfn-time-series", marker = "python_full_version < '3.13'", specifier = "==1.0.3" },
     { name = "tensorboard", specifier = ">=2.20.0" },
-    { name = "tfc-t0", marker = "python_full_version >= '3.11' and python_full_version < '3.14'", specifier = ">=0.2.3" },
-    { name = "timecopilot-chronos-forecasting", specifier = ">=0.2.2" },
-    { name = "timecopilot-granite-tsfm", marker = "python_full_version >= '3.11' and python_full_version < '3.14'", specifier = ">=0.2.1" },
-    { name = "timecopilot-timesfm", specifier = ">=0.3.0" },
-    { name = "timecopilot-tirex", marker = "python_full_version >= '3.11'", specifier = ">=0.1.1" },
-    { name = "timecopilot-tirex2", marker = "python_full_version >= '3.11'", specifier = ">=0.1.0" },
-    { name = "timecopilot-toto", specifier = ">=0.1.7" },
-    { name = "timecopilot-toto-2", specifier = ">=0.1.1" },
-    { name = "timecopilot-uni2ts", marker = "python_full_version < '3.14'", specifier = ">=0.1.3" },
     { name = "torchmetrics", specifier = ">=1.8.2" },
     { name = "transformers", marker = "python_full_version < '3.13'", specifier = ">=4.41,<6" },
     { name = "transformers", marker = "python_full_version >= '3.13'", specifier = ">=4.48,<6" },

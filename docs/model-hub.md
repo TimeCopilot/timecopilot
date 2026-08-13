@@ -5,6 +5,9 @@ TimeCopilot provides a unified API for time series forecasting, integrating foun
 
 Here you'll find all the time series forecasting models available in TimeCopilot, organized by family. Click on any model name to jump to its detailed API documentation.
 
+!!! note "Foundation model implementations"
+    Foundation model implementations live in the [`foundationforecast`](https://pypi.org/project/foundationforecast/) package on PyPI. TimeCopilot re-exports them at `timecopilot.models.foundation.*` for backward compatibility. Model docstrings are maintained in the [foundationforecast](https://github.com/TimeCopilot/foundationforecast) repository.
+
 !!! note "Family example notebooks"
     Walkthrough notebooks for families of foundation models [here](examples/index.md#foundation-models).
 
