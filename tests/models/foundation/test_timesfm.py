@@ -1,21 +1,20 @@
 import os
 
 import pytest
-
-from timecopilot.models.foundation.timesfm import _TimesFMV1, _TimesFMV2_p5
+from foundationforecast.models.timesfm import _TimesFMV1, _TimesFMV2_p5
 
 MODEL_PARAMS = [
     (
         _TimesFMV1,
         [
-            "timecopilot.models.foundation.timesfm.timesfm_v1.TimesFmCheckpoint",
-            "timecopilot.models.foundation.timesfm.timesfm_v1.TimesFm",
+            "foundationforecast.models.timesfm.timesfm_v1.TimesFmCheckpoint",
+            "foundationforecast.models.timesfm.timesfm_v1.TimesFm",
         ],
     ),
     (
         _TimesFMV2_p5,
         [
-            "timecopilot.models.foundation.timesfm.TimesFM_2p5_200M_torch",
+            "foundationforecast.models.timesfm.TimesFM_2p5_200M_torch",
         ],
     ),
 ]
@@ -24,7 +23,7 @@ MODEL_PARAMS = [
 @pytest.mark.parametrize("model_class, mock_paths", MODEL_PARAMS)
 def test_load_model_from_local_path(mocker, model_class, mock_paths):
     """Tests loading from a local path."""
-    module_path = "timecopilot.models.foundation.timesfm"
+    module_path = "foundationforecast.models.timesfm"
     mock_os_exists = mocker.patch(f"{module_path}.os.path.exists", return_value=True)
     mock_loader = [mocker.patch(i) for i in mock_paths]
 
@@ -55,7 +54,7 @@ def test_load_model_from_local_path(mocker, model_class, mock_paths):
 @pytest.mark.parametrize("model_class, mock_paths", MODEL_PARAMS)
 def test_load_model_from_hf_repo(mocker, model_class, mock_paths):
     """Tests loading from a Hugging Face repo."""
-    module_path = "timecopilot.models.foundation.timesfm"
+    module_path = "foundationforecast.models.timesfm"
     mock_os_exists = mocker.patch(f"{module_path}.os.path.exists", return_value=False)
     mock_repo_exists = mocker.patch(f"{module_path}.repo_exists", return_value=True)
     mock_loader = [mocker.patch(i) for i in mock_paths]
@@ -87,7 +86,7 @@ def test_load_model_from_hf_repo(mocker, model_class, mock_paths):
 def test_model_raises_OSError_on_failed_load(mocker, model_class, _):
     """Tests that an OSError is raised on a failed load attempt."""
 
-    module_path = "timecopilot.models.foundation.timesfm"
+    module_path = "foundationforecast.models.timesfm"
     mock_os_exists = mocker.patch(f"{module_path}.os.path.exists", return_value=False)
     mock_repo_exists = mocker.patch(f"{module_path}.repo_exists", return_value=False)
 

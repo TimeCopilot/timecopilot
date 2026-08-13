@@ -1,3 +1,4 @@
+import pandas as pd
 from foundationforecast.core.forecaster import Forecaster as _Forecaster
 from foundationforecast.core.forecaster import (
     QuantileConverter,
@@ -20,4 +21,6 @@ __all__ = [
 class Forecaster(_Forecaster):
     """TimeCopilot Forecaster base (extends foundationforecast)."""
 
-    pass
+    @staticmethod
+    def _maybe_infer_freq(df: pd.DataFrame, freq: str | None) -> str:
+        return maybe_infer_freq(df, freq)
