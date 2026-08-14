@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-
-from timecopilot.models.stats import SeasonalNaive
 from timecopilot_gift_eval import GIFTEval, GluonTSPredictor
 from timecopilot_gift_eval.utils import DATASETS_WITH_TERMS
+
+from timecopilot.models.stats import SeasonalNaive
 
 METRIC_COLS = [
     "eval_metrics/MSE[mean]",

@@ -59,7 +59,6 @@ def main():
     import logging
 
     import fsspec
-
     from timecopilot_gift_eval.utils import DATASETS_WITH_TERMS
 
     logging.basicConfig(level=logging.INFO)

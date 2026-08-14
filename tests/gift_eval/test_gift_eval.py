@@ -2,9 +2,9 @@ import tempfile
 from pathlib import Path
 
 import pandas as pd
+from timecopilot_gift_eval import GIFTEval, GluonTSPredictor
 
 from timecopilot.models.stats import SeasonalNaive
-from timecopilot_gift_eval import GIFTEval, GluonTSPredictor
 
 
 def test_concat_results(storage_path: Path):

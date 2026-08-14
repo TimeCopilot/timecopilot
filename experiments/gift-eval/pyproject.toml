@@ -2,8 +2,8 @@
 dependencies = [
   "modal>=1.0.5",
   "s3fs>=2023.12.1",
-  "timecopilot>=0.0.21",
   "timecopilot-gift-eval>=0.3.0",
+  "timecopilot>=0.0.21",
   "transformers<4.54",
   "transformers==4.40.1 ; python_full_version < '3.12'",
   "typer>=0.16.0",
