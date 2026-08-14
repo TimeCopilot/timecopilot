@@ -5,14 +5,11 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from timecopilot.gift_eval.eval import GIFTEval
-from timecopilot.gift_eval.gluonts_predictor import GluonTSPredictor
-from timecopilot.gift_eval.utils import DATASETS_WITH_TERMS
 from timecopilot.models.stats import SeasonalNaive
+from timecopilot_gift_eval import GIFTEval, GluonTSPredictor
+from timecopilot_gift_eval.utils import DATASETS_WITH_TERMS
 
-TARGET_COLS = [
-    "dataset",
-    "model",
+METRIC_COLS = [
     "eval_metrics/MSE[mean]",
     "eval_metrics/MSE[0.5]",
     "eval_metrics/MAE[0.5]",
@@ -38,8 +35,6 @@ def test_number_of_datasets(all_results_df: pd.DataFrame):
 @pytest.mark.gift_eval
 @pytest.mark.parametrize(
     "dataset_name, term",
-    # testing 20 random datasets
-    # each time to prevent longer running tests
     random.sample(DATASETS_WITH_TERMS, 20),
 )
 def test_evaluation(
@@ -49,10 +44,7 @@ def test_evaluation(
     storage_path: Path,
 ):
     predictor = GluonTSPredictor(
-        forecaster=SeasonalNaive(
-            # alias used by the official evaluation
-            alias="Seasonal_Naive",
-        ),
+        forecaster=SeasonalNaive(alias="Seasonal_Naive"),
         batch_size=512,
     )
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -70,8 +62,8 @@ def test_evaluation(
         expected_eval_df = all_results_df.query("dataset == @gifteval.ds_config")
         assert not eval_df.isna().any().any()
         pd.testing.assert_frame_equal(
-            eval_df.reset_index(drop=True)[TARGET_COLS],
-            expected_eval_df.reset_index(drop=True)[TARGET_COLS],
+            eval_df.reset_index(drop=True)[METRIC_COLS],
+            expected_eval_df.reset_index(drop=True)[METRIC_COLS],
             atol=1e-2,
             rtol=1e-2,
             check_dtype=False,

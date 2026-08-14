@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from timecopilot.gift_eval.eval import GIFTEval
+from timecopilot_gift_eval import GIFTEval
 
 
 @pytest.fixture(scope="session")

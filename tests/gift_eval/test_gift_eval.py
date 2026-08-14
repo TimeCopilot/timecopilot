@@ -3,9 +3,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from timecopilot.gift_eval.eval import GIFTEval
-from timecopilot.gift_eval.gluonts_predictor import GluonTSPredictor
 from timecopilot.models.stats import SeasonalNaive
+from timecopilot_gift_eval import GIFTEval, GluonTSPredictor
 
 
 def test_concat_results(storage_path: Path):
@@ -45,7 +44,6 @@ def test_concat_results(storage_path: Path):
                 output_path=temp_dir,
             )
             eval_df = pd.read_csv(Path(temp_dir) / "all_results.csv")
-            print(eval_df)
             assert len(eval_df) == i + 1
 
         _evaluate_predictor(
