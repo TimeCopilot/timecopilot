@@ -9,7 +9,9 @@ from timecopilot_gift_eval.utils import DATASETS_WITH_TERMS
 
 from timecopilot.models.stats import SeasonalNaive
 
-METRIC_COLS = [
+TARGET_COLS = [
+    "dataset",
+    "model",
     "eval_metrics/MSE[mean]",
     "eval_metrics/MSE[0.5]",
     "eval_metrics/MAE[0.5]",
@@ -62,8 +64,8 @@ def test_evaluation(
         expected_eval_df = all_results_df.query("dataset == @gifteval.ds_config")
         assert not eval_df.isna().any().any()
         pd.testing.assert_frame_equal(
-            eval_df.reset_index(drop=True)[METRIC_COLS],
-            expected_eval_df.reset_index(drop=True)[METRIC_COLS],
+            eval_df.reset_index(drop=True)[TARGET_COLS],
+            expected_eval_df.reset_index(drop=True)[TARGET_COLS],
             atol=1e-2,
             rtol=1e-2,
             check_dtype=False,
