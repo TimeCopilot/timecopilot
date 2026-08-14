@@ -169,6 +169,8 @@ plugins:
         python:
           paths: [timecopilot]
           options:
+            preload_modules:
+              - foundationforecast
             relative_crossrefs: true
             members_order: source
             separate_signature: true

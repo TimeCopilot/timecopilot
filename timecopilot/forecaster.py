@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypeVar
 
 import pandas as pd
+from foundationforecast.core.multi_model import MultiModelForecasterMixin
 
 from .models.utils.forecaster import Forecaster
 
@@ -29,7 +30,7 @@ DistributedDataFrame = TypeVar(
 )
 
 
-class TimeCopilotForecaster(Forecaster):
+class TimeCopilotForecaster(MultiModelForecasterMixin, Forecaster):
     """
     Unified forecaster for multiple time series models.
 
@@ -72,41 +73,6 @@ class TimeCopilotForecaster(Forecaster):
         self.fallback_model = fallback_model
         self.clean_cache = clean_cache
 
-    def _validate_unique_aliases(self, models: list[Forecaster]) -> None:
-        """
-        Validate that all models have unique aliases.
-
-        Args:
-            models (list[Forecaster]): List of model instances to validate.
-
-        Raises:
-            ValueError: If duplicate aliases are found.
-        """
-        aliases = [model.alias for model in models]
-        duplicates = set([alias for alias in aliases if aliases.count(alias) > 1])
-
-        if duplicates:
-            raise ValueError(
-                f"Duplicate model aliases found: {sorted(duplicates)}. "
-                f"Each model must have a unique alias to avoid column name conflicts. "
-                f"Please provide different aliases when instantiating models of the "
-                f"same class."
-            )
-
-    @staticmethod
-    def _clean_model_cache() -> None:
-        """Release temporary Python and CUDA memory between model calls."""
-        import gc
-
-        gc.collect()
-        try:
-            import torch
-
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
-        except ImportError:
-            pass
-
     @staticmethod
     def _is_distributed_df(df: AnyDataFrame) -> bool:
         """
@@ -119,64 +85,6 @@ class TimeCopilotForecaster(Forecaster):
             True if the DataFrame is Spark, Dask, or Ray; False if pandas.
         """
         return not isinstance(df, pd.DataFrame)
-
-    def _call_models(
-        self,
-        attr: str,
-        merge_on: list[str],
-        df: pd.DataFrame,
-        h: int,
-        freq: str | None,
-        level: list[int | float] | None,
-        quantiles: list[float] | None,
-        **kwargs,
-    ) -> pd.DataFrame:
-        # infer just once to avoid multiple calls to _maybe_infer_freq
-        freq = self._maybe_infer_freq(df, freq)
-        res_df: pd.DataFrame | None = None
-        for model in self.models:
-            known_kwargs = {
-                "df": df,
-                "h": h,
-                "freq": freq,
-                "level": level,
-            }
-            if attr != "detect_anomalies":
-                known_kwargs["quantiles"] = quantiles
-            fn = getattr(model, attr)
-            try:
-                res_df_model = fn(**known_kwargs, **kwargs)
-            except (ValueError, RuntimeError) as e:
-                if self.fallback_model is None:
-                    raise e
-                fn = getattr(self.fallback_model, attr)
-                try:
-                    res_df_model = fn(**known_kwargs, **kwargs)
-                    res_df_model = res_df_model.rename(
-                        columns={
-                            col: (
-                                col.replace(self.fallback_model.alias, model.alias)
-                                if col.startswith(self.fallback_model.alias)
-                                else col
-                            )
-                            for col in res_df_model.columns
-                        }
-                    )
-                except (ValueError, RuntimeError) as e:
-                    raise e
-            if res_df is None:
-                res_df = res_df_model
-            else:
-                if "y" in res_df_model:
-                    # drop y to avoid duplicate columns
-                    # y was added by the previous condition
-                    # to cross validation
-                    # (the initial model)
-                    res_df_model = res_df_model.drop(columns=["y"])
-                res_df = res_df.merge(res_df_model, on=merge_on, how="left")
-            if self.clean_cache:
-                self._clean_model_cache()
-        return res_df
 
     def _forecast_pandas(
         self,
@@ -192,9 +100,8 @@ class TimeCopilotForecaster(Forecaster):
         This method is called directly for pandas DataFrames or by the
         distributed wrapper for each partition.
         """
-        return self._call_models(
-            "forecast",
-            merge_on=["unique_id", "ds"],
+        return MultiModelForecasterMixin.forecast(
+            self,
             df=df,
             h=h,
             freq=freq,
@@ -369,9 +276,8 @@ class TimeCopilotForecaster(Forecaster):
         This method is called directly for pandas DataFrames or by the
         distributed wrapper for each partition.
         """
-        return self._call_models(
-            "cross_validation",
-            merge_on=["unique_id", "ds", "cutoff"],
+        return MultiModelForecasterMixin.cross_validation(
+            self,
             df=df,
             h=h,
             freq=freq,
@@ -564,15 +470,13 @@ class TimeCopilotForecaster(Forecaster):
         This method is called directly for pandas DataFrames or by the
         distributed wrapper for each partition.
         """
-        return self._call_models(
-            "detect_anomalies",
-            merge_on=["unique_id", "ds", "cutoff"],
+        return MultiModelForecasterMixin.detect_anomalies(
+            self,
             df=df,
-            h=h,  # type: ignore
+            h=h,
             freq=freq,
             n_windows=n_windows,
-            level=level,  # type: ignore
-            quantiles=None,
+            level=level,
         )
 
     def _detect_anomalies_distributed(

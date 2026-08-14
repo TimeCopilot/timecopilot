@@ -1,6 +1,5 @@
 import torch
-
-from timecopilot.models.foundation.utils import TimeSeriesDataset
+from foundationforecast.core.utils import TimeSeriesDataset
 
 
 def test_timeseries_dataset_class_default_dtype_is_bfloat16():

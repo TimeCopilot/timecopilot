@@ -122,6 +122,9 @@ class Prophet(ProphetBase, ParallelForecaster):
         fcst_df = qc.maybe_convert_quantiles_to_level(fcst_df, models=[self.alias])
         return fcst_df
 
+    def _anomaly_min_series_length(self, h: int) -> int:
+        return h + 2
+
     def _local_forecast(
         self,
         df: pd.DataFrame,

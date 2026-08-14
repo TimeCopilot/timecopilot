@@ -181,7 +181,7 @@ def test_clean_cache_runs_after_each_model(monkeypatch, models):
     monkeypatch.setattr(
         TimeCopilotForecaster,
         "_clean_model_cache",
-        staticmethod(lambda: calls.append("cleaned")),
+        lambda self: calls.append("cleaned"),
     )
 
     df = generate_series(n_series=1, freq="D", min_length=10)
