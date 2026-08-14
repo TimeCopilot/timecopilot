@@ -171,6 +171,7 @@ plugins:
           options:
             preload_modules:
               - foundationforecast
+              - timecopilot_gift_eval
             relative_crossrefs: true
             members_order: source
             separate_signature: true

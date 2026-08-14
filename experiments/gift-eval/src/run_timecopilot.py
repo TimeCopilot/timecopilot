@@ -3,8 +3,7 @@ from typing import Annotated
 
 import typer
 
-from timecopilot.gift_eval.eval import GIFTEval
-from timecopilot.gift_eval.gluonts_predictor import GluonTSPredictor
+from timecopilot_gift_eval import GIFTEval, GluonTSPredictor
 from timecopilot.models.ensembles.median import MedianEnsemble
 from timecopilot.models.foundation.chronos import Chronos
 from timecopilot.models.foundation.timesfm import TimesFM
