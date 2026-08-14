@@ -7572,6 +7572,9 @@ distributed = [
     { name = "pyspark" },
     { name = "ray" },
 ]
+gift-eval = [
+    { name = "timecopilot-gift-eval" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -7587,6 +7590,7 @@ dev = [
     { name = "pytest-xdist" },
     { name = "s3fs" },
     { name = "sktime" },
+    { name = "timecopilot-gift-eval" },
 ]
 docs = [
     { name = "mkdocs" },
@@ -7597,6 +7601,7 @@ docs = [
     { name = "mktestdocs" },
     { name = "modal" },
     { name = "ruff" },
+    { name = "timecopilot-gift-eval" },
 ]
 
 [package.metadata]
@@ -7638,6 +7643,7 @@ requires-dist = [
     { name = "scipy", specifier = "<=1.15.3" },
     { name = "statsforecast", specifier = ">=2.0.2" },
     { name = "tensorboard", specifier = ">=2.20.0" },
+    { name = "timecopilot-gift-eval", marker = "extra == 'gift-eval'", specifier = ">=0.3.0" },
     { name = "torchmetrics", specifier = ">=1.8.2" },
     { name = "transformers", marker = "python_full_version < '3.13'", specifier = ">=4.41,<6" },
     { name = "transformers", marker = "python_full_version >= '3.13'", specifier = ">=4.48,<6" },
@@ -7645,7 +7651,7 @@ requires-dist = [
     { name = "utilsforecast", extras = ["plotting"], specifier = ">=0.2.15" },
     { name = "xgboost", specifier = ">=3.2.0" },
 ]
-provides-extras = ["distributed"]
+provides-extras = ["distributed", "gift-eval"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -7662,6 +7668,7 @@ dev = [
     { name = "pytest-xdist", specifier = ">=3.8.0" },
     { name = "s3fs", specifier = ">=2025.3.0" },
     { name = "sktime", specifier = ">=0.40.1" },
+    { name = "timecopilot-gift-eval", specifier = ">=0.3.0" },
 ]
 docs = [
     { name = "mkdocs", specifier = ">=1.6.1" },
@@ -7672,6 +7679,7 @@ docs = [
     { name = "mktestdocs", specifier = ">=0.2.5" },
     { name = "modal", specifier = ">=1.0.4" },
     { name = "ruff", specifier = ">=0.12.1" },
+    { name = "timecopilot-gift-eval", specifier = ">=0.3.0" },
 ]
 
 [[package]]
@@ -7706,6 +7714,26 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/b3/90/465f1d79e76698549679dab143d98730de947f3a8366cdde55d9e6bbeab0/timecopilot_dd_unit_scaling-0.1.0.tar.gz", hash = "sha256:249a126ca734ead5a7a7a9c48adf494d6d7e2f481c65efb9f7bd9140051fb44b", size = 15148, upload-time = "2026-06-03T17:49:03.119Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fb/57/04e5e2ecf3932dfc50008c59e296c240c0f51b6bc13761ac9bb009273d20/timecopilot_dd_unit_scaling-0.1.0-py3-none-any.whl", hash = "sha256:fd703cec2c07c02bf183e61908b0b8d5386d9bd5c6678bfe49ff162bff9180f5", size = 14990, upload-time = "2026-06-03T17:49:02.018Z" },
+]
+
+[[package]]
+name = "timecopilot-gift-eval"
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "datasets" },
+    { name = "gluonts", extra = ["torch"] },
+    { name = "huggingface-hub" },
+    { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "python-dotenv" },
+    { name = "requests" },
+    { name = "toolz" },
+    { name = "tqdm" },
+    { name = "utilsforecast" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/35/b5/f14feef27e5bb66d2b547f0982b75f74ae4cc4af64bbf92ecde1863aebea/timecopilot_gift_eval-0.3.0.tar.gz", hash = "sha256:8bc98c27720b918b6cbb6e4914cc21c3224c1eff9581a72c9961f35e41410c65", size = 215668, upload-time = "2026-08-14T19:19:58.276Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5d/b9/c6b5f529a7a04df5adcbbb57ac0a6320d035e6196173877eefcdc7889d2c/timecopilot_gift_eval-0.3.0-py3-none-any.whl", hash = "sha256:2ca7f30bfa09be28a72e7eb1d755362b319662e08691f9904d3b1a54b800c357", size = 11017, upload-time = "2026-08-14T19:19:56.133Z" },
 ]
 
 [[package]]
