@@ -2,8 +2,7 @@ import logging
 from pathlib import Path
 
 import pandas as pd
-
-from timecopilot.gift_eval.utils import DATASETS_WITH_TERMS
+from timecopilot_gift_eval.utils import DATASETS_WITH_TERMS
 
 logging.basicConfig(level=logging.INFO)
 

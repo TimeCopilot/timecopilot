@@ -4,10 +4,9 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from timecopilot_gift_eval import GIFTEval, GluonTSPredictor
+from timecopilot_gift_eval.utils import DATASETS_WITH_TERMS
 
-from timecopilot.gift_eval.eval import GIFTEval
-from timecopilot.gift_eval.gluonts_predictor import GluonTSPredictor
-from timecopilot.gift_eval.utils import DATASETS_WITH_TERMS
 from timecopilot.models.stats import SeasonalNaive
 
 TARGET_COLS = [
@@ -38,8 +37,6 @@ def test_number_of_datasets(all_results_df: pd.DataFrame):
 @pytest.mark.gift_eval
 @pytest.mark.parametrize(
     "dataset_name, term",
-    # testing 20 random datasets
-    # each time to prevent longer running tests
     random.sample(DATASETS_WITH_TERMS, 20),
 )
 def test_evaluation(
@@ -49,10 +46,7 @@ def test_evaluation(
     storage_path: Path,
 ):
     predictor = GluonTSPredictor(
-        forecaster=SeasonalNaive(
-            # alias used by the official evaluation
-            alias="Seasonal_Naive",
-        ),
+        forecaster=SeasonalNaive(alias="Seasonal_Naive"),
         batch_size=512,
     )
     with tempfile.TemporaryDirectory() as temp_dir:

@@ -17,6 +17,7 @@ dev = [
   "pytest>=8.4.2",
   "s3fs>=2025.3.0",
   "sktime>=0.40.1",
+  "timecopilot-gift-eval>=0.3.0",
 ]
 docs = [
   "mkdocs-include-markdown-plugin>=7.1.6",
@@ -27,6 +28,7 @@ docs = [
   "mktestdocs>=0.2.5",
   "modal>=1.0.4",
   "ruff>=0.12.1",
+  "timecopilot-gift-eval>=0.3.0",
 ]
 
 [project]
@@ -113,6 +115,9 @@ distributed = [
   "fugue[dask,ray,spark]>=0.9.0",
   "pyspark<4.1",
   "ray==2.48",
+]
+gift-eval = [
+  "timecopilot-gift-eval>=0.3.0",
 ]
 
 [project.scripts]
