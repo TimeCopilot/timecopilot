@@ -5,6 +5,7 @@ import pytest
 from timecopilot.models.ensembles.median import MedianEnsemble
 from timecopilot.models.foundation.chronos import Chronos
 from timecopilot.models.foundation.moirai import Moirai
+from timecopilot.models.foundation.tafsut import Tafsut
 from timecopilot.models.foundation.timesfm import TimesFM
 from timecopilot.models.foundation.toto import Toto
 from timecopilot.models.ml import (
@@ -129,6 +130,7 @@ models = [
         batch_size=2,
         repo_id="Salesforce/moirai-2.0-R-small",
     ),
+    Tafsut(context_length=512, batch_size=2),
 ]
 if sys.version_info >= (3, 11):
     from timecopilot.models.foundation.tirex import TiRex
