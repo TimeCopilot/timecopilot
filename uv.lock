@@ -1753,7 +1753,7 @@ wheels = [
 
 [[package]]
 name = "foundationforecast"
-version = "0.1.1"
+version = "0.1.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "gluonts", extra = ["torch"] },
@@ -1762,6 +1762,7 @@ dependencies = [
     { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
     { name = "scipy" },
     { name = "tabpfn-time-series", marker = "python_full_version < '3.13'" },
+    { name = "tafsut" },
     { name = "tfc-t0", marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
     { name = "timecopilot-chronos-forecasting" },
     { name = "timecopilot-granite-tsfm", marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
@@ -1776,9 +1777,9 @@ dependencies = [
     { name = "transformers" },
     { name = "utilsforecast" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a3/93/c3307da9f4a0293930cad98060132893efb85a12ff8250cb8440c1aefba2/foundationforecast-0.1.1.tar.gz", hash = "sha256:5b619c6bf5bc46c9b81964827973d9d4025faef65b69f85c957556c89cd3f9bc", size = 2340749, upload-time = "2026-08-13T20:10:28.393Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/65/2e/2b839f4db7d2b29a236f5bed97a840cc41da35b60949bf9fad9b9ac25c3d/foundationforecast-0.1.2.tar.gz", hash = "sha256:758e83293e69674c92c709b48e8d6d36746b001abbdec241c4f76b41d1926cfc", size = 2711491, upload-time = "2026-08-31T23:30:22.012Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ca/d4/a81f0379a40d7289399cf906d4cb9339c4cb9242df04564bc1e15691ad21/foundationforecast-0.1.1-py3-none-any.whl", hash = "sha256:598fc883089f636aed8a152777295e9db838693852d4ebe9c78cc8f161e15d96", size = 52972, upload-time = "2026-08-13T20:10:26.925Z" },
+    { url = "https://files.pythonhosted.org/packages/a7/72/6aa7e5ac80d6d350f321f1b6ee1ea33cefab9b4f381a7fef4cf5b9067572/foundationforecast-0.1.2-py3-none-any.whl", hash = "sha256:c0f1fe1f9f69f3964a01dd6b85d1248ddc451eb575e3301c457284dd9b9a7008", size = 56014, upload-time = "2026-08-31T23:30:20.474Z" },
 ]
 
 [[package]]
@@ -7400,6 +7401,23 @@ wheels = [
 ]
 
 [[package]]
+name = "tafsut"
+version = "0.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "huggingface-hub" },
+    { name = "numpy", version = "1.26.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "safetensors" },
+    { name = "torch", version = "2.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
+    { name = "torch", version = "2.13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/fa/70/9041794f03613571ddaf136b8139a9c9cad9db49f367caeb7be6696f7791/tafsut-0.1.0.tar.gz", hash = "sha256:41c1f3a512995090decc2c8a46041559d9d64356806a3da81ae97494ea7cca4a", size = 16875, upload-time = "2026-08-12T14:53:37.042Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/20/18/08de8e3db29a5cfe06449ef692113e50966c7915c8709aaa4a0ac4a9e7bf/tafsut-0.1.0-py3-none-any.whl", hash = "sha256:8c892f4f521ae60014073e43faabae2c8e3427db554f035729c29590b4d5de1a", size = 17394, upload-time = "2026-08-12T14:53:35.779Z" },
+]
+
+[[package]]
 name = "tblib"
 version = "3.2.2"
 source = { registry = "https://pypi.org/simple" }
@@ -7522,7 +7540,7 @@ wheels = [
 
 [[package]]
 name = "timecopilot"
-version = "0.0.30"
+version = "0.0.31"
 source = { editable = "." }
 dependencies = [
     { name = "accelerate" },
@@ -7613,7 +7631,7 @@ requires-dist = [
     { name = "dask", marker = "extra == 'distributed'", specifier = "<=2024.12.1" },
     { name = "datasets", specifier = ">=4.1.1" },
     { name = "fire" },
-    { name = "foundationforecast", specifier = ">=0.1.1" },
+    { name = "foundationforecast", specifier = ">=0.1.2" },
     { name = "fsspec", specifier = ">=2025.9.0" },
     { name = "fugue", extras = ["dask", "ray", "spark"], marker = "extra == 'distributed'", specifier = ">=0.9.0" },
     { name = "huggingface-hub", specifier = ">=0.36.2,<2.0" },
