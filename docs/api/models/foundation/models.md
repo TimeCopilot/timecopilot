@@ -31,6 +31,12 @@
         members:
             - T0
 
+
+::: timecopilot.models.foundation.tafsut
+    options:
+        members:
+            - Tafsut
+
 ::: timecopilot.models.foundation.tabpfn
     options:
         members:
