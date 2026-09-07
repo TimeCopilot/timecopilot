@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from foundationforecast.models.timesfm import _TimesFMV1, _TimesFMV2_p5
+from foundationforecast.models.timesfm import _TimesFMV1, _TimesFMV2_p5, _TimesFMV3
 
 MODEL_PARAMS = [
     (
@@ -15,6 +15,13 @@ MODEL_PARAMS = [
         _TimesFMV2_p5,
         [
             "foundationforecast.models.timesfm.TimesFM_2p5_200M_torch",
+        ],
+    ),
+    (
+        _TimesFMV3,
+        [
+            "foundationforecast.models.timesfm.ModelConfig",
+            "foundationforecast.models.timesfm.TimesFM3Evaluator",
         ],
     ),
 ]
@@ -46,9 +53,15 @@ def test_load_model_from_local_path(mocker, model_class, mock_paths):
         expected_path = os.path.join(local_path, "torch_model.ckpt")
         mock_loader[0].assert_called_once_with(path=expected_path)
     elif model_class is _TimesFMV2_p5:
-        # `from_pretrained` handles both local directories and HF repos.
         assert predictor is mock_loader[0].from_pretrained.return_value
         mock_loader[0].from_pretrained.assert_called_once_with(local_path)
+    elif model_class is _TimesFMV3:
+        assert predictor is mock_loader[1].return_value
+        mock_loader[0].assert_called_once_with(
+            checkpoint_path=local_path,
+            per_core_batch_size=32,
+        )
+        mock_loader[1].assert_called_once_with(mock_loader[0].return_value)
 
 
 @pytest.mark.parametrize("model_class, mock_paths", MODEL_PARAMS)
@@ -80,6 +93,13 @@ def test_load_model_from_hf_repo(mocker, model_class, mock_paths):
     elif model_class is _TimesFMV2_p5:
         assert predictor is mock_loader[0].from_pretrained.return_value
         mock_loader[0].from_pretrained.assert_called_once_with(repo_id)
+    elif model_class is _TimesFMV3:
+        assert predictor is mock_loader[1].return_value
+        mock_loader[0].assert_called_once_with(
+            checkpoint_path=repo_id,
+            per_core_batch_size=32,
+        )
+        mock_loader[1].assert_called_once_with(mock_loader[0].return_value)
 
 
 @pytest.mark.parametrize("model_class, _", MODEL_PARAMS)
@@ -106,3 +126,11 @@ def test_model_raises_OSError_on_failed_load(mocker, model_class, _):
 
     mock_os_exists.assert_called_once_with(repo_id)
     mock_repo_exists.assert_called_once_with(repo_id)
+
+
+def test_timesfm_routes_3_0_repo():
+    from timecopilot.models.foundation.timesfm import TimesFM
+
+    model = TimesFM(repo_id="google/timesfm-3.0-pytorch")
+    assert isinstance(model, _TimesFMV3)
+    assert model.repo_id == "google/timesfm-3.0-pytorch"
