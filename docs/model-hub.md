@@ -54,7 +54,7 @@ TimeCopilot provides a unified interface to state-of-the-art foundation models f
 - [TabPFN](api/models/foundation/models.md#timecopilot.models.foundation.tabpfn) ([arXiv:2501.02945](https://arxiv.org/abs/2501.02945))
 - [TiRex / TiRex-2](api/models/foundation/models.md#timecopilot.models.foundation.tirex) ([arXiv:2505.23719](https://arxiv.org/abs/2505.23719), [arXiv:2607.01204](https://arxiv.org/abs/2607.01204))
 - [TimeGPT](api/models/foundation/models.md#timecopilot.models.foundation.timegpt) ([arXiv:2310.03589](https://arxiv.org/abs/2310.03589))
-- [TimesFM](api/models/foundation/models.md#timecopilot.models.foundation.timesfm) ([arXiv:2310.10688](https://arxiv.org/abs/2310.10688))
+- [TimesFM](api/models/foundation/models.md#timecopilot.models.foundation.timesfm) ([arXiv:2310.10688](https://arxiv.org/abs/2310.10688); [3.0 license](https://huggingface.co/google/timesfm-3.0-pytorch/blob/main/LICENSE))
 - [Toto](api/models/foundation/models.md#timecopilot.models.foundation.toto) ([arXiv:2505.14766](https://arxiv.org/abs/2505.14766))
 
 ---

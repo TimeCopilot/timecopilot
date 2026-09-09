@@ -1753,7 +1753,7 @@ wheels = [
 
 [[package]]
 name = "foundationforecast"
-version = "0.1.2"
+version = "0.1.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "gluonts", extra = ["torch"] },
@@ -1777,9 +1777,9 @@ dependencies = [
     { name = "transformers" },
     { name = "utilsforecast" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/65/2e/2b839f4db7d2b29a236f5bed97a840cc41da35b60949bf9fad9b9ac25c3d/foundationforecast-0.1.2.tar.gz", hash = "sha256:758e83293e69674c92c709b48e8d6d36746b001abbdec241c4f76b41d1926cfc", size = 2711491, upload-time = "2026-08-31T23:30:22.012Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/76/45/4eb5eb6b4e6af737516e27eafe6ed79bb23de24f9b7b787c1e39f4f596b1/foundationforecast-0.1.3.tar.gz", hash = "sha256:2e61f58dc80eb9c216bd187483646b470f845cc459fa403b280a7d4417b72774", size = 3210090, upload-time = "2026-09-07T21:31:23.783Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a7/72/6aa7e5ac80d6d350f321f1b6ee1ea33cefab9b4f381a7fef4cf5b9067572/foundationforecast-0.1.2-py3-none-any.whl", hash = "sha256:c0f1fe1f9f69f3964a01dd6b85d1248ddc451eb575e3301c457284dd9b9a7008", size = 56014, upload-time = "2026-08-31T23:30:20.474Z" },
+    { url = "https://files.pythonhosted.org/packages/1a/a4/483b1a7a20e456818124937a2b0ecae7263e890672187091eede51d83506/foundationforecast-0.1.3-py3-none-any.whl", hash = "sha256:e48472ae1f37e5c3bb5301f3e733c8b7e27bccb30666ad25ba89a35c42fdb5d5", size = 64853, upload-time = "2026-09-07T21:31:22.267Z" },
 ]
 
 [[package]]
@@ -7540,7 +7540,7 @@ wheels = [
 
 [[package]]
 name = "timecopilot"
-version = "0.0.31"
+version = "0.0.32"
 source = { editable = "." }
 dependencies = [
     { name = "accelerate" },
@@ -7631,7 +7631,7 @@ requires-dist = [
     { name = "dask", marker = "extra == 'distributed'", specifier = "<=2024.12.1" },
     { name = "datasets", specifier = ">=4.1.1" },
     { name = "fire" },
-    { name = "foundationforecast", specifier = ">=0.1.2" },
+    { name = "foundationforecast", specifier = ">=0.1.3" },
     { name = "fsspec", specifier = ">=2025.9.0" },
     { name = "fugue", extras = ["dask", "ray", "spark"], marker = "extra == 'distributed'", specifier = ">=0.9.0" },
     { name = "huggingface-hub", specifier = ">=0.36.2,<2.0" },
@@ -7779,7 +7779,7 @@ wheels = [
 
 [[package]]
 name = "timecopilot-timesfm"
-version = "0.3.0"
+version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "absl-py" },
@@ -7798,9 +7798,9 @@ dependencies = [
     { name = "utilsforecast" },
     { name = "wandb" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b6/4e/2ed6fb5533862d858861cb3e1060c085f40f58d64937d5e9523f0d2e9c20/timecopilot_timesfm-0.3.0.tar.gz", hash = "sha256:e0d2608cc30b4d010027f0aca7e74874cd289d2d31dd19d08e4397c017124e7a", size = 61715, upload-time = "2026-06-25T01:55:57.929Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e9/a7/85a07334d68be96f40e33e9087bf3e60e3a51d5c30984ac0764168854b75/timecopilot_timesfm-0.4.0.tar.gz", hash = "sha256:59d73de66e697fadc4613f4e2c49f1d81c71b35f042e4654aa745010c28eab0f", size = 91968, upload-time = "2026-09-07T16:38:04.76Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ca/95/35e8ba2f2416fb8afc32290eb727beb70c276e685f3d93936f8484586da1/timecopilot_timesfm-0.3.0-py3-none-any.whl", hash = "sha256:98c3c11532957dc2102a989c1457a73fcb6616059a5b0dd6c1a8c2260dd05dc0", size = 89253, upload-time = "2026-06-25T01:55:56.942Z" },
+    { url = "https://files.pythonhosted.org/packages/04/08/c8956c7ca45a9d6dd06e8070957494087f0f243494a08b5005ab4fbc3c82/timecopilot_timesfm-0.4.0-py3-none-any.whl", hash = "sha256:874aac6e53ec1210a3debe3e350b61ce390880bf3f16ae4af5053f63eb3f2989", size = 135822, upload-time = "2026-09-07T16:38:03.66Z" },
 ]
 
 [[package]]

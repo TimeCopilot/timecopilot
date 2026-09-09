@@ -36,6 +36,7 @@ nav:
           - Compare Foundation Models: examples/ts-foundation-models-comparison-quickstart.ipynb
           - Family Guides:
               - Chronos: examples/chronos-family.ipynb
+              - TimesFM: examples/timesfm-family.ipynb
               - TiRex: examples/tirex-family.ipynb
               - Toto: examples/toto-family.ipynb
           - Finetuning: examples/finetuning.ipynb
@@ -61,6 +62,7 @@ nav:
       - experiments/fev.md
   - Changelogs:
       - changelogs/index.md
+      - changelogs/v0.0.32.md
       - changelogs/v0.0.31.md
       - changelogs/v0.0.30.md
       - changelogs/v0.0.29.md

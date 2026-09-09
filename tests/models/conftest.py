@@ -118,6 +118,10 @@ models = [
         repo_id="google/timesfm-2.5-200m-pytorch",
         context_length=256,
     ),
+    TimesFM(
+        repo_id="google/timesfm-3.0-pytorch",
+        context_length=256,
+    ),
     MedianEnsemble(
         models=[
             Chronos(repo_id="amazon/chronos-t5-tiny", alias="Chronos-T5"),
