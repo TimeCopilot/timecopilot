@@ -15,6 +15,7 @@ dev = [
   "pytest-rerunfailures>=15.1",
   "pytest-xdist>=3.8.0",
   "pytest>=8.4.2",
+  "python-dotenv>=1.0",
   "s3fs>=2025.3.0",
   "sktime>=0.40.1",
   "timecopilot-gift-eval>=0.3.0",
@@ -68,7 +69,7 @@ dependencies = [
   "catboost>=1.2.10",
   "datasets>=4.1.1",
   "fire",
-  "foundationforecast>=0.1.3",
+  "foundationforecast>=0.1.6",
   "fsspec>=2025.9.0",
   "huggingface-hub>=0.36.2,<2.0",
   "hydra-core>=1.3.2",
@@ -107,7 +108,7 @@ license = "MIT"
 name = "timecopilot"
 readme = "README.md"
 requires-python = ">=3.10"
-version = "0.0.32"
+version = "0.0.33"
 
 [project.optional-dependencies]
 distributed = [

@@ -167,8 +167,26 @@ if (3, 11) <= sys.version_info < (3, 14):
     models.append(PatchTSTFM(context_length=2_048))
 
 if sys.version_info < (3, 13):
-    from tabpfn_time_series import TabPFNMode
+    from contextlib import contextmanager
+
+    import numpy as np
+    import pandas as pd
+    from tabpfn_time_series import TimeSeriesDataFrame
 
     from timecopilot.models.foundation.tabpfn import TabPFN
 
-    models.append(TabPFN(mode=TabPFNMode.MOCK))
+    class _MockTabPFNPredictor:
+        def predict(self, train_tsdf, test_tsdf, quantiles=None):
+            result = {"target": np.full(len(test_tsdf), 1.0)}
+            if quantiles is not None:
+                for q in quantiles:
+                    result[q] = np.full(len(test_tsdf), q)
+            return TimeSeriesDataFrame(pd.DataFrame(result, index=test_tsdf.index))
+
+    @contextmanager
+    def _mock_get_model(_self):
+        yield _MockTabPFNPredictor()
+
+    tabpfn_model = TabPFN()
+    tabpfn_model._get_model = lambda: _mock_get_model(tabpfn_model)  # type: ignore[method-assign, assignment]
+    models.append(tabpfn_model)
