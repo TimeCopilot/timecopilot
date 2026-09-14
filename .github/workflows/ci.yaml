@@ -48,10 +48,17 @@ jobs:
           path: ~/.cache/huggingface/hub/
           key: ${{ Runner.os }}-huggingface-${{ hashFiles('**/tests/') }}
 
+      - name: Cache TabPFN checkpoints
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/tabpfn
+          key: ${{ runner.os }}-tabpfn-v1
+
       - name: Run tests 
         run: uv run pytest
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          TABPFN_TOKEN: ${{ secrets.TABPFN_TOKEN }}
 
       - name: Test import class
         run: uv run -- python -c "from timecopilot import TimeCopilot, TimeCopilotForecaster" 
