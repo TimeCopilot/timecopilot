@@ -172,7 +172,3 @@ select = ["B", "E", "F", "I", "SIM", "UP"]
 [tool.ruff.lint.isort]
 known-local-folder = ["timecopilot"]
 no-lines-before = ["local-folder"]
-
-[tool.uv.sources]
-# Remove after foundationforecast 0.1.6 is on PyPI, then: uv lock --upgrade-package foundationforecast
-foundationforecast = {branch = "feat/tabpfn-ts-3", git = "https://github.com/TimeCopilot/foundationforecast"}

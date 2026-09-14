@@ -43,9 +43,18 @@ def test_tabpfn_default_model_path() -> None:
 
 
 def test_tabpfn_v3_model_path() -> None:
-    model = TabPFN(model_path=TABPFN_V3_MODEL, context_length=32768)
+    model = TabPFN(
+        model_path=TABPFN_V3_MODEL,
+        context_length=32768,
+        mode=TabPFNMode.LOCAL,
+    )
     assert model.model_path == TABPFN_V3_MODEL
     assert model.context_length == 32768
+
+
+def test_tabpfn_v3_rejects_client_mode() -> None:
+    with pytest.raises(ValueError, match="LOCAL-only"):
+        TabPFN(model_path=TABPFN_V3_MODEL, mode=TabPFNMode.CLIENT)
 
 
 def test_tabpfn_predictor_receives_model_path() -> None:

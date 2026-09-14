@@ -1769,7 +1769,7 @@ wheels = [
 [[package]]
 name = "foundationforecast"
 version = "0.1.6"
-source = { git = "https://github.com/TimeCopilot/foundationforecast?branch=feat%2Ftabpfn-ts-3#f70eb3f05788cd5cb8f2121a85bbc3800d062a82" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "gluonts", extra = ["torch"] },
     { name = "huggingface-hub" },
@@ -1791,6 +1791,10 @@ dependencies = [
     { name = "torch", version = "2.13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
     { name = "transformers" },
     { name = "utilsforecast" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d9/f9/174c146ac7078c7ab443e0aaddb210c11368d47f1483723f5a6f01db71d6/foundationforecast-0.1.6.tar.gz", hash = "sha256:eaab910fcc4980970f4135ee2a5bcf3cfe388c0af2898a2923bd69ecf18b2468", size = 3629335, upload-time = "2026-09-14T20:32:11.645Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2d/28/f4044aa413653dd62f3869fd4d91cbba145156308636aa519af1b26ae7ff/foundationforecast-0.1.6-py3-none-any.whl", hash = "sha256:4da896a9f33a88991ea040ad465058449836e8d558f295fb1ad39c26121c5f24", size = 71084, upload-time = "2026-09-14T20:32:09.967Z" },
 ]
 
 [[package]]
@@ -7689,7 +7693,7 @@ requires-dist = [
     { name = "dask", marker = "extra == 'distributed'", specifier = "<=2024.12.1" },
     { name = "datasets", specifier = ">=4.1.1" },
     { name = "fire" },
-    { name = "foundationforecast", git = "https://github.com/TimeCopilot/foundationforecast?branch=feat%2Ftabpfn-ts-3" },
+    { name = "foundationforecast", specifier = ">=0.1.6" },
     { name = "fsspec", specifier = ">=2025.9.0" },
     { name = "fugue", extras = ["dask", "ray", "spark"], marker = "extra == 'distributed'", specifier = ">=0.9.0" },
     { name = "huggingface-hub", specifier = ">=0.36.2,<2.0" },
