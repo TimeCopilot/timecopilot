@@ -11,7 +11,7 @@ pytest.importorskip("tabpfn_time_series", reason="TabPFN requires Python < 3.13"
 
 from tabpfn.errors import TabPFNLicenseError  # noqa: E402
 from tabpfn_time_series import TabPFNMode  # noqa: E402
-from utilsforecast.data import generate_series  # noqa: E402
+from utilsforecast.data import generate_series as _generate_series  # noqa: E402
 
 from timecopilot.models.foundation.tabpfn import (  # noqa: E402
     TABPFN_V2_MODEL,
@@ -69,6 +69,12 @@ def test_tabpfn_predictor_receives_model_path() -> None:
             tabpfn_mode=TabPFNMode.LOCAL,
             tabpfn_config={"model_path": TABPFN_V3_MODEL},
         )
+
+
+def generate_series(n_series, freq, **kwargs):
+    df = _generate_series(n_series, freq, **kwargs)
+    df["unique_id"] = df["unique_id"].astype(str)
+    return df
 
 
 @pytest.fixture(scope="module")
