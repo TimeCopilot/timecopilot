@@ -1768,7 +1768,7 @@ wheels = [
 
 [[package]]
 name = "foundationforecast"
-version = "0.1.6"
+version = "0.1.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "gluonts", extra = ["torch"] },
@@ -1792,9 +1792,9 @@ dependencies = [
     { name = "transformers" },
     { name = "utilsforecast" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d9/f9/174c146ac7078c7ab443e0aaddb210c11368d47f1483723f5a6f01db71d6/foundationforecast-0.1.6.tar.gz", hash = "sha256:eaab910fcc4980970f4135ee2a5bcf3cfe388c0af2898a2923bd69ecf18b2468", size = 3629335, upload-time = "2026-09-14T20:32:11.645Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3c/02/a78fc51a45d2d03d12dbe57a2e8c9ee643e996ed83836d754b097aa3caed/foundationforecast-0.1.7.tar.gz", hash = "sha256:eee487f09b3013e59065734f619ce3197d49db86d2f0fb85ee8bf8eb7c950469", size = 3630379, upload-time = "2026-09-15T17:22:12.017Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2d/28/f4044aa413653dd62f3869fd4d91cbba145156308636aa519af1b26ae7ff/foundationforecast-0.1.6-py3-none-any.whl", hash = "sha256:4da896a9f33a88991ea040ad465058449836e8d558f295fb1ad39c26121c5f24", size = 71084, upload-time = "2026-09-14T20:32:09.967Z" },
+    { url = "https://files.pythonhosted.org/packages/cb/f1/0b4f16bf2a6b27a8d55c5cbed9f98732492d75a5271f2ad794b820cf34fa/foundationforecast-0.1.7-py3-none-any.whl", hash = "sha256:f2d2835952334226f134277d77180c55a7fd57071a2699d233b215f473725c2d", size = 71105, upload-time = "2026-09-15T17:22:10.555Z" },
 ]
 
 [[package]]
@@ -7693,7 +7693,7 @@ requires-dist = [
     { name = "dask", marker = "extra == 'distributed'", specifier = "<=2024.12.1" },
     { name = "datasets", specifier = ">=4.1.1" },
     { name = "fire" },
-    { name = "foundationforecast", specifier = ">=0.1.6" },
+    { name = "foundationforecast", specifier = ">=0.1.7" },
     { name = "fsspec", specifier = ">=2025.9.0" },
     { name = "fugue", extras = ["dask", "ray", "spark"], marker = "extra == 'distributed'", specifier = ">=0.9.0" },
     { name = "huggingface-hub", specifier = ">=0.36.2,<2.0" },
