@@ -63,6 +63,7 @@ nav:
       - experiments/fev.md
   - Changelogs:
       - changelogs/index.md
+      - changelogs/v0.0.34.md
       - changelogs/v0.0.33.md
       - changelogs/v0.0.32.md
       - changelogs/v0.0.31.md

@@ -108,7 +108,7 @@ license = "MIT"
 name = "timecopilot"
 readme = "README.md"
 requires-python = ">=3.10"
-version = "0.0.33"
+version = "0.0.34"
 
 [project.optional-dependencies]
 distributed = [
