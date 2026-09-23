@@ -78,9 +78,10 @@ def test_prepare_level_and_quantiles_with_levels():
 @pytest.mark.parametrize(
     "quantiles,expected_level",
     [
-        ([0.1, 0.5, 0.9], [0, 80]),
-        ([0.1, 0.5, 0.2, 0.9], [0, 60, 80]),
-        ([0.5], [0]),
+        # foundationforecast>=0.1.8: q=0.5 is the point forecast, not a level band
+        ([0.1, 0.5, 0.9], [80]),
+        ([0.1, 0.5, 0.2, 0.9], [60, 80]),
+        ([0.5], None),
     ],
 )
 def test_prepare_level_and_quantiles_with_quantiles(quantiles, expected_level):
