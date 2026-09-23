@@ -48,7 +48,7 @@ TimeCopilot provides a unified interface to state-of-the-art foundation models f
 - [Chronos](api/models/foundation/models.md#timecopilot.models.foundation.chronos) ([arXiv:2403.07815](https://arxiv.org/abs/2403.07815))
 - [FlowState](api/models/foundation/models.md#timecopilot.models.foundation.flowstate) ([arXiv:2508.05287](https://arxiv.org/abs/2508.05287)) 
 - [Moirai](api/models/foundation/models.md#timecopilot.models.foundation.moirai) ([arXiv:2402.02592](https://arxiv.org/abs/2402.02592))
-- [PatchTST-FM](api/models/foundation/models.md#timecopilot.models.foundation.patchtst_fm) ([arXiv:2602.06909](https://arxiv.org/abs/2602.06909))
+- [PatchTST-FM](api/models/foundation/models.md#timecopilot.models.foundation.patchtst_fm) ([arXiv:2602.06909](https://arxiv.org/abs/2602.06909); `ibm-research/patchtst-fm-r1` [NC](https://huggingface.co/ibm-research/patchtst-fm-r1), `ibm-granite/granite-timeseries-patchtst-fm-r1`, `ibm-granite/granite-timeseries-patchtst-fm-r2`) — Python 3.11–3.13
 - [Sundial](api/models/foundation/models.md#timecopilot.models.foundation.sundial) ([arXiv:2502.00816](https://arxiv.org/pdf/2502.00816))
 - [T0](api/models/foundation/models.md#timecopilot.models.foundation.t0) ([model card](https://huggingface.co/theforecastingcompany/t0-alpha))
 - [TabPFN](api/models/foundation/models.md#timecopilot.models.foundation.tabpfn) ([arXiv:2501.02945](https://arxiv.org/abs/2501.02945); TabPFN-2 default, TabPFN-3 via `model_path`; [NC license](https://docs.priorlabs.ai/models))
