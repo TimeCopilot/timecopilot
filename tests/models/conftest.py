@@ -164,6 +164,7 @@ if (3, 11) <= sys.version_info < (3, 14):
             alias="FlowState-Granite",
         )
     )
+    models.append(PatchTSTFM(context_length=2_048, batch_size=32))
     models.append(
         PatchTSTFM(
             repo_id="ibm-granite/granite-timeseries-patchtst-fm-r1",
