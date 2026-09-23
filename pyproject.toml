@@ -172,6 +172,3 @@ select = ["B", "E", "F", "I", "SIM", "UP"]
 [tool.ruff.lint.isort]
 known-local-folder = ["timecopilot"]
 no-lines-before = ["local-folder"]
-
-[tool.uv.sources]
-foundationforecast = {editable = true, path = ".."}
