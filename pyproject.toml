@@ -96,6 +96,7 @@ dependencies = [
   "scipy<=1.15.3",
   "statsforecast>=2.0.2",
   "tensorboard>=2.20.0",
+  "torch>=2.10,<2.11 ; python_full_version >= '3.11'",
   "torchmetrics>=1.8.2",
   "transformers>=4.41,<6 ; python_full_version < '3.13'",
   "transformers>=4.48,<6 ; python_full_version >= '3.13'",
