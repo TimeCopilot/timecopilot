@@ -29,6 +29,7 @@ For model API details, see the [Model Hub](../model-hub.md).
 | [Compare Foundation Models](ts-foundation-models-comparison-quickstart.ipynb) | Benchmark multiple foundation models side by side | Python 3.10+; GPU optional |
 | [Chronos Family](chronos-family.ipynb) | Forecast with Chronos 1.x and 2.x checkpoints | Python 3.10+ |
 | [TimesFM Family](timesfm-family.ipynb) | Forecast with TimesFM 1.0, 2.0, 2.5, and 3.0 with prediction intervals | Python 3.10+ |
+| [PatchTST-FM Family](patchtst-fm-family.ipynb) | Forecast with IBM Research and Granite PatchTST-FM r1 checkpoints | Python 3.11–3.13; GPU recommended |
 | [TabPFN Family](tabpfn-family.ipynb) | Forecast with TabPFN-2 and TabPFN-3 with prediction intervals | Python 3.10–3.12; `TABPFN_TOKEN` for LOCAL |
 | [TiRex Family](tirex-family.ipynb) | Forecast with TiRex 1.0 and 2.0 | Python 3.11+ |
 | [Toto Family](toto-family.ipynb) | Forecast with Toto 1.0 and 2.0 | Python 3.10+ |

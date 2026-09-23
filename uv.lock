@@ -1769,7 +1769,7 @@ wheels = [
 [[package]]
 name = "foundationforecast"
 version = "0.1.7"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "../" }
 dependencies = [
     { name = "gluonts", extra = ["torch"] },
     { name = "huggingface-hub" },
@@ -1792,9 +1792,56 @@ dependencies = [
     { name = "transformers" },
     { name = "utilsforecast" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3c/02/a78fc51a45d2d03d12dbe57a2e8c9ee643e996ed83836d754b097aa3caed/foundationforecast-0.1.7.tar.gz", hash = "sha256:eee487f09b3013e59065734f619ce3197d49db86d2f0fb85ee8bf8eb7c950469", size = 3630379, upload-time = "2026-09-15T17:22:12.017Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/cb/f1/0b4f16bf2a6b27a8d55c5cbed9f98732492d75a5271f2ad794b820cf34fa/foundationforecast-0.1.7-py3-none-any.whl", hash = "sha256:f2d2835952334226f134277d77180c55a7fd57071a2699d233b215f473725c2d", size = 71105, upload-time = "2026-09-15T17:22:10.555Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "gluonts", extras = ["torch"] },
+    { name = "huggingface-hub", specifier = ">=0.36.2,<2.0" },
+    { name = "matplotlib", marker = "extra == 'plot'", specifier = ">=3.10.6" },
+    { name = "nixtla", specifier = ">=0.7.0" },
+    { name = "pandas", marker = "python_full_version >= '3.13'", specifier = ">=2.2.0" },
+    { name = "plotly", marker = "extra == 'plot'", specifier = ">=6.3.1" },
+    { name = "scipy" },
+    { name = "tabpfn-time-series", marker = "python_full_version < '3.13'", specifier = ">=1.2.0" },
+    { name = "tafsut", specifier = ">=0.1.0" },
+    { name = "tfc-t0", marker = "python_full_version >= '3.11' and python_full_version < '3.14'", specifier = ">=0.2.3" },
+    { name = "timecopilot-chronos-forecasting", specifier = ">=0.2.2" },
+    { name = "timecopilot-granite-tsfm", marker = "python_full_version >= '3.11' and python_full_version < '3.14'", specifier = ">=0.2.1" },
+    { name = "timecopilot-timesfm", specifier = ">=0.4.0" },
+    { name = "timecopilot-tirex", marker = "python_full_version >= '3.11'", specifier = ">=0.1.1" },
+    { name = "timecopilot-tirex2", marker = "python_full_version >= '3.11'", specifier = ">=0.1.0" },
+    { name = "timecopilot-toto", specifier = ">=0.1.7" },
+    { name = "timecopilot-toto-2", specifier = ">=0.1.1" },
+    { name = "timecopilot-uni2ts", marker = "python_full_version < '3.14'", specifier = ">=0.1.3" },
+    { name = "torch" },
+    { name = "transformers", marker = "python_full_version < '3.13'", specifier = ">=4.41,<6" },
+    { name = "transformers", marker = "python_full_version >= '3.13'", specifier = ">=4.48,<6" },
+    { name = "utilsforecast", specifier = ">=0.2.15" },
+]
+provides-extras = ["plot"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mktestdocs", specifier = ">=0.2.5" },
+    { name = "pre-commit" },
+    { name = "pytest", specifier = ">=8.0" },
+    { name = "pytest-codspeed", specifier = ">=5.0.3" },
+    { name = "pytest-cov", specifier = ">=6.0" },
+    { name = "pytest-mock", specifier = ">=3.15.1" },
+    { name = "pytest-rerunfailures", specifier = ">=15.1" },
+    { name = "pytest-xdist", specifier = ">=3.8.0" },
+    { name = "python-dotenv", specifier = ">=1.0" },
+    { name = "ruff", specifier = ">=0.12" },
+]
+docs = [
+    { name = "matplotlib", specifier = ">=3.10.6" },
+    { name = "mkdocs", specifier = ">=1.6.1" },
+    { name = "mkdocs-include-markdown-plugin", specifier = ">=7.1.6" },
+    { name = "mkdocs-jupyter", specifier = ">=0.25.1" },
+    { name = "mkdocs-material", specifier = ">=9.6.14" },
+    { name = "mkdocstrings", extras = ["python"], specifier = ">=0.29.1" },
+    { name = "mktestdocs", specifier = ">=0.2.5" },
+    { name = "plotly", specifier = ">=6.3.1" },
 ]
 
 [[package]]
@@ -7601,7 +7648,7 @@ wheels = [
 
 [[package]]
 name = "timecopilot"
-version = "0.0.34"
+version = "0.0.35"
 source = { editable = "." }
 dependencies = [
     { name = "accelerate" },
@@ -7693,7 +7740,7 @@ requires-dist = [
     { name = "dask", marker = "extra == 'distributed'", specifier = "<=2024.12.1" },
     { name = "datasets", specifier = ">=4.1.1" },
     { name = "fire" },
-    { name = "foundationforecast", specifier = ">=0.1.7" },
+    { name = "foundationforecast", editable = "../" },
     { name = "fsspec", specifier = ">=2025.9.0" },
     { name = "fugue", extras = ["dask", "ray", "spark"], marker = "extra == 'distributed'", specifier = ">=0.9.0" },
     { name = "huggingface-hub", specifier = ">=0.36.2,<2.0" },

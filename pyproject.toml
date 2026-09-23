@@ -108,7 +108,7 @@ license = "MIT"
 name = "timecopilot"
 readme = "README.md"
 requires-python = ">=3.10"
-version = "0.0.34"
+version = "0.0.35"
 
 [project.optional-dependencies]
 distributed = [
@@ -172,3 +172,6 @@ select = ["B", "E", "F", "I", "SIM", "UP"]
 [tool.ruff.lint.isort]
 known-local-folder = ["timecopilot"]
 no-lines-before = ["local-folder"]
+
+[tool.uv.sources]
+foundationforecast = {editable = true, path = ".."}
