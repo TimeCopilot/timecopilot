@@ -180,6 +180,14 @@ if (3, 11) <= sys.version_info < (3, 14):
             batch_size=32,
         )
     )
+    models.append(
+        PatchTSTFM(
+            repo_id="ibm-granite/granite-timeseries-patchtst-fm-r2",
+            alias="Granite-PatchTST-FM-r2",
+            context_length=2_048,
+            batch_size=32,
+        )
+    )
 
 if sys.version_info < (3, 13):
     from contextlib import contextmanager
