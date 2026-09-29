@@ -38,6 +38,7 @@ nav:
               - Chronos: examples/chronos-family.ipynb
               - TimesFM: examples/timesfm-family.ipynb
               - PatchTST-FM: examples/patchtst-fm-family.ipynb
+              - T0: examples/t0-family.ipynb
               - TiRex: examples/tirex-family.ipynb
               - TabPFN: examples/tabpfn-family.ipynb
               - Toto: examples/toto-family.ipynb
