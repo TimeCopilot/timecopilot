@@ -50,7 +50,7 @@ TimeCopilot provides a unified interface to state-of-the-art foundation models f
 - [Moirai](api/models/foundation/models.md#timecopilot.models.foundation.moirai) ([arXiv:2402.02592](https://arxiv.org/abs/2402.02592))
 - [PatchTST-FM](api/models/foundation/models.md#timecopilot.models.foundation.patchtst_fm) ([arXiv:2602.06909](https://arxiv.org/abs/2602.06909); `ibm-research/patchtst-fm-r1` [NC](https://huggingface.co/ibm-research/patchtst-fm-r1), `ibm-granite/granite-timeseries-patchtst-fm-r1`, `ibm-granite/granite-timeseries-patchtst-fm-r2`) — Python 3.11–3.13
 - [Sundial](api/models/foundation/models.md#timecopilot.models.foundation.sundial) ([arXiv:2502.00816](https://arxiv.org/pdf/2502.00816))
-- [T0](api/models/foundation/models.md#timecopilot.models.foundation.t0) ([model card](https://huggingface.co/theforecastingcompany/t0-alpha))
+- [T0](api/models/foundation/models.md#timecopilot.models.foundation.t0) ([t0-alpha](https://huggingface.co/theforecastingcompany/t0-alpha), [t0-beta](https://huggingface.co/theforecastingcompany/t0-beta); requires `tfc-t0>=0.5.0` for beta) — Python 3.11–3.13
 - [TabPFN](api/models/foundation/models.md#timecopilot.models.foundation.tabpfn) ([arXiv:2501.02945](https://arxiv.org/abs/2501.02945); TabPFN-2 default, TabPFN-3 via `model_path`; [NC license](https://docs.priorlabs.ai/models))
 - [TiRex / TiRex-2](api/models/foundation/models.md#timecopilot.models.foundation.tirex) ([arXiv:2505.23719](https://arxiv.org/abs/2505.23719), [arXiv:2607.01204](https://arxiv.org/abs/2607.01204))
 - [TimeGPT](api/models/foundation/models.md#timecopilot.models.foundation.timegpt) ([arXiv:2310.03589](https://arxiv.org/abs/2310.03589))

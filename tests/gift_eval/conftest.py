@@ -17,7 +17,7 @@ def all_results_df(cache_path: Path) -> pd.DataFrame:
     all_results_file = cache_path / "seasonal_naive_all_results.csv"
     if not all_results_file.exists():
         all_results_df = pd.read_csv(
-            "https://huggingface.co/spaces/Salesforce/GIFT-Eval/raw/main/results/seasonal_naive/all_results.csv"
+            "https://huggingface.co/spaces/Salesforce/GIFT-Eval/raw/main/results/Seasonal_Naive/all_results.csv"
         )
         all_results_df.to_csv(all_results_file, index=False)
     return pd.read_csv(all_results_file)
