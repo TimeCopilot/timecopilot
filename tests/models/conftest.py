@@ -152,6 +152,14 @@ if (3, 11) <= sys.version_info < (3, 14):
     from timecopilot.models.foundation.t0 import T0
 
     models.append(T0(context_length=256, batch_size=2))
+    models.append(
+        T0(
+            repo_id="theforecastingcompany/t0-beta",
+            alias="t0-beta",
+            context_length=256,
+            batch_size=2,
+        )
+    )
 
 if (3, 11) <= sys.version_info < (3, 14):
     from timecopilot.models.foundation.flowstate import FlowState
