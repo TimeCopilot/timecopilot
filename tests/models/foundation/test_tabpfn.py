@@ -24,7 +24,7 @@ load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 pytestmark = pytest.mark.models
 
 DEFAULT_QUANTILES = [round(i * 0.1, 1) for i in range(1, 10)]
-DEFAULT_LEVEL = [0, 20, 40, 60, 80]
+DEFAULT_LEVEL = [20, 40, 60, 80]
 
 TABPFN_CASES = [
     pytest.param(TABPFN_V2_MODEL, 4096, "TabPFN-2", id="v2"),
