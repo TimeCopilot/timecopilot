@@ -178,7 +178,6 @@ def test_cross_validation_spark(simple_models, spark_df):
 
 @pytest.mark.distributed
 def test_using_level_spark(foundation_model, spark_session):
-    # level = [0, 20, 40, 60, 80]  # corresponds to qs [0.1, 0.2, ..., 0.9]
     level: list[int | float] = [20, 80]
     df = generate_series(
         n_series=2, freq="D", max_length=100, static_as_categorical=False
@@ -217,7 +216,6 @@ def test_using_level_spark(foundation_model, spark_session):
     assert all(col in fcst_df_pd.columns for col in exp_lv_cols)
     assert not any(("-q-" in col) for col in fcst_df_pd.columns)
     # test monotonicity of levels
-    exp_lv_cols = exp_lv_cols[2:]  # remove level 0
     for c1, c2 in zip(exp_lv_cols[:-1:2], exp_lv_cols[1::2], strict=False):
         for model in foundation_model:
             if model.alias == "ZeroModel":
@@ -312,7 +310,6 @@ def test_cross_validation_dask(simple_models, dask_df):
 def test_using_level_dask(foundation_model):
     import dask.dataframe as dd
 
-    # level = [0, 20, 40, 60, 80]  # corresponds to qs [0.1, 0.2, ..., 0.9]
     level: list[int | float] = [20, 80]
     n_partitions = 2
     df = generate_series(
@@ -352,7 +349,6 @@ def test_using_level_dask(foundation_model):
     assert all(col in fcst_df_pd.columns for col in exp_lv_cols)
     assert not any(("-q-" in col) for col in fcst_df_pd.columns)
     # test monotonicity of levels
-    exp_lv_cols = exp_lv_cols[2:]  # remove level 0
     for c1, c2 in zip(exp_lv_cols[:-1:2], exp_lv_cols[1::2], strict=False):
         for model in foundation_model:
             if model.alias == "ZeroModel":
@@ -425,7 +421,6 @@ def test_cross_validation_ray(simple_models, ray_dataset):
 def test_using_level_ray(foundation_model):
     import ray
 
-    # level = [0, 20, 40, 60, 80]  # corresponds to qs [0.1, 0.2, ..., 0.9]
     level: list[int | float] = [20, 80]
     df = generate_series(
         n_series=2, freq="D", max_length=100, static_as_categorical=False
@@ -473,7 +468,6 @@ def test_using_level_ray(foundation_model):
     assert all(col in fcst_df_pd.columns for col in exp_lv_cols)
     assert not any(("-q-" in col) for col in fcst_df_pd.columns)
     # test monotonicity of levels
-    exp_lv_cols = exp_lv_cols[2:]  # remove level 0
     for c1, c2 in zip(exp_lv_cols[:-1:2], exp_lv_cols[1::2], strict=False):
         for model in foundation_model:
             if model.alias == "ZeroModel":
