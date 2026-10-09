@@ -44,6 +44,7 @@ classifiers = [
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -56,7 +57,7 @@ classifiers = [
 # - transformers>=5 (CVE-2026-1839 fix) requires huggingface-hub>=1; the upper
 # bounds were widened together (transformers<6, huggingface-hub<2). Reaching
 # transformers 5 also requires tfc-t0>=0.2 (older tfc-t0 capped hub<1).
-# - scipy>=1.17.1 requires Python>=3.11 (see requires-python).
+# - scipy>=1.17.1 on Python>=3.11; scipy<=1.15.3 remains on 3.10 (no 1.17 wheels).
 # - lightning and pytorch-lightning are the same library
 # NOTE: dependencies pinned for faster pip installs
 # versions chosen from uv's dependency resolution
@@ -93,7 +94,8 @@ dependencies = [
   "prophet>=1.1.7",
   "pydantic-ai>=0.7.0",
   "pytorch-lightning==2.4.0",
-  "scipy>=1.17.1",
+  "scipy<=1.15.3 ; python_full_version < '3.11'",
+  "scipy>=1.17.1 ; python_full_version >= '3.11'",
   "statsforecast>=2.0.2",
   "tensorboard>=2.20.0",
   "torch>=2.10,<2.11 ; python_full_version >= '3.11'",
@@ -108,7 +110,7 @@ description = "The GenAI Forecasting Agent · LLMs × Time Series Foundation Mod
 license = "MIT"
 name = "timecopilot"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 version = "0.0.36"
 
 [project.optional-dependencies]
