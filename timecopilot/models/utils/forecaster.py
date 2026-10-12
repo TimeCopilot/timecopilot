@@ -1,8 +1,5 @@
 import pandas as pd
-from foundationforecast.core.exog.covariates import (
-    ExogStrategyConfig,
-    normalize_exog_strategy,
-)
+from foundationforecast.core.exog.covariates import normalize_exog_strategy
 from foundationforecast.core.forecaster import Forecaster as _Forecaster
 from foundationforecast.core.forecaster import (
     QuantileConverter,
@@ -24,17 +21,6 @@ __all__ = [
 
 class Forecaster(_Forecaster):
     """TimeCopilot Forecaster base (extends foundationforecast)."""
-
-    def __init__(
-        self,
-        *,
-        reuse_loaded_model: bool = True,
-        exog_strategy: ExogStrategyConfig = False,
-    ) -> None:
-        super().__init__(
-            reuse_loaded_model=reuse_loaded_model,
-            exog_strategy=exog_strategy,
-        )
 
     def _ensure_forecaster_state(self) -> None:
         if not hasattr(self, "exog_strategy"):
