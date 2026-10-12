@@ -269,6 +269,8 @@ class TimeCopilotForecaster(MultiModelForecasterMixin, Forecaster):
         step_size: int | None = None,
         level: list[int | float] | None = None,
         quantiles: list[float] | None = None,
+        *,
+        futr_exog_list: list[str] | None = None,
     ) -> pd.DataFrame:
         """
         Internal pandas-only cross-validation implementation.
@@ -285,6 +287,7 @@ class TimeCopilotForecaster(MultiModelForecasterMixin, Forecaster):
             step_size=step_size,
             level=level,
             quantiles=quantiles,
+            futr_exog_list=futr_exog_list,
         )
 
     def _cross_validation_distributed(
@@ -296,6 +299,8 @@ class TimeCopilotForecaster(MultiModelForecasterMixin, Forecaster):
         step_size: int | None = None,
         level: list[int | float] | None = None,
         quantiles: list[float] | None = None,
+        *,
+        futr_exog_list: list[str] | None = None,
         num_partitions: int | None = None,
     ) -> DistributedDataFrame:
         """
@@ -368,6 +373,8 @@ class TimeCopilotForecaster(MultiModelForecasterMixin, Forecaster):
         step_size: int | None = None,
         level: list[int | float] | None = None,
         quantiles: list[float] | None = None,
+        *,
+        futr_exog_list: list[str] | None = None,
         num_partitions: int | None = None,
     ) -> AnyDataFrame:
         """
@@ -443,6 +450,7 @@ class TimeCopilotForecaster(MultiModelForecasterMixin, Forecaster):
                 step_size=step_size,
                 level=level,
                 quantiles=quantiles,
+                futr_exog_list=futr_exog_list,
                 num_partitions=num_partitions,
             )
 
@@ -455,6 +463,7 @@ class TimeCopilotForecaster(MultiModelForecasterMixin, Forecaster):
             step_size=step_size,
             level=level,
             quantiles=quantiles,
+            futr_exog_list=futr_exog_list,
         )
 
     def _detect_anomalies_pandas(

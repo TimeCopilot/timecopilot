@@ -57,6 +57,7 @@ classifiers = [
 # - transformers>=5 (CVE-2026-1839 fix) requires huggingface-hub>=1; the upper
 # bounds were widened together (transformers<6, huggingface-hub<2). Reaching
 # transformers 5 also requires tfc-t0>=0.2 (older tfc-t0 capped hub<1).
+# - scipy>=1.17.1 on Python>=3.11; scipy<=1.15.3 remains on 3.10 (no 1.17 wheels).
 # - lightning and pytorch-lightning are the same library
 # NOTE: dependencies pinned for faster pip installs
 # versions chosen from uv's dependency resolution
@@ -69,7 +70,7 @@ dependencies = [
   "catboost>=1.2.10",
   "datasets>=4.1.1",
   "fire",
-  "foundationforecast>=0.1.8",
+  "foundationforecast>=0.1.12",
   "fsspec>=2025.9.0",
   "huggingface-hub>=0.36.2,<2.0",
   "hydra-core>=1.3.2",
@@ -93,7 +94,8 @@ dependencies = [
   "prophet>=1.1.7",
   "pydantic-ai>=0.7.0",
   "pytorch-lightning==2.4.0",
-  "scipy<=1.15.3",
+  "scipy<=1.15.3 ; python_full_version < '3.11'",
+  "scipy>=1.17.1 ; python_full_version >= '3.11'",
   "statsforecast>=2.0.2",
   "tensorboard>=2.20.0",
   "torch>=2.10,<2.11 ; python_full_version >= '3.11'",
