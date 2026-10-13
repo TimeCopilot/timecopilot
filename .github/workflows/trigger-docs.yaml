@@ -1,0 +1,32 @@
+name: Trigger unified docs
+
+# Rebuilds https://github.com/TimeCopilot/docs: main -> preview-docs.timecopilot.dev,
+# release tags -> docs.timecopilot.dev. Path filters do not apply to tag pushes.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+    paths:
+      - docs/**
+      - mkdocs.yml
+      - README.md
+      - timecopilot/**
+      - pyproject.toml
+      - uv.lock
+      - .github/workflows/trigger-docs.yaml
+  workflow_dispatch:
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify TimeCopilot/docs
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_DISPATCH_TOKEN }}
+          EVENT: ${{ github.ref_type == 'tag' && 'library-release' || 'library-main' }}
+          REF: ${{ github.ref_name }}
+        run: >-
+          gh api repos/TimeCopilot/docs/dispatches
+          -f event_type="$EVENT"
+          -f "client_payload[library]=timecopilot"
+          -f "client_payload[ref]=$REF"
