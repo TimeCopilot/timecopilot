@@ -1,1 +1,1 @@
-{% include-markdown "../../experiments/fev/README.md" %}
+--8<-- "experiments/fev/README.md"
