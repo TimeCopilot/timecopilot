@@ -1,6 +1,6 @@
 <div align="center">
-      <img src="https://github.com/user-attachments/assets/3d5e8595-f486-40ee-b34f-743849896462#gh-dark-mode-only" alt="TimeCopilot">
-      <img src="https://github.com/user-attachments/assets/ca31b9cf-d1e6-45ff-b757-d961e1299f74#gh-light-mode-only" alt="TimeCopilot">
+  <img src="https://raw.githubusercontent.com/TimeCopilot/timecopilot/main/docs/assets/logos/timecopilot-dark.png#gh-dark-mode-only" alt="TimeCopilot" width="900">
+  <img src="https://raw.githubusercontent.com/TimeCopilot/timecopilot/main/docs/assets/logos/timecopilot-light.png#gh-light-mode-only" alt="TimeCopilot" width="900">
 </div>
 <div align="center">
   <em>The GenAI Forecasting Agent · LLMs × Time Series Foundation Models</em>
