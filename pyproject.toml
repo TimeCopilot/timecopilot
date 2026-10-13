@@ -27,7 +27,6 @@ docs = [
   "mkdocs>=1.6.1",
   "mkdocstrings[python]>=0.29.1",
   "mktestdocs>=0.2.5",
-  "modal>=1.0.4",
   "ruff>=0.12.1",
   "timecopilot-gift-eval>=0.3.0",
 ]
