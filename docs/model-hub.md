@@ -81,7 +81,7 @@ TimeCopilot includes a suite of classical and statistical forecasting models, pr
 TimeCopilot integrates the popular Prophet model for time series forecasting, developed by Facebook. Prophet is well-suited for business time series with strong seasonal effects and several seasons of historical data. Below you will find the API reference for the Prophet model.
 
 
-- [Prophet](api/models/prophet.md/#timecopilot.models.prophet.Prophet)
+- [Prophet](api/models/prophet.md#timecopilot.models.prophet.Prophet)
 
 ## Machine Learning Models
 
