@@ -58,18 +58,20 @@ uv run pytest
 
 ## Documentation Changes
 
-To run the documentation page in your local environment, run:
+The docs are built with [Zensical](https://zensical.org). To preview them locally with live reload, run:
 
 ```bash
-uv run mkdocs serve
+make serve-docs
 ```
+
+Zensical does not render Jupyter notebooks yet, so example pages under `docs/examples/` show up as `.ipynb` downloads in this preview. The deployed site converts them to pages at build time; to preview exactly what will be deployed (converted notebooks and the shared header), run `uv run tc-docs preview --local timecopilot=../timecopilot` from a checkout of [TimeCopilot/docs](https://github.com/TimeCopilot/docs).
 
 
 ### Documentation Notes
 
 - Each pull request is tested to ensure it can successfully build the documentation, preventing potential errors.
-- Merging into the main branch triggers a deployment of a documentation preview, accessible at [preview.timecopilot.dev](https://preview.timecopilot.dev).
-- When a new version of the library is released, the documentation is deployed to [timecopilot.dev](https://timecopilot.dev).
+- Merging into the main branch triggers a deployment of a documentation preview, accessible at [preview-docs.timecopilot.dev](https://preview-docs.timecopilot.dev/timecopilot/).
+- When a new version of the library is released, the documentation is deployed to [docs.timecopilot.dev](https://docs.timecopilot.dev/timecopilot/).
 
 ### File Naming Convention
 

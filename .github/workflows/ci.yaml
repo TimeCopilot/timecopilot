@@ -155,7 +155,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
 
       - name: Build docs
-        run: uv run --group docs mkdocs build
+        run: uv run --group docs zensical build
 
   lint:
     name: lint and style checks

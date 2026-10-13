@@ -22,14 +22,12 @@ dev = [
 ]
 docs = [
   "griffe-inherited-docstrings>=1.1",
-  "mkdocs-jupyter>=0.25.1",
-  "mkdocs-material>=9.7",
-  "mkdocs>=1.6.1",
   "mkdocstrings-python>=2.0",
   "mkdocstrings[python]>=1.0",
   "mktestdocs>=0.2.5",
   "ruff>=0.12.1",
   "timecopilot-gift-eval>=0.3.0",
+  "zensical>=0.0.70; python_version >= '3.11'",
 ]
 
 [project]
