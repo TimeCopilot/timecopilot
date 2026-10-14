@@ -58,7 +58,7 @@ uv run pytest
 
 ## Documentation Changes
 
-The docs are built with [Zensical](https://zensical.org), which reads the site configuration and navigation from [`mkdocs.yml`](https://github.com/TimeCopilot/timecopilot/blob/main/mkdocs.yml). To preview them locally with live reload, run:
+The docs are built with [Zensical](https://zensical.org) (Python 3.11 or newer; the library itself supports 3.10, but the docs tooling is skipped there), which reads the site configuration and navigation from [`mkdocs.yml`](https://github.com/TimeCopilot/timecopilot/blob/main/mkdocs.yml). To preview them locally with live reload, run:
 
 ```bash
 make serve-docs
