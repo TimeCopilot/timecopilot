@@ -1,3 +1,3 @@
 .PHONY: serve-docs
 serve-docs:
-	uv run --group docs mkdocs serve
+	uv run --group docs zensical serve
