@@ -58,10 +58,16 @@ uv run pytest
 
 ## Documentation Changes
 
-The docs are built with [Zensical](https://zensical.org). To preview them locally with live reload, run:
+The docs are built with [Zensical](https://zensical.org), which reads the site configuration and navigation from [`mkdocs.yml`](https://github.com/TimeCopilot/timecopilot/blob/main/mkdocs.yml). To preview them locally with live reload, run:
 
 ```bash
 make serve-docs
+```
+
+To run the same strict build as CI (warnings such as broken links fail the build), run:
+
+```bash
+uv run --group docs zensical build
 ```
 
 Zensical does not render Jupyter notebooks yet, so example pages under `docs/examples/` show up as `.ipynb` downloads in this preview. The deployed site converts them to pages at build time; to preview exactly what will be deployed (converted notebooks and the shared header), run `uv run tc-docs preview --local timecopilot=../timecopilot` from a checkout of [TimeCopilot/docs](https://github.com/TimeCopilot/docs).
