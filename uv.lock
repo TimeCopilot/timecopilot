@@ -7407,7 +7407,7 @@ wheels = [
 
 [[package]]
 name = "timecopilot"
-version = "0.0.37"
+version = "0.0.38"
 source = { editable = "." }
 dependencies = [
     { name = "accelerate" },
