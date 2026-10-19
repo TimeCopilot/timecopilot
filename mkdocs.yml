@@ -39,6 +39,7 @@ nav:
               - TimesFM: examples/timesfm-family.ipynb
               - PatchTST-FM: examples/patchtst-fm-family.ipynb
               - T0: examples/t0-family.ipynb
+              - Timestral: examples/timestral-family.ipynb
               - TiRex: examples/tirex-family.ipynb
               - TabPFN: examples/tabpfn-family.ipynb
               - Toto: examples/toto-family.ipynb
@@ -65,6 +66,7 @@ nav:
       - experiments/fev.md
   - Changelogs:
       - changelogs/index.md
+      - changelogs/v0.0.39.md
       - changelogs/v0.0.38.md
       - changelogs/v0.0.37.md
       - changelogs/v0.0.36.md

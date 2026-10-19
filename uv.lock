@@ -1611,7 +1611,7 @@ wheels = [
 
 [[package]]
 name = "foundationforecast"
-version = "0.1.12"
+version = "0.1.15"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "gluonts", extra = ["torch"] },
@@ -1624,9 +1624,10 @@ dependencies = [
     { name = "scipy", version = "1.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "tabpfn-time-series", marker = "python_full_version < '3.13'" },
     { name = "tafsut" },
-    { name = "tfc-t0", marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
+    { name = "tfc-t0", extra = ["torch"], marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
     { name = "timecopilot-chronos-forecasting" },
     { name = "timecopilot-timesfm" },
+    { name = "timecopilot-timestral" },
     { name = "timecopilot-tirex", marker = "python_full_version >= '3.11'" },
     { name = "timecopilot-tirex2", marker = "python_full_version >= '3.11'" },
     { name = "timecopilot-toto" },
@@ -1636,9 +1637,9 @@ dependencies = [
     { name = "transformers" },
     { name = "utilsforecast" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/21/52/6af8ae6f8b96679e84ce0a983955627ef0f43bbdc54e65e9f6b21b9f6237/foundationforecast-0.1.12.tar.gz", hash = "sha256:e8d24339d035dbf1be0774ea8590d5663668ddecc0a7bf8036e7d7c527ea3669", size = 5189521, upload-time = "2026-10-07T22:25:14.497Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9e/54/e6de7a8626388a18420bc0c0edc8f5bcef8cc0880f698ca2c5a5fd80000b/foundationforecast-0.1.15.tar.gz", hash = "sha256:73aaf78880e156f7536fa84dd5d931167fb3171f514b4090cc0d460826414022", size = 7837541, upload-time = "2026-10-19T21:25:40.524Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b5/56/d4e900c40713409ee60fbebe59018ea7762718bc2be3040041c071fc98cc/foundationforecast-0.1.12-py3-none-any.whl", hash = "sha256:a68ee90d1d064d86835cc34b3490afc909cadb6672da419e5d95e25addc3016a", size = 86132, upload-time = "2026-10-07T22:25:12.875Z" },
+    { url = "https://files.pythonhosted.org/packages/6d/1f/13816a6a8d03f553d4f2fb14a601e342b9fff6324f92c18df499340e7251/foundationforecast-0.1.15-py3-none-any.whl", hash = "sha256:42ac1b4f0e102416cfab224f71831cca85815c59ad20cb1f7d29c76ba378f6cf", size = 92712, upload-time = "2026-10-19T21:25:39.076Z" },
 ]
 
 [[package]]
@@ -7379,21 +7380,25 @@ wheels = [
 
 [[package]]
 name = "tfc-t0"
-version = "0.5.0"
+version = "0.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "einops", marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
     { name = "huggingface-hub", marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
     { name = "jaxtyping", marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
     { name = "numpy", version = "1.26.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
     { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12' and python_full_version < '3.14'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ba/0d/1a25ce944f4ecc4598937ecb34330b93484dd4f4111770d3181d73d21da4/tfc_t0-0.6.0.tar.gz", hash = "sha256:40284afc78a544485f4f62aaf541f66f988028f6e51691a308cf604134da94d4", size = 1125198, upload-time = "2026-10-13T09:47:46.291Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/55/82/4e47c03dd3a22af03fded4d85feb1c7770d71623ea2173809b731c2d2a21/tfc_t0-0.6.0-py3-none-any.whl", hash = "sha256:0db2315e051d1fcb3c40f9525534817d40ee2f700d3b7498145a86cf0bcfd864", size = 75131, upload-time = "2026-10-13T09:47:44.624Z" },
+]
+
+[package.optional-dependencies]
+torch = [
+    { name = "einops", marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
     { name = "rotary-embedding-torch", marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
     { name = "safetensors", marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
     { name = "torch", marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/cd/50/72f469a14395b80efa72c5a94a6a595673cf5fa73e2f92c5dbba082c6c63/tfc_t0-0.5.0.tar.gz", hash = "sha256:603e43a16da6210ca11fc26f957b1b43a7f2a60caa59e34643a015ec85335da7", size = 523589, upload-time = "2026-09-17T14:21:35.373Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/77/6b/a33a4382e70f7612ae82f0c5f4178f5c1132f317508ef6def180054f73cd/tfc_t0-0.5.0-py3-none-any.whl", hash = "sha256:551936dfe72b0464d3963d0b3bf4415d49b6ac37c5695ff97b8ff844f12c6a8c", size = 55148, upload-time = "2026-09-17T14:21:33.802Z" },
 ]
 
 [[package]]
@@ -7502,7 +7507,7 @@ requires-dist = [
     { name = "dask", marker = "extra == 'distributed'", specifier = "<=2024.12.1" },
     { name = "datasets", specifier = ">=4.1.1" },
     { name = "fire" },
-    { name = "foundationforecast", specifier = ">=0.1.12" },
+    { name = "foundationforecast", specifier = ">=0.1.15" },
     { name = "fsspec", specifier = ">=2025.9.0" },
     { name = "fugue", extras = ["dask", "ray", "spark"], marker = "extra == 'distributed'", specifier = ">=0.9.0" },
     { name = "huggingface-hub", specifier = ">=0.36.2,<2.0" },
@@ -7645,6 +7650,22 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/e9/a7/85a07334d68be96f40e33e9087bf3e60e3a51d5c30984ac0764168854b75/timecopilot_timesfm-0.4.0.tar.gz", hash = "sha256:59d73de66e697fadc4613f4e2c49f1d81c71b35f042e4654aa745010c28eab0f", size = 91968, upload-time = "2026-09-07T16:38:04.76Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/04/08/c8956c7ca45a9d6dd06e8070957494087f0f243494a08b5005ab4fbc3c82/timecopilot_timesfm-0.4.0-py3-none-any.whl", hash = "sha256:874aac6e53ec1210a3debe3e350b61ce390880bf3f16ae4af5053f63eb3f2989", size = 135822, upload-time = "2026-09-07T16:38:03.66Z" },
+]
+
+[[package]]
+name = "timecopilot-timestral"
+version = "0.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "huggingface-hub" },
+    { name = "numpy", version = "1.26.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version != '3.11.*'" },
+    { name = "safetensors" },
+    { name = "torch" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/51/95/76978ffd279865cf3a86fa69d00cc5e626cc756ebd0bfddafde56e382f6f/timecopilot_timestral-0.1.0.tar.gz", hash = "sha256:bd7e8bc461416a9f183bf7ed02bc9b4d3ca4e8e5ac3e384659d6f2945528601c", size = 31805, upload-time = "2026-10-16T19:50:32.765Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d3/13/d86c4e4b6350c0e3dc03a5da23ad8ae190e967d26ce3cdb325c5389d35ea/timecopilot_timestral-0.1.0-py3-none-any.whl", hash = "sha256:a84f1c729d948e7e9617e17a5ce38705f17aa13403bdde5e2a918a96c4f94ec8", size = 34182, upload-time = "2026-10-16T19:50:31.587Z" },
 ]
 
 [[package]]

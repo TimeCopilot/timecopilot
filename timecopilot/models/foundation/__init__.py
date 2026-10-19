@@ -5,6 +5,7 @@ from .moirai import Moirai
 from .tafsut import Tafsut
 from .timegpt import TimeGPT, TimeGPTFinetuningConfig
 from .timesfm import TimesFM
+from .timestral import Timestral
 from .toto import Toto
 
 __all__ = [
@@ -15,6 +16,7 @@ __all__ = [
     "TimeGPT",
     "TimeGPTFinetuningConfig",
     "TimesFM",
+    "Timestral",
     "Toto",
 ]
 

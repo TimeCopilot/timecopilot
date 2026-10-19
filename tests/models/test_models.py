@@ -19,6 +19,10 @@ def test_timegpt_import():
     from timecopilot.models.foundation.timegpt import TimeGPT  # noqa: F401
 
 
+def test_timestral_import():
+    from timecopilot.models.foundation.timestral import Timestral  # noqa: F401
+
+
 @pytest.mark.skipif(
     sys.version_info >= (3, 11),
     reason="TiRex requires Python >= 3.11",
