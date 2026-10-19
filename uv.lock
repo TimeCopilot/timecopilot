@@ -7466,7 +7466,8 @@ gift-eval = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "fugue", extra = ["dask", "ray", "spark"] },
+    { name = "fugue", extra = ["dask", "spark"] },
+    { name = "fugue", extra = ["ray"], marker = "python_full_version < '3.14'" },
     { name = "mktestdocs" },
     { name = "pre-commit" },
     { name = "pyspark" },
@@ -7546,7 +7547,8 @@ provides-extras = ["distributed", "gift-eval"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "fugue", extras = ["dask", "ray", "spark"], specifier = ">=0.9.0" },
+    { name = "fugue", extras = ["dask", "ray", "spark"], marker = "python_full_version < '3.14'", specifier = ">=0.9.0" },
+    { name = "fugue", extras = ["dask", "spark"], marker = "python_full_version >= '3.14'", specifier = ">=0.9.0" },
     { name = "mktestdocs", specifier = ">=0.2.5" },
     { name = "pre-commit" },
     { name = "pyspark", specifier = "<4.1" },
