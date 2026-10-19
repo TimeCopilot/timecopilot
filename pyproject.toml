@@ -87,7 +87,7 @@ dependencies = [
   "opentelemetry-sdk>=1.37.0,<2",
   "optuna>=4.5.0",
   "pandas>=2.2.0 ; python_full_version >= '3.13'",
-  "peft>=0.13.0,<1",
+  "peft>=0.20.0,<1",
   "plotly>=6.3.1",
   "prophet>=1.1.7",
   "pydantic-ai>=0.7.0",
