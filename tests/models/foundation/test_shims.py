@@ -7,10 +7,11 @@ from timecopilot.models.foundation.moirai import Moirai
 from timecopilot.models.foundation.tafsut import Tafsut
 from timecopilot.models.foundation.timegpt import TimeGPT
 from timecopilot.models.foundation.timesfm import TimesFM
+from timecopilot.models.foundation.timestral import Timestral
 from timecopilot.models.foundation.toto import Toto
 from timecopilot.models.utils.forecaster import Forecaster
 
-SHIM_MODELS = [Chronos, Moirai, Tafsut, TimesFM, Toto, TimeGPT]
+SHIM_MODELS = [Chronos, Moirai, Tafsut, TimesFM, Timestral, Toto, TimeGPT]
 
 if sys.version_info >= (3, 11):
     from timecopilot.models.foundation.tirex import TiRex

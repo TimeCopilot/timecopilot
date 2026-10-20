@@ -53,6 +53,11 @@
         members:
             - TimesFM
 
+::: timecopilot.models.foundation.timestral
+    options:
+        members:
+            - Timestral
+
 ::: timecopilot.models.foundation.tirex
     options:
         members:
