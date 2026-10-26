@@ -4,6 +4,7 @@ import pytest
 
 from timecopilot.models.foundation.chronos import Chronos
 from timecopilot.models.foundation.moirai import Moirai
+from timecopilot.models.foundation.tabby import Tabby
 from timecopilot.models.foundation.tafsut import Tafsut
 from timecopilot.models.foundation.timegpt import TimeGPT
 from timecopilot.models.foundation.timesfm import TimesFM
@@ -11,7 +12,7 @@ from timecopilot.models.foundation.timestral import Timestral
 from timecopilot.models.foundation.toto import Toto
 from timecopilot.models.utils.forecaster import Forecaster
 
-SHIM_MODELS = [Chronos, Moirai, Tafsut, TimesFM, Timestral, Toto, TimeGPT]
+SHIM_MODELS = [Chronos, Moirai, Tabby, Tafsut, TimesFM, Timestral, Toto, TimeGPT]
 
 if sys.version_info >= (3, 11):
     from timecopilot.models.foundation.tirex import TiRex
@@ -24,6 +25,11 @@ if sys.version_info >= (3, 11) and sys.version_info < (3, 14):
     from timecopilot.models.foundation.t0 import T0
 
     SHIM_MODELS.extend([FlowState, PatchTSTFM, T0])
+
+if sys.version_info >= (3, 12):
+    from timecopilot.models.foundation.timeh2o import TimeH2O
+
+    SHIM_MODELS.append(TimeH2O)
 
 if sys.version_info < (3, 13):
     from timecopilot.models.foundation.sundial import Sundial
