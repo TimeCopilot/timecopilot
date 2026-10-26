@@ -32,6 +32,11 @@
             - T0
 
 
+::: timecopilot.models.foundation.tabby
+    options:
+        members:
+            - Tabby
+
 ::: timecopilot.models.foundation.tafsut
     options:
         members:
@@ -47,6 +52,11 @@
         members:
             - TimeGPT
             - TimeGPTFinetuningConfig
+
+::: timecopilot.models.foundation.timeh2o
+    options:
+        members:
+            - TimeH2O
 
 ::: timecopilot.models.foundation.timesfm
     options:
