@@ -2,6 +2,7 @@ import sys
 
 from .chronos import Chronos, ChronosFinetuningConfig
 from .moirai import Moirai
+from .tabby import Tabby
 from .tafsut import Tafsut
 from .timegpt import TimeGPT, TimeGPTFinetuningConfig
 from .timesfm import TimesFM
@@ -12,6 +13,7 @@ __all__ = [
     "Chronos",
     "ChronosFinetuningConfig",
     "Moirai",
+    "Tabby",
     "Tafsut",
     "TimeGPT",
     "TimeGPTFinetuningConfig",
@@ -31,6 +33,11 @@ if sys.version_info >= (3, 11) and sys.version_info < (3, 14):
     from .t0 import T0 as T0
 
     __all__.extend(["FlowState", "PatchTSTFM", "T0"])
+
+if sys.version_info >= (3, 12):
+    from .timeh2o import TimeH2O as TimeH2O
+
+    __all__.append("TimeH2O")
 
 if sys.version_info < (3, 13):
     from .sundial import Sundial as Sundial
