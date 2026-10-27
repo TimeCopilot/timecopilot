@@ -23,6 +23,20 @@ def test_timestral_import():
     from timecopilot.models.foundation.timestral import Timestral  # noqa: F401
 
 
+def test_tabby_import():
+    from timecopilot.models.foundation.tabby import Tabby  # noqa: F401
+
+
+@pytest.mark.skipif(
+    sys.version_info >= (3, 12),
+    reason="TimeH2O requires Python >= 3.12",
+)
+def test_timeh2o_import_fails():
+    with pytest.raises(ImportError) as excinfo:
+        from timecopilot.models.foundation.timeh2o import TimeH2O  # noqa: F401
+    assert "requires Python >= 3.12" in str(excinfo.value)
+
+
 @pytest.mark.skipif(
     sys.version_info >= (3, 11),
     reason="TiRex requires Python >= 3.11",

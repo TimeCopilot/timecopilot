@@ -40,8 +40,10 @@ nav:
               - PatchTST-FM: examples/patchtst-fm-family.ipynb
               - T0: examples/t0-family.ipynb
               - Timestral: examples/timestral-family.ipynb
+              - TimeH2O: examples/timeh2o-family.ipynb
               - TiRex: examples/tirex-family.ipynb
               - TabPFN: examples/tabpfn-family.ipynb
+              - Tabby: examples/tabby-family.ipynb
               - Toto: examples/toto-family.ipynb
           - Finetuning: examples/finetuning.ipynb
       - Benchmarks and Ensembles:
@@ -66,6 +68,7 @@ nav:
       - experiments/fev.md
   - Changelogs:
       - changelogs/index.md
+      - changelogs/v0.0.40.md
       - changelogs/v0.0.39.md
       - changelogs/v0.0.38.md
       - changelogs/v0.0.37.md
