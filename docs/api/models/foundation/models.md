@@ -26,6 +26,11 @@
         members:
             - Sundial
 
+::: timecopilot.models.foundation.kumo
+    options:
+        members:
+            - Kumo
+
 ::: timecopilot.models.foundation.t0
     options:
         members:

@@ -47,6 +47,7 @@ TimeCopilot provides a unified interface to state-of-the-art foundation models f
 
 - [Chronos](api/models/foundation/models.md#timecopilot.models.foundation.chronos) ([arXiv:2403.07815](https://arxiv.org/abs/2403.07815))
 - [FlowState](api/models/foundation/models.md#timecopilot.models.foundation.flowstate) ([arXiv:2508.05287](https://arxiv.org/abs/2508.05287)) 
+- [Kumo](api/models/foundation/models.md#timecopilot.models.foundation.kumo) ([Kumo-TS](https://github.com/NVIDIA/Kumo-TS), [`nvidia/Kumo-Forecast`](https://huggingface.co/nvidia/Kumo-Forecast)) — point forecasts only (intervals need `prediction_intervals=ConformalIntervals(...)` from `foundationforecast`); 512-step context, 72-step native horizon with autoregressive rollout; Apache-2.0
 - [Moirai](api/models/foundation/models.md#timecopilot.models.foundation.moirai) ([arXiv:2402.02592](https://arxiv.org/abs/2402.02592))
 - [PatchTST-FM](api/models/foundation/models.md#timecopilot.models.foundation.patchtst_fm) ([arXiv:2602.06909](https://arxiv.org/abs/2602.06909); `ibm-research/patchtst-fm-r1` [NC](https://huggingface.co/ibm-research/patchtst-fm-r1), `ibm-granite/granite-timeseries-patchtst-fm-r1`, `ibm-granite/granite-timeseries-patchtst-fm-r2`) — Python 3.11–3.13
 - [Sundial](api/models/foundation/models.md#timecopilot.models.foundation.sundial) ([arXiv:2502.00816](https://arxiv.org/pdf/2502.00816))
