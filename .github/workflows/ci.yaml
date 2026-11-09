@@ -139,6 +139,12 @@ jobs:
         with:
           enable-cache: true
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
       - name: Run tests
         run: uv run pytest -m distributed -n 1
         env:
