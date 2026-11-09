@@ -23,6 +23,10 @@ def test_timestral_import():
     from timecopilot.models.foundation.timestral import Timestral  # noqa: F401
 
 
+def test_kumo_import():
+    from timecopilot.models.foundation.kumo import Kumo  # noqa: F401
+
+
 def test_tabby_import():
     from timecopilot.models.foundation.tabby import Tabby  # noqa: F401
 
