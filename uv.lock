@@ -1612,7 +1612,7 @@ wheels = [
 
 [[package]]
 name = "foundationforecast"
-version = "0.1.17"
+version = "0.1.20"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "gluonts", extra = ["torch"] },
@@ -1628,6 +1628,7 @@ dependencies = [
     { name = "tafsut" },
     { name = "tfc-t0", extra = ["torch"], marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
     { name = "timecopilot-chronos-forecasting" },
+    { name = "timecopilot-kumo-forecast" },
     { name = "timecopilot-timesfm" },
     { name = "timecopilot-timestral" },
     { name = "timecopilot-tirex", marker = "python_full_version >= '3.11'" },
@@ -1639,9 +1640,9 @@ dependencies = [
     { name = "transformers" },
     { name = "utilsforecast" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a3/60/c249684022fcdd3673c27b066aac6519d895c0e17e27a2e305d9636660dc/foundationforecast-0.1.17.tar.gz", hash = "sha256:f135a48574c43d2441b77693e46d456ba8455209fe0e3f2b6162bdcc74d8f855", size = 8908871, upload-time = "2026-10-26T22:55:32.98Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5d/7e/e85fca69a5f7a9198887aa98dc86c386e27b77cdc9ab024d38b6de7e49f1/foundationforecast-0.1.20.tar.gz", hash = "sha256:1d1c5241d91db067ad90debc9a96fa1c5da316f1ea96e5e4b490943e32ec7f53", size = 11875050, upload-time = "2026-11-09T21:43:21.807Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9d/e1/31b685dfe2689392cb9049b7747000e4abbb8ddcb529a3ae17869051c5e0/foundationforecast-0.1.17-py3-none-any.whl", hash = "sha256:eae5417125b8a445b19805f329b10a99d8377728c4904158227d2b07f717d053", size = 101634, upload-time = "2026-10-26T22:55:30.925Z" },
+    { url = "https://files.pythonhosted.org/packages/75/e6/fd2152d6ba39f47af21bc4ddab7f06ebcc3aa14b82d3c60afeaf43ab73af/foundationforecast-0.1.20-py3-none-any.whl", hash = "sha256:1d3c20b8d4dcca1429d6f85d7a0a04cba25a62fc44671df01ddf08983b623566", size = 116128, upload-time = "2026-11-09T21:43:19.525Z" },
 ]
 
 [[package]]
@@ -7569,7 +7570,7 @@ requires-dist = [
     { name = "dask", marker = "extra == 'distributed'", specifier = "<=2024.12.1" },
     { name = "datasets", specifier = ">=4.1.1" },
     { name = "fire" },
-    { name = "foundationforecast", specifier = ">=0.1.17" },
+    { name = "foundationforecast", specifier = ">=0.1.20" },
     { name = "fsspec", specifier = ">=2025.9.0" },
     { name = "fugue", extras = ["dask", "ray", "spark"], marker = "extra == 'distributed'", specifier = ">=0.9.0" },
     { name = "huggingface-hub", specifier = ">=0.36.2,<2.0" },
@@ -7688,6 +7689,23 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/35/b5/f14feef27e5bb66d2b547f0982b75f74ae4cc4af64bbf92ecde1863aebea/timecopilot_gift_eval-0.3.0.tar.gz", hash = "sha256:8bc98c27720b918b6cbb6e4914cc21c3224c1eff9581a72c9961f35e41410c65", size = 215668, upload-time = "2026-08-14T19:19:58.276Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5d/b9/c6b5f529a7a04df5adcbbb57ac0a6320d035e6196173877eefcdc7889d2c/timecopilot_gift_eval-0.3.0-py3-none-any.whl", hash = "sha256:2ca7f30bfa09be28a72e7eb1d755362b319662e08691f9904d3b1a54b800c357", size = 11017, upload-time = "2026-08-14T19:19:56.133Z" },
+]
+
+[[package]]
+name = "timecopilot-kumo-forecast"
+version = "0.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "huggingface-hub" },
+    { name = "joblib" },
+    { name = "numpy", version = "1.26.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version != '3.11.*'" },
+    { name = "torch" },
+    { name = "transformers" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2a/22/8cd247d191e4061a051acfc8f5c8524e283f493ffd1db4b44bb0f7f552e9/timecopilot_kumo_forecast-0.1.0.tar.gz", hash = "sha256:c66ebe7d9be0fe9ee4f8dcfbb0b8a2ba0df6be844b6b3c7add7ac128575efb7c", size = 137607, upload-time = "2026-11-09T19:36:39.367Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d1/ed/4345fde5b055df13e0b5a0a2beed831dbd5f05fdebab4abfdd3a5c2ce88b/timecopilot_kumo_forecast-0.1.0-py3-none-any.whl", hash = "sha256:6f8f7482723481773a52be215b6daf597edbdafd6fff253495f526267089684e", size = 17526, upload-time = "2026-11-09T19:36:38.107Z" },
 ]
 
 [[package]]
@@ -9095,7 +9113,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/50/ee/5d4fbe0d24bba9e797b7c4e636184b48cf5eee0d5598ee15fa5231515225/zensical-0.0.70-cp311-abi3-macosx_10_12_x86_64.whl", hash = "sha256:2b16dfbc12d2cdf1ab3ef52984831c9db5d202b0e508329de383f0aace277d81", size = 18127509, upload-time = "2026-10-12T18:54:44.199Z" },
     { url = "https://files.pythonhosted.org/packages/fb/b0/61bb824448493c5db9a5dacf050326e946f91a3dbe704cfa6953d3639660/zensical-0.0.70-cp311-abi3-macosx_11_0_arm64.whl", hash = "sha256:e9579ada6e14e659b86833d6a1723fa5f947b10ec66e65fc059b05dc8068ec8b", size = 17660685, upload-time = "2026-10-12T18:54:47.373Z" },
     { url = "https://files.pythonhosted.org/packages/f1/bc/0d9959bf065b8187aaddd42b237e7864d57fc1f30df5b8cf07b2c5284721/zensical-0.0.70-cp311-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9b187d69ce1563bc24c248b93da468c7bc11b8cc269f231505bff0e45e2e2e32", size = 18166247, upload-time = "2026-10-12T18:54:50.12Z" },
-    { url = "https://files.pythonhosted.org/packages/ca/a9/6f95078f2c16ca014caec8ee986d34ec1f137441c13ec6eb0153cf5033e7/zensical-0.0.70-cp311-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:78397d29a2bc2b69b2d46f1f39f64b197e204c0403f343da339c3d73ea692b34", size = 18100648, upload-time = "2026-10-12T18:54:53.117Z" },
     { url = "https://files.pythonhosted.org/packages/02/fe/ceaeaa19b8caed3978c2d3a65ab97b6ba34659200b20dded0da91b7e3138/zensical-0.0.70-cp311-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:eec6d8b92a7e00986d8c62d813cf37371ec03a3d5e11383363c979ca98ef0d14", size = 18642573, upload-time = "2026-10-12T18:54:55.798Z" },
     { url = "https://files.pythonhosted.org/packages/7a/2f/3ba313d98d7aa8b13ce8e1730fdf571ff1bacfe7e1c883870b9a384d0d15/zensical-0.0.70-cp311-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:d11e08cf0a0e0572aa3cc6adc17f88a691f0c6211f45ea386f5483b79019cf2b", size = 18333292, upload-time = "2026-10-12T18:54:58.383Z" },
     { url = "https://files.pythonhosted.org/packages/66/25/982a0ccf753e733ab79a889b39491b93c7be2db7479e659f9398dc387dbb/zensical-0.0.70-cp311-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:78fe80274362b800d1b4d9d5cbdb3c7459206c48cfbac0f7eea0833ae8c41c1e", size = 18899896, upload-time = "2026-10-12T18:55:01.338Z" },
