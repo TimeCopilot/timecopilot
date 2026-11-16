@@ -1,6 +1,7 @@
 import sys
 
 from .chronos import Chronos, ChronosFinetuningConfig
+from .ciproto import CIProto
 from .kumo import Kumo
 from .moirai import Moirai
 from .tabby import Tabby
@@ -13,6 +14,7 @@ from .toto import Toto
 __all__ = [
     "Chronos",
     "ChronosFinetuningConfig",
+    "CIProto",
     "Kumo",
     "Moirai",
     "Tabby",
