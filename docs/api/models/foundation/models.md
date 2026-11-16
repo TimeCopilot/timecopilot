@@ -6,6 +6,11 @@
             - Chronos
             - ChronosFinetuningConfig
 
+::: timecopilot.models.foundation.ciproto
+    options:
+        members:
+            - CIProto
+
 ::: timecopilot.models.foundation.flowstate
     options:
         members:

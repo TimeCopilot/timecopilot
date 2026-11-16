@@ -23,6 +23,12 @@ def test_timestral_import():
     from timecopilot.models.foundation.timestral import Timestral  # noqa: F401
 
 
+def test_ciproto_import():
+    # importing must work without the optional `ci-proto` extra;
+    # the extra is only needed to instantiate the model
+    from timecopilot.models.foundation.ciproto import CIProto  # noqa: F401
+
+
 def test_kumo_import():
     from timecopilot.models.foundation.kumo import Kumo  # noqa: F401
 

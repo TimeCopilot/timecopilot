@@ -36,6 +36,7 @@ nav:
           - Compare Foundation Models: examples/ts-foundation-models-comparison-quickstart.ipynb
           - Family Guides:
               - Chronos: examples/chronos-family.ipynb
+              - CIProto: examples/ci-proto-family.ipynb
               - TimesFM: examples/timesfm-family.ipynb
               - PatchTST-FM: examples/patchtst-fm-family.ipynb
               - T0: examples/t0-family.ipynb
@@ -69,6 +70,7 @@ nav:
       - experiments/fev.md
   - Changelogs:
       - changelogs/index.md
+      - changelogs/v0.0.42.md
       - changelogs/v0.0.41.md
       - changelogs/v0.0.40.md
       - changelogs/v0.0.39.md

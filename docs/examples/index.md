@@ -28,6 +28,7 @@ For model API details, see the [Model Hub](../model-hub.md).
 |----------|-------------------|---------------|
 | [Compare Foundation Models](ts-foundation-models-comparison-quickstart.ipynb) | Benchmark multiple foundation models side by side | Python 3.10+; GPU optional |
 | [Chronos Family](chronos-family.ipynb) | Forecast with Chronos 1.x and 2.x checkpoints | Python 3.10+ |
+| [CIProto Family](ci-proto-family.ipynb) | Forecast with Continuous Intelligence ci-proto and its native 80/95% prediction intervals | Python 3.10+; `timecopilot[ci-proto]`; GPU recommended |
 | [TimesFM Family](timesfm-family.ipynb) | Forecast with TimesFM 1.0, 2.0, 2.5, and 3.0 with prediction intervals | Python 3.10+ |
 | [PatchTST-FM Family](patchtst-fm-family.ipynb) | Forecast with IBM Research PatchTST-FM r1 and Granite PatchTST-FM r1/r2 | Python 3.11–3.13; GPU recommended |
 | [T0 Family](t0-family.ipynb) | Forecast with t0-alpha, t0-beta and t0-gamma, including the t0-gamma benchmark settings | Python 3.11–3.13; GPU recommended |
